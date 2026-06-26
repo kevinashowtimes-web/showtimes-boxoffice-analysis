@@ -1686,3 +1686,17 @@ function exportHTML() {
   const src = document.documentElement.outerHTML;
   const blob = new Blob([src], {type:'text/html;charset=utf-8'});
   const a = document.createElement('a'
+  a.href = URL.createObjectURL(blob);
+  a.download = \`秀泰營運報表_${DATA.date}.html\`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('✅ HTML 已下載');
+}
+
+// ════════════════════════════════════
+//  INIT
+// ════════════════════════════════════
+renderAll();
+</script>
+</body>
+</html>
