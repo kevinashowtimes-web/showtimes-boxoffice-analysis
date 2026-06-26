@@ -191,12 +191,17 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
 
 <script>
 (function(){
-  const _uh='632a1d221abc91787ceb713a503eeb42f88a6de543d3ec40971cdc6fd3f80714';
-  const _ph='5d654de65920fe1435042cf23e45f7bc94cea1060674bfd9e35d17ea00f81714';
+  const _users=[
+    {u:'632a1d221abc91787ceb713a503eeb42f88a6de543d3ec40971cdc6fd3f80714',p:'5d654de65920fe1435042cf23e45f7bc94cea1060674bfd9e35d17ea00f81714'},
+    {u:'2769b09b7cdaa0b36ff0ed2a32643675e3aa2713e55a429c1188c02515664649',p:'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3'},
+    {u:'738a6a9f214225742f78a692c049f03960be54aee37083d5731e72b0228d23ef',p:'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3'},
+    {u:'e1bad657cc0ddd36f29241b98e87efbe8c0342f684711d6e725dd28c2bf52704',p:'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3'},
+  ];
   async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}
   window.doLogin=async function(){
     const u=document.getElementById('lgUser').value.trim(),p=document.getElementById('lgPass').value;
-    if(await sha256(u)===_uh&&await sha256(p)===_ph){document.getElementById('loginOverlay').style.display='none';sessionStorage.setItem('st_auth','1');}
+    const uh=await sha256(u),ph=await sha256(p);
+    if(_users.some(x=>x.u===uh&&x.p===ph)){document.getElementById('loginOverlay').style.display='none';sessionStorage.setItem('st_auth','1');}
     else{document.getElementById('lgErr').textContent='帳號或密碼錯誤';document.getElementById('lgPass').value='';}
   };
   document.addEventListener('DOMContentLoaded',function(){
@@ -1680,19 +1685,4 @@ function scrollToHistory() {
 function exportHTML() {
   const src = document.documentElement.outerHTML;
   const blob = new Blob([src], {type:'text/html;charset=utf-8'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `秀泰營運報表_${DATA.date}.html`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-  toast('📤 已匯出 ' + a.download);
-}
-
-// ════════════════════════════════════
-//  INIT
-// ════════════════════════════════════
-renderAll();
-setHistoryFilter('all');
-</script>
-</body>
-</html>
+  const a = document.createElement('a'
