@@ -187,6 +187,71 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
 }
 .hist-quick:hover { background: var(--st-lt); color: var(--st); border-color: var(--st); }
 .hist-quick.active { background: var(--st); color: #fff; border-color: var(--st); font-weight: 600; }
+
+/* ── RESPONSIVE MOBILE ── */
+@media (max-width: 768px) {
+  /* Header */
+  .hdr { flex-direction: column; align-items: flex-start; gap: 10px; padding: 12px 14px; }
+  .hdr-btns { flex-wrap: wrap; gap: 6px; width: 100%; }
+  .btn-hdr { font-size: 11px; padding: 6px 10px; flex: 1; min-width: 70px; text-align: center; }
+  .hdr-logo { font-size: 16px; }
+
+  /* Wrap */
+  .wrap { padding: 10px 12px; }
+
+  /* KPI strip: 2 per row */
+  .kpi-strip { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .kpi-val { font-size: 20px; }
+
+  /* Main 2-col grid → single column */
+  .grid2 { grid-template-columns: 1fr; gap: 10px; }
+
+  /* Tables: horizontal scroll */
+  .card { overflow-x: auto; padding: 12px 10px; }
+  .tbl { min-width: 480px; }
+
+  /* Charts full width */
+  .chart-wrap canvas { width: 100% !important; }
+
+  /* Alert grid: 1 col */
+  .alert-grid { grid-template-columns: 1fr; }
+
+  /* Login box */
+  .login-box { width: 92%; padding: 28px 20px; }
+
+  /* Modal */
+  .overlay { padding: 16px 8px; }
+  .modal { padding: 16px; }
+  .input-grid { grid-template-columns: 1fr 1fr; }
+
+  /* Cinema input rows: scrollable */
+  .cinema-hdr, .cinema-row-inp { grid-template-columns: 80px repeat(5, minmax(60px, 1fr)); font-size: 10px; }
+
+  /* Accum rows */
+  .accum-val { font-size: 15px; }
+
+  /* Sec label */
+  .sec-label { margin: 14px 0 8px; font-size: 10px; }
+
+  /* VS bar text */
+  .vs-bar-val { font-size: 9px; }
+}
+
+@media (max-width: 480px) {
+  /* KPI strip: still 2 cols but smaller */
+  .kpi-strip { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .kpi { padding: 10px 12px; }
+  .kpi-val { font-size: 18px; }
+  .kpi-lbl { font-size: 10px; }
+
+  /* Font sizes */
+  body { font-size: 12px; }
+  .hdr-logo { font-size: 14px; }
+
+  /* Modal full width */
+  .modal { border-radius: 12px; }
+  .input-grid { grid-template-columns: 1fr; }
+}
 </style>
 
 <script>
@@ -1845,46 +1910,4 @@ function viewHistoryDay(date) {
     + (alertHtml ? '<div class="card" style="margin:0;padding:14px;"><div style="font-size:10px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">⑥ 異常波動警示 vs 前日（±15%）</div>' + alertHtml + '</div>' : '')
     + '</div>';
 
-  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
-  document.body.appendChild(overlay);
-
-  // Init donut chart
-  if (comp && Object.values(comp).some(function(v){return v>0;})) {
-    setTimeout(function() {
-      const colors={'秀泰':'#572d88','威秀':'#1A237E','國賓':'#00695C','美麗華':'#4A148C','in89':'#E65100','其他':'#607D8B'};
-      const labels=Object.keys(comp).filter(function(k){return comp[k]>0;});
-      const vals=labels.map(function(k){return comp[k];});
-      const ctx=document.getElementById('histDonut_'+date);
-      if (ctx) {
-        new Chart(ctx.getContext('2d'),{
-          type:'doughnut',
-          data:{labels:labels,datasets:[{data:vals,backgroundColor:labels.map(function(k){return colors[k]||'#607D8B';}),borderWidth:2,borderColor:'#fff'}]},
-          options:{cutout:'65%',responsive:true,maintainAspectRatio:false,
-            plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.label+': '+c.parsed.toFixed(1)+'萬 ('+( c.parsed/vals.reduce(function(a,b){return a+b;},0)*100).toFixed(1)+'%)';} }}}}
-        });
-      }
-    }, 50);
-  }
-}
-
-function scrollToHistory() {
-  document.getElementById('historyCard').scrollIntoView({behavior:'smooth', block:'start'});
-}
-
-// ════════════════════════════════════
-//  EXPORT
-// ════════════════════════════════════
-function exportHTML() {
-  const src = document.documentElement.outerHTML;
-  const blob = new Blob([src], {type:'text/html;charset=utf-8'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `秀泰營運報表_${DATA.date}.html`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-  toast('✅ HTML 已下載');
-}
-renderAll();
-</script>
-</body>
-</html>
+  overlay.onclick = function(e) { if (e.target ===
