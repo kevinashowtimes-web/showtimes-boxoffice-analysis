@@ -1904,4 +1904,46 @@ function viewHistoryDay(date) {
     + (alertHtml ? '<div class="card" style="margin:0;padding:14px;"><div style="font-size:10px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">⑥ 異常波動警示 vs 前日（±15%）</div>' + alertHtml + '</div>' : '')
     + '</div>';
 
-  overlay.onclick = function(e) { if (e
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  document.body.appendChild(overlay);
+
+  // Init donut chart
+  if (comp && Object.values(comp).some(function(v){return v>0;})) {
+    setTimeout(function() {
+      const colors={'秀泰':'#572d88','威秀':'#1A237E','國賓':'#00695C','美麗華':'#4A148C','in89':'#E65100','其他':'#607D8B'};
+      const labels=Object.keys(comp).filter(function(k){return comp[k]>0;});
+      const vals=labels.map(function(k){return comp[k];});
+      const ctx=document.getElementById('histDonut_'+date);
+      if (ctx) {
+        new Chart(ctx.getContext('2d'),{
+          type:'doughnut',
+          data:{labels:labels,datasets:[{data:vals,backgroundColor:labels.map(function(k){return colors[k]||'#607D8B';}),borderWidth:2,borderColor:'#fff'}]},
+          options:{cutout:'65%',responsive:true,maintainAspectRatio:false,
+            plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.label+': '+c.parsed.toFixed(1)+'萬 ('+( c.parsed/vals.reduce(function(a,b){return a+b;},0)*100).toFixed(1)+'%)';} }}}}
+        });
+      }
+    }, 50);
+  }
+}
+
+function scrollToHistory() {
+  document.getElementById('historyCard').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// ════════════════════════════════════
+//  EXPORT
+// ════════════════════════════════════
+function exportHTML() {
+  const src = document.documentElement.outerHTML;
+  const blob = new Blob([src], {type:'text/html;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `秀泰營運報表_${DATA.date}.html`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('✅ HTML 已下載');
+}
+renderAll();
+</script>
+</body>
+</html>
