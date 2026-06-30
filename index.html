@@ -192,17 +192,30 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
 .region-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
 .region-tbl-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
 
-/* ── TABLE SCROLL WRAPPER (all sections) ── */
-.tbl-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; width:100%; }
+/* ── MOBILE COMMON (≤900px) ── */
+@media (max-width: 900px) {
+  /* Date text: never wrap, ellipsis if too long */
+  .hdr-date {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 52vw;
+    font-size: 10px;
+  }
+  /* 5th KPI card full-width when alone in its row */
+  .kpi-strip > *:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  /* All tables: horizontal scroll */
+  .tbl th, .tbl td { white-space: nowrap; }
+}
 
-/* ── MOBILE: portrait (≤768px) ── */
+/* ── MOBILE PORTRAIT (≤768px) ── */
 @media (max-width: 768px) {
   body { overflow-x: hidden; }
   .wrap { padding: 10px 12px; }
 
-  /* ── Section labels: solid visible block dividers ── */
+  /* Section labels: solid purple block dividers */
   .sec-label {
-    margin: 18px 0 10px;
+    margin: 16px 0 10px;
     font-size: 11px;
     background: var(--st-lt);
     color: var(--st);
@@ -212,55 +225,58 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
   }
   .sec-label::after { display: none; }
 
-  /* ── Cards: clear blocks with bottom gap ── */
-  .card { padding: 12px 10px; margin-bottom: 2px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.09); }
+  /* Cards */
+  .card { padding: 12px 10px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.09); }
 
-  /* ── Header: compact 2-row ── */
-  .hdr { flex-direction: column; align-items: flex-start; gap: 6px; padding: 10px 14px; }
-  .hdr-left { flex-wrap: nowrap; align-items: center; gap: 10px; width: 100%; }
-  .hdr-logo { font-size: 15px; white-space: nowrap; }
-  .hdr-date { font-size: 11px; }
-  .hdr-btns { display: flex; flex-direction: row; gap: 6px; width: 100%; }
+  /* Header: logo+date on row1, buttons on row2 */
+  .hdr { flex-direction: column; align-items: stretch; gap: 6px; padding: 10px 14px; }
+  .hdr-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .hdr-logo { font-size: 15px; white-space: nowrap; flex-shrink: 0; }
+  .hdr-btns { display: flex; gap: 6px; }
   .btn-hdr { font-size: 11px; padding: 6px 8px; flex: 1; text-align: center; white-space: nowrap; min-width: 0; }
 
-  /* ── KPI strip: 2 per row ── */
+  /* KPI strip: 2 per row, 5th spans full width */
   .kpi-strip { grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
   .kpi { padding: 10px 11px; }
   .kpi-val { font-size: 18px; }
   .kpi-lbl { font-size: 11px; }
 
-  /* ── 2-col grids → single column ── */
+  /* 2-col → 1-col */
   .grid2 { grid-template-columns: 1fr !important; gap: 10px; }
 
-  /* ── Donut chart + legend: stack vertically ── */
+  /* Chart */
   .chart-wrap { height: 140px !important; }
 
-  /* ── All tables: horizontal scroll ── */
-  .card [style*="overflow-x:auto"],
-  .card > div[style*="overflow"] { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+  /* Tables */
   .tbl { font-size: 11px; }
-  .tbl th, .tbl td { padding: 6px 8px; white-space: nowrap; }
+  .tbl th, .tbl td { padding: 6px 8px; }
 
-  /* ── Section 7: regions stack vertically ── */
+  /* Section 7 regions: stack */
   .region-grid { grid-template-columns: 1fr !important; gap: 10px; }
 
-  /* ── Alert grid: 1 col ── */
+  /* Alert grid: 1 col */
   .alert-grid { grid-template-columns: 1fr !important; }
 
-  /* ── Accum values ── */
+  /* Accum */
   .accum-val { font-size: 15px; }
 
-  /* ── Login ── */
+  /* Login */
   .login-box { width: 92%; padding: 28px 20px; }
 
-  /* ── Modal ── */
+  /* Modal */
   .overlay { padding: 16px 8px; }
   .modal { padding: 16px; }
   .input-grid { grid-template-columns: 1fr 1fr !important; }
   .vs-bar-val { font-size: 9px; }
 }
 
-/* ── MOBILE: narrow portrait (≤480px) ── */
+/* ── NARROW PORTRAIT (≤480px) ── */
 @media (max-width: 480px) {
   .kpi-strip { gap: 6px !important; }
   .kpi-val { font-size: 16px; }
@@ -272,39 +288,66 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
   .tbl th, .tbl td { padding: 5px 6px; }
 }
 
-/* ── MOBILE LANDSCAPE: 2-column layout ── */
+/* ── LANDSCAPE PHONE (≤900px, landscape) ── */
 @media (max-width: 900px) and (orientation: landscape) {
   .wrap { padding: 8px 14px; }
 
-  /* Compact header - single row */
-  .hdr { flex-direction: row; align-items: center; padding: 8px 14px; gap: 10px; }
-  .hdr-left { flex: 1; }
-  .hdr-logo { font-size: 14px; }
-  .hdr-date { font-size: 10px; }
-  .hdr-btns { gap: 5px; }
-  .btn-hdr { padding: 5px 8px; font-size: 10px; }
+  /* Header: force single compact row */
+  .hdr {
+    flex-direction: row !important;
+    align-items: center !important;
+    padding: 6px 14px !important;
+    gap: 8px;
+    flex-wrap: nowrap;
+  }
+  .hdr-left {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .hdr-logo { font-size: 13px; white-space: nowrap; flex-shrink: 0; }
+  .hdr-date {
+    font-size: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+    max-width: none;
+    background: rgba(255,255,255,.12);
+    padding: 3px 8px;
+    border-radius: 5px;
+  }
+  .hdr-btns { flex: 0 0 auto; gap: 5px; flex-wrap: nowrap; }
+  .btn-hdr { padding: 5px 8px; font-size: 10px; flex: none; }
 
-  /* KPI strip: 3 per row in landscape */
+  /* KPI: 3 per row */
   .kpi-strip { grid-template-columns: repeat(3, 1fr) !important; gap: 7px; }
+  /* Cancel full-width for 5th in landscape (3-col, 5th is position 2 in last row) */
+  .kpi-strip > *:last-child:nth-child(odd) { grid-column: auto; }
   .kpi { padding: 8px 10px; }
-  .kpi-val { font-size: 16px; }
+  .kpi-val { font-size: 15px; }
   .kpi-lbl { font-size: 10px; }
 
-  /* 2-col layout in landscape */
+  /* 2-col layout */
   .grid2 { grid-template-columns: 1fr 1fr !important; gap: 10px; }
 
-  /* Section 7: 2 regions side by side */
+  /* Section 7: 2 cols */
   .region-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px; }
 
-  /* Alert grid: 2 cols */
+  /* Alert: 2 cols */
   .alert-grid { grid-template-columns: repeat(2, 1fr) !important; }
 
   /* Section labels compact */
-  .sec-label { margin: 12px 0 8px; padding: 5px 10px; font-size: 10px; }
+  .sec-label { margin: 10px 0 7px; padding: 5px 10px; font-size: 10px; }
+  .sec-label::after { display: none; }
 
   /* Cards compact */
   .card { padding: 10px; }
-  .chart-wrap { height: 130px !important; }
+  .chart-wrap { height: 120px !important; }
   .tbl { font-size: 11px; }
   .tbl th, .tbl td { padding: 5px 7px; }
 }
@@ -533,19 +576,19 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
 //  DATA
 // ════════════════════════════════════
 const DATA = {
-  date: '2026-06-28', weekday: '日',
-  lastUpdate: '自動更新 2026-06-28 全日票房（市場總票房已確認）',
+  date: '2026-06-29', weekday: '一',
+  lastUpdate: '自動更新 2026-06-29 全日票房（市場總票房已確認）',
 
-  mkt: { bo: 4334.8, lastWeekBO: 0 },
+  mkt: { bo: 1079.8, lastWeekBO: 0 },
 
   st: {
-    bo: 887.3, fb: 172.0, visitors: 29037,
-    ystBO: 1008.4,
-    mtdBO: 12993.2, mtdLastMonthBO: 0, mtdLastYearBO: 0,
-    ytdBO: 84406.9, ytdLastYearBO: 0,
+    bo: 319.1, fb: 60.8, visitors: 10189,
+    ystBO: 887.3,
+    mtdBO: 13312.3, mtdLastMonthBO: 0, mtdLastYearBO: 0,
+    ytdBO: 84726.0, ytdLastYearBO: 0,
   },
 
-  wison: { bo: 1963.1 },
+  wison: { bo: 483.8 },
 
   // 全台排行榜 YTD (2026-01-01~06-28，資料來源：taipeitheater.org.tw)
   // region: N=北, C=中, S=南; st=true 表示秀泰
@@ -580,24 +623,24 @@ const DATA = {
   ],
   mtdMktTotal: 63480.2,
 
-  competitors: { '秀泰':887.3, '威秀':1963.1, '國賓':324.0, '美麗華':82.1, 'in89':89.9, '其他':988.4 },
+  competitors: { '秀泰':319.1, '威秀':483.8, '國賓':48.7, '美麗華':23.6, 'in89':21.3, '其他':183.3 },
 
   cinemas: [
-    { name:'秀泰巨蛋', bo:133.3, fb:19.6, visitors:2770, shows:73, avgPrice:481, ystBO:142.5, ytdBO:12004.1, ytdVisitors:255001, mtdBO:1949.6, mtdVisitors:39995 },
-    { name:'秀泰欣欣', bo:64.2, fb:11.4, visitors:2156, shows:85, avgPrice:298, ystBO:69.4, ytdBO:6852.2, ytdVisitors:229998, mtdBO:1051.8, mtdVisitors:35102 },
-    { name:'秀泰土城', bo:38.4, fb:7.2, visitors:1393, shows:56, avgPrice:276, ystBO:41.3, ytdBO:3135.8, ytdVisitors:112486, mtdBO:470.6, mtdVisitors:16895 },
-    { name:'秀泰樹林', bo:64.8, fb:15.9, visitors:2218, shows:70, avgPrice:292, ystBO:68.9, ytdBO:5463.3, ytdVisitors:186336, mtdBO:832.8, mtdVisitors:28017 },
-    { name:'秀泰基隆', bo:32.7, fb:5.2, visitors:1241, shows:45, avgPrice:264, ystBO:32.6, ytdBO:2868.9, ytdVisitors:107417, mtdBO:392.6, mtdVisitors:14557 },
-    { name:'秀泰文心', bo:139.8, fb:21.4, visitors:4671, shows:87, avgPrice:299, ystBO:158.6, ytdBO:13527.8, ytdVisitors:434227, mtdBO:1962.6, mtdVisitors:62937 },
-    { name:'秀泰站前', bo:108.1, fb:22.2, visitors:3733, shows:107, avgPrice:290, ystBO:132.8, ytdBO:10651.8, ytdVisitors:348196, mtdBO:1582.7, mtdVisitors:51284 },
-    { name:'秀泰麗寶', bo:32.9, fb:7.1, visitors:1135, shows:49, avgPrice:289, ystBO:36.9, ytdBO:2601.5, ytdVisitors:88215, mtdBO:340.1, mtdVisitors:11593 },
-    { name:'秀泰北港', bo:7.9, fb:1.8, visitors:295, shows:16, avgPrice:269, ystBO:10.5, ytdBO:868.3, ytdVisitors:32598, mtdBO:97.1, mtdVisitors:3634 },
-    { name:'秀泰嘉義', bo:48.5, fb:10.4, visitors:1741, shows:63, avgPrice:279, ystBO:53.3, ytdBO:5119.6, ytdVisitors:181313, mtdBO:709.4, mtdVisitors:24919 },
-    { name:'秀泰仁德', bo:10.3, fb:1.4, visitors:388, shows:20, avgPrice:265, ystBO:9.6, ytdBO:731.2, ytdVisitors:26638, mtdBO:94.3, mtdVisitors:3389 },
-    { name:'秀泰夢時代', bo:110.9, fb:25.3, visitors:3815, shows:82, avgPrice:291, ystBO:138.0, ytdBO:10261.5, ytdVisitors:340811, mtdBO:1690.0, mtdVisitors:56121 },
-    { name:'秀泰岡山', bo:60.1, fb:13.2, visitors:2127, shows:77, avgPrice:283, ystBO:71.5, ytdBO:6334.7, ytdVisitors:214246, mtdBO:960.7, mtdVisitors:32919 },
-    { name:'秀泰台東', bo:19.2, fb:5.6, visitors:743, shows:39, avgPrice:259, ystBO:22.2, ytdBO:1980.6, ytdVisitors:75088, mtdBO:271.6, mtdVisitors:10365 },
-    { name:'秀泰花蓮', bo:16.3, fb:4.2, visitors:611, shows:47, avgPrice:267, ystBO:20.1, ytdBO:2005.7, ytdVisitors:75318, mtdBO:287.4, mtdVisitors:10693 }
+    { name:'秀泰巨蛋', bo:71.4, fb:10.5, visitors:1470, shows:72, avgPrice:486, ystBO:133.3, ytdBO:12075.5, ytdVisitors:256471, mtdBO:2021.0, mtdVisitors:41465 },
+    { name:'秀泰欣欣', bo:23.2, fb:4.1, visitors:810, shows:85, avgPrice:286, ystBO:64.2, ytdBO:6875.4, ytdVisitors:230808, mtdBO:1075.0, mtdVisitors:35912 },
+    { name:'秀泰土城', bo:9.6, fb:1.8, visitors:341, shows:56, avgPrice:283, ystBO:38.4, ytdBO:3145.4, ytdVisitors:112827, mtdBO:480.2, mtdVisitors:17236 },
+    { name:'秀泰樹林', bo:16.6, fb:4.1, visitors:589, shows:70, avgPrice:282, ystBO:64.8, ytdBO:5479.9, ytdVisitors:186925, mtdBO:849.4, mtdVisitors:28606 },
+    { name:'秀泰基隆', bo:10.1, fb:1.6, visitors:379, shows:45, avgPrice:268, ystBO:32.7, ytdBO:2879.0, ytdVisitors:107796, mtdBO:402.7, mtdVisitors:14936 },
+    { name:'秀泰文心', bo:44.7, fb:6.8, visitors:1522, shows:89, avgPrice:294, ystBO:139.8, ytdBO:13572.5, ytdVisitors:435749, mtdBO:2007.3, mtdVisitors:64459 },
+    { name:'秀泰站前', bo:34.2, fb:7.0, visitors:1158, shows:108, avgPrice:295, ystBO:108.1, ytdBO:10686.0, ytdVisitors:349354, mtdBO:1616.9, mtdVisitors:52442 },
+    { name:'秀泰麗寶', bo:7.0, fb:1.5, visitors:239, shows:49, avgPrice:294, ystBO:32.9, ytdBO:2608.5, ytdVisitors:88454, mtdBO:347.1, mtdVisitors:11832 },
+    { name:'秀泰北港', bo:2.7, fb:0.6, visitors:107, shows:16, avgPrice:257, ystBO:7.9, ytdBO:871.0, ytdVisitors:32705, mtdBO:99.8, mtdVisitors:3741 },
+    { name:'秀泰嘉義', bo:20.2, fb:4.3, visitors:727, shows:63, avgPrice:278, ystBO:48.5, ytdBO:5139.8, ytdVisitors:182040, mtdBO:729.6, mtdVisitors:25646 },
+    { name:'秀泰仁德', bo:1.2, fb:0.2, visitors:41, shows:20, avgPrice:282, ystBO:10.3, ytdBO:732.4, ytdVisitors:26679, mtdBO:95.5, mtdVisitors:3430 },
+    { name:'秀泰夢時代', bo:41.4, fb:9.4, visitors:1445, shows:81, avgPrice:286, ystBO:110.9, ytdBO:10302.9, ytdVisitors:342256, mtdBO:1731.4, mtdVisitors:57566 },
+    { name:'秀泰岡山', bo:23.1, fb:5.1, visitors:841, shows:67, avgPrice:275, ystBO:60.1, ytdBO:6357.8, ytdVisitors:215087, mtdBO:983.8, mtdVisitors:33760 },
+    { name:'秀泰台東', bo:7.2, fb:2.1, visitors:276, shows:39, avgPrice:261, ystBO:19.2, ytdBO:1987.8, ytdVisitors:75364, mtdBO:278.8, mtdVisitors:10641 },
+    { name:'秀泰花蓮', bo:6.4, fb:1.7, visitors:244, shows:47, avgPrice:262, ystBO:16.3, ytdBO:2012.1, ytdVisitors:75562, mtdBO:293.8, mtdVisitors:10937 }
   ],
 
   movies: [
@@ -647,6 +690,12 @@ const DATA = {
 
   // 每日歷史快照（key = 'YYYY-MM-DD'，匯出 HTML 後永久保存）
   history: {
+  '2026-06-29': {
+    date:'2026-06-29', mktBO:1079.8, stBO:319.1, stFB:60.8, stVisitors:10189,
+    ystBO:887.3, mtdBO:13312.3, ytdBO:84726.0, wisonBO:483.8, mktShare:29.6,
+    competitors:{'秀泰':319.1,'威秀':483.8,'國賓':48.7,'美麗華':23.6,'in89':21.3,'其他':183.3},
+        cinemas:[{"name":"秀泰巨蛋","bo":71.4,"fb":10.5,"visitors":1470,"shows":72,"avgPrice":486},{"name":"秀泰欣欣","bo":23.2,"fb":4.1,"visitors":810,"shows":85,"avgPrice":286},{"name":"秀泰土城","bo":9.6,"fb":1.8,"visitors":341,"shows":56,"avgPrice":283},{"name":"秀泰樹林","bo":16.6,"fb":4.1,"visitors":589,"shows":70,"avgPrice":282},{"name":"秀泰基隆","bo":10.1,"fb":1.6,"visitors":379,"shows":45,"avgPrice":268},{"name":"秀泰文心","bo":44.7,"fb":6.8,"visitors":1522,"shows":89,"avgPrice":294},{"name":"秀泰站前","bo":34.2,"fb":7.0,"visitors":1158,"shows":108,"avgPrice":295},{"name":"秀泰麗寶","bo":7.0,"fb":1.5,"visitors":239,"shows":49,"avgPrice":294},{"name":"秀泰北港","bo":2.7,"fb":0.6,"visitors":107,"shows":16,"avgPrice":257},{"name":"秀泰嘉義","bo":20.2,"fb":4.3,"visitors":727,"shows":63,"avgPrice":278},{"name":"秀泰仁德","bo":1.2,"fb":0.2,"visitors":41,"shows":20,"avgPrice":282},{"name":"秀泰夢時代","bo":41.4,"fb":9.4,"visitors":1445,"shows":81,"avgPrice":286},{"name":"秀泰岡山","bo":23.1,"fb":5.1,"visitors":841,"shows":67,"avgPrice":275},{"name":"秀泰台東","bo":7.2,"fb":2.1,"visitors":276,"shows":39,"avgPrice":261},{"name":"秀泰花蓮","bo":6.4,"fb":1.7,"visitors":244,"shows":47,"avgPrice":262}],
+  },
   '2026-06-01': {
     date:'2026-06-01', mktBO:1489.3, stBO:285.1, stFB:55.2, stVisitors:9352,
     ystBO:0, mtdBO:285.1, ytdBO:0, wisonBO:748.1, mktShare:19.1,
