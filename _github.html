@@ -403,6 +403,26 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
     <button class="btn-hdr primary" onclick="openUpload()">📂 上傳資料</button>
     <button class="btn-hdr" onclick="exportHTML()">📤 匯出 HTML</button>
     <button class="btn-hdr" onclick="scrollToHistory()" id="histBtn" style="display:none;">🗂 歷史紀錄 <span id="histCount"></span></button>
+    <button class="btn-hdr" onclick="openHallDB()">🎬 影廳資料庫</button>
+  </div>
+</div>
+
+
+<!-- ── HALL DB MODAL ── -->
+<div id="hallDBModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.65);overflow-y:auto;" onclick="if(event.target===this)closeHallDB()">
+  <div style="background:var(--bg2);max-width:860px;margin:40px auto;border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.5);">
+    <div style="background:var(--acc);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-weight:700;font-size:1.05rem;color:#fff;">🎬 影廳資料庫　<span style="font-size:.8rem;opacity:.8;font-weight:400;">來源：影廳銀幕資料 2026-06-12（座位數不含輪椅席）</span></div>
+      <button onclick="closeHallDB()" style="background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;line-height:1;">✕</button>
+    </div>
+    <div style="padding:20px;">
+      <!-- Summary table -->
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:.88rem;" id="hallSummaryTbl"></table>
+      </div>
+      <!-- Detail accordion -->
+      <div id="hallDetail" style="margin-top:16px;"></div>
+    </div>
   </div>
 </div>
 
@@ -2089,6 +2109,84 @@ function exportHTML() {
   a.click();
 }
 renderAll();
+
+// ════════════════════════════════════
+//  HALL DB MODAL
+// ════════════════════════════════════
+function openHallDB() {
+  const tbl = document.getElementById('hallSummaryTbl');
+  const detail = document.getElementById('hallDetail');
+
+  // Build summary table
+  let html = '<thead><tr style="background:var(--acc);color:#fff;">'
+    + '<th style="padding:8px 10px;text-align:left;">影城</th>'
+    + '<th style="padding:8px 10px;text-align:center;">廳數</th>'
+    + '<th style="padding:8px 10px;text-align:right;">總座位</th>'
+    + '<th style="padding:8px 10px;text-align:right;">平均座位/廳</th>'
+    + '<th style="padding:8px 10px;text-align:left;">各廳座位分佈</th>'
+    + '</tr></thead><tbody>';
+
+  const order = ['秀泰文心','秀泰站前','秀泰夢時代','秀泰巨蛋','秀泰岡山','秀泰樹林','秀泰嘉義','秀泰欣欣','秀泰基隆','秀泰麗寶','秀泰土城','秀泰花蓮','秀泰台東','秀泰仁德','秀泰北港'];
+  let totalHalls = 0, totalSeats = 0;
+
+  order.forEach((name, idx) => {
+    const d = HALL_DB[name];
+    if (!d) return;
+    totalHalls += d.halls;
+    totalSeats += d.totalSeats;
+    const bg = idx % 2 === 0 ? 'var(--bg2)' : 'var(--bg3)';
+    const maxS = Math.max(...d.hallSeats.filter(s=>s>0));
+    const bars = d.hallSeats.map(s => {
+      if (!s) return '<span style="display:inline-block;width:6px;height:14px;background:var(--border);border-radius:2px;margin:0 1px;" title="未開放"></span>';
+      const h = Math.round(s / maxS * 28);
+      return `<span style="display:inline-block;width:6px;height:${h}px;background:var(--acc);border-radius:2px;margin:0 1px;vertical-align:bottom;" title="${s}座"></span>`;
+    }).join('');
+    html += `<tr style="background:${bg};">
+      <td style="padding:7px 10px;font-weight:600;">${name}</td>
+      <td style="padding:7px 10px;text-align:center;">${d.halls}</td>
+      <td style="padding:7px 10px;text-align:right;">${d.totalSeats.toLocaleString()}</td>
+      <td style="padding:7px 10px;text-align:right;">${d.avgSeats}</td>
+      <td style="padding:7px 10px;">${bars}</td>
+    </tr>`;
+  });
+
+  html += `<tr style="background:var(--acc20);font-weight:700;">
+    <td style="padding:7px 10px;">合計</td>
+    <td style="padding:7px 10px;text-align:center;">${totalHalls}</td>
+    <td style="padding:7px 10px;text-align:right;">${totalSeats.toLocaleString()}</td>
+    <td style="padding:7px 10px;text-align:right;">${Math.round(totalSeats/totalHalls)}</td>
+    <td style="padding:7px 10px;"></td>
+  </tr>`;
+  html += '</tbody>';
+  tbl.innerHTML = html;
+
+  // Build detail (each cinema expandable)
+  let dhtml = '<div style="font-size:.8rem;color:var(--txt2);margin-bottom:8px;">點擊影城名稱可展開各廳明細</div>';
+  order.forEach(name => {
+    const d = HALL_DB[name];
+    if (!d) return;
+    const hallRows = d.hallSeats.map((s,i) => {
+      const label = `${i+1}廳`;
+      const pct = d.totalSeats > 0 ? (s/d.totalSeats*100).toFixed(1) : 0;
+      return `<td style="padding:4px 8px;text-align:center;color:${s?'var(--txt)':'var(--txt2)'};">${label}<br><b>${s||'—'}</b>${s?`<br><span style="font-size:.7rem;color:var(--txt2);">${pct}%</span>`:''}</td>`;
+    }).join('');
+    dhtml += `<details style="margin-bottom:6px;border:1px solid var(--border);border-radius:6px;overflow:hidden;">
+      <summary style="padding:9px 14px;cursor:pointer;background:var(--bg3);font-weight:600;list-style:none;display:flex;justify-content:space-between;">
+        <span>${name}</span>
+        <span style="color:var(--txt2);font-weight:400;">${d.halls}廳｜${d.totalSeats.toLocaleString()}座｜平均${d.avgSeats}座/廳</span>
+      </summary>
+      <div style="padding:10px;overflow-x:auto;"><table style="border-collapse:collapse;font-size:.82rem;"><tr>${hallRows}</tr></table></div>
+    </details>`;
+  });
+  detail.innerHTML = dhtml;
+
+  document.getElementById('hallDBModal').style.display = 'block';
+}
+
+function closeHallDB() {
+  document.getElementById('hallDBModal').style.display = 'none';
+}
+
 </script>
 </body>
 </html>
