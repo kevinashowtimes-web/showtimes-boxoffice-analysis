@@ -1947,4 +1947,15 @@ function scrollToHistory() {
 
 // ════════════════════════════════════
 //  EXPORT
-// ═══�
+// ════════════════════════════════════
+function exportHTML() {
+  const blob = new Blob([document.documentElement.outerHTML], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '秀泰影城每日營運儀表板_' + (DATA.date||'report') + '.html';
+  a.click();
+}
+renderAll();
+</script>
+</body>
+</html>
