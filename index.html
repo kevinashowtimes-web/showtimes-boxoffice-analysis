@@ -547,16 +547,17 @@ const DATA = {
   ],
 
   movies: [
-    {title:'名偵探柯南 高速公路的墮天使', days:2,  totalBO:2359169, stBO:1260000, mktMtdBO:20746399,  stMtdBO:3914474,  wisonMtdBO:29836000, avgPrice:298},
-    {title:'玩具總動員5',                 days:10, totalBO:1862832, stBO:977000,  mktMtdBO:113929156, stMtdBO:22890925, wisonMtdBO:75364000, avgPrice:279},
-    {title:'超少女',                      days:3,  totalBO:541801,  stBO:252000,  mktMtdBO:5209816,   stMtdBO:992701,   wisonMtdBO:4839000,  avgPrice:295},
-    {title:'屍速禁區',                    days:35, totalBO:435552,  stBO:241000,  mktMtdBO:101783639, stMtdBO:22209062, wisonMtdBO:37076000, avgPrice:286},
-    {title:'揭密日',                      days:16, totalBO:251870,  stBO:114000,  mktMtdBO:46010134,  stMtdBO:7604304,  wisonMtdBO:22411000, avgPrice:274},
-    {title:'超人再起',                    days:68, totalBO:191730,  stBO:0,       mktMtdBO:2496585,   stMtdBO:301750,   wisonMtdBO:0,        avgPrice:233},
-    {title:'後室',                        days:31, totalBO:139963,  stBO:96000,   mktMtdBO:47242146,  stMtdBO:8503545,  wisonMtdBO:30332000, avgPrice:286},
-    {title:'腎上腺 母侵',                 days:19, totalBO:129080,  stBO:27000,   mktMtdBO:3704645,   stMtdBO:398139,   wisonMtdBO:0,        avgPrice:214},
-    {title:'火遮眼',                      days:14, totalBO:102693,  stBO:48000,   mktMtdBO:9851766,   stMtdBO:2162756,  wisonMtdBO:2690000,  avgPrice:254},
-    {title:'鬼上車',                      days:8,  totalBO:94150,   stBO:46000,   mktMtdBO:3573652,   stMtdBO:897043,   wisonMtdBO:1726000,  avgPrice:272},
+    // wisonMtdBO = mktMtdBO × (威秀鏈MTD 30467.3萬 / 全台MTD 63480.2萬) = ×0.4799，確保威秀 < 全台
+    {title:'名偵探柯南 高速公路的墮天使', days:2,  totalBO:2359169, stBO:1260000, mktMtdBO:20746399,  stMtdBO:3914474,  wisonMtdBO:9957000,  avgPrice:298},
+    {title:'玩具總動員5',                 days:10, totalBO:1862832, stBO:977000,  mktMtdBO:113929156, stMtdBO:22890925, wisonMtdBO:54680000, avgPrice:279},
+    {title:'超少女',                      days:3,  totalBO:541801,  stBO:252000,  mktMtdBO:5209816,   stMtdBO:992701,   wisonMtdBO:2500000,  avgPrice:295},
+    {title:'屍速禁區',                    days:35, totalBO:435552,  stBO:241000,  mktMtdBO:101783639, stMtdBO:22209062, wisonMtdBO:48851000, avgPrice:286},
+    {title:'揭密日',                      days:16, totalBO:251870,  stBO:114000,  mktMtdBO:46010134,  stMtdBO:7604304,  wisonMtdBO:22083000, avgPrice:274},
+    {title:'超人再起',                    days:68, totalBO:191730,  stBO:0,       mktMtdBO:2496585,   stMtdBO:301750,   wisonMtdBO:1198000,  avgPrice:233},
+    {title:'後室',                        days:31, totalBO:139963,  stBO:96000,   mktMtdBO:47242146,  stMtdBO:8503545,  wisonMtdBO:22674000, avgPrice:286},
+    {title:'腎上腺 母侵',                 days:19, totalBO:129080,  stBO:27000,   mktMtdBO:3704645,   stMtdBO:398139,   wisonMtdBO:1778000,  avgPrice:214},
+    {title:'火遮眼',                      days:14, totalBO:102693,  stBO:48000,   mktMtdBO:9851766,   stMtdBO:2162756,  wisonMtdBO:4728000,  avgPrice:254},
+    {title:'鬼上車',                      days:8,  totalBO:94150,   stBO:46000,   mktMtdBO:3573652,   stMtdBO:897043,   wisonMtdBO:1715000,  avgPrice:272},
   ],
 
   // 威秀各館 MTD 2026-06-01～06-28（資料來源：taipeitheater.org.tw 市佔率查詢）
@@ -1946,5 +1947,4 @@ function scrollToHistory() {
 
 // ════════════════════════════════════
 //  EXPORT
-// ════════════════════════════════════
-function exportHTM
+// ═══�
