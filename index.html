@@ -1969,7 +1969,37 @@ function viewHistoryDay(date) {
     + '<div class="card" style="margin:0 0 12px;padding:14px;">'
     + '<div style="font-size:10px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">④ 影城業績排行</div>'
     + '<div style="overflow-x:auto;"><table class="tbl"><thead><tr><th class="c">#</th><th>影城</th><th class="r">票房(萬)</th><th class="r">餐飲(萬)</th><th class="r">來客數</th><th class="r">場次</th><th class="r">均票</th><th class="r">滿座%</th></tr></thead><tbody>' + rankHtml + '</tbody></table></div>'
-    + ════════════════════════════════════
+    + '</div>'
+    + (alertHtml ? '<div class="card" style="margin:0 0 12px;padding:14px;"><div style="font-size:10px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">⑤ 異常波動</div>' + alertHtml + '</div>' : '')
+    + '</div>';
+
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if (e.target === overlay) overlay.remove(); });
+
+  setTimeout(function(){
+    const ctx = document.getElementById('histDonut_' + date);
+    if (ctx && comp && typeof Chart !== 'undefined') {
+      const colors2 = {'秀泰':'#572d88','威秀':'#1A237E','國賓':'#00695C','美麗華':'#4A148C','in89':'#E65100','其他':'#607D8B'};
+      const labels2 = Object.keys(comp).filter(function(k){ return comp[k]>0; });
+      const vals2   = labels2.map(function(k){ return comp[k]; });
+      if (labels2.length > 0) {
+        new Chart(ctx, {
+          type: 'doughnut',
+          data: { labels: labels2, datasets: [{ data: vals2, backgroundColor: labels2.map(function(k){ return colors2[k]||'#607D8B'; }), borderWidth: 2, borderColor: '#fff' }] },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c){ return ' ' + c.label + ': ' + c.parsed.toFixed(1) + '萬'; } } } } }
+        });
+      }
+    }
+  }, 50);
+}
+
+function scrollToHistory() {
+  document.getElementById('historyCard').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// ════════════════════════════════════
+//  EXPORT
+// ════════════════════════════════════
 function exportHTML() {
   const blob = new Blob([document.documentElement.outerHTML], {type:'text/html'});
   const a = document.createElement('a');
