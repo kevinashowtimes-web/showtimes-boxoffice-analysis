@@ -189,10 +189,18 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
 .hist-quick.active { background: var(--st); color: #fff; border-color: var(--st); font-weight: 600; }
 
 /* ── RESPONSIVE MOBILE ── */
+/* ── REGION GRID (Section 7) ── */
+.region-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.region-tbl-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+
 @media (max-width: 768px) {
   /* Prevent horizontal scroll on whole page */
   body { overflow-x: hidden; }
   .wrap { padding: 10px 12px; overflow-x: hidden; }
+
+  /* Section 7: stack regions vertically */
+  .region-grid { grid-template-columns: 1fr !important; gap: 10px; }
+  .region-tbl-wrap { overflow-x: auto; }
 
   /* Header: stack vertically */
   .hdr { flex-direction: column; align-items: flex-start; gap: 8px; padding: 12px 14px; width: 100%; box-sizing: border-box; }
@@ -407,7 +415,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
 <div class="alert-grid" id="alertGrid"></div>
 
 <!-- ⑦ 秀泰 vs 威秀 區域對決 -->
-<div class="sec-label">⑦ 秀泰 vs 威秀 區域對決 <span style="font-weight:400;font-size:10px;color:var(--sub);">MTD 2026-06-01～06-25</span></div>
+<div class="sec-label">⑦ 秀泰 vs 威秀 區域對決 <span style="font-weight:400;font-size:10px;color:var(--sub);">MTD 2026-06-01～06-28</span></div>
 <div id="vsWisonSection"></div>
 
 <!-- ⑧ 歷史紀錄 -->
@@ -1546,7 +1554,7 @@ function renderVsWison() {
     return rows;
   }
 
-  let html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">';
+  let html = '<div class="region-grid">';
 
   for (const reg of ['N','C','S']) {
     const meta = regionMeta[reg];
@@ -1573,7 +1581,8 @@ function renderVsWison() {
       html += metricBar(st.avgP, wi.avgP, '元', v=>v);
       // Cinema rows
       html += `<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px;">
-        <table class="tbl" style="font-size:11px;">
+        <div class="region-tbl-wrap">
+        <table class="tbl" style="font-size:11px;min-width:320px;">
           <thead><tr>
             <th style="color:var(--st);">秀泰</th><th class="r" style="color:var(--st);">票房</th><th class="r">均價</th>
             <th class="c"></th>
@@ -1581,6 +1590,7 @@ function renderVsWison() {
           </tr></thead>
           <tbody>${cinemaRows(stList, wiList)}</tbody>
         </table>
+        </div>
       </div>`;
     }
     html += `</div>`;
@@ -1937,17 +1947,4 @@ function scrollToHistory() {
 // ════════════════════════════════════
 //  EXPORT
 // ════════════════════════════════════
-function exportHTML() {
-  const src = document.documentElement.outerHTML;
-  const blob = new Blob([src], {type:'text/html;charset=utf-8'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `秀泰營運報表_${DATA.date}.html`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-  toast('✅ HTML 已下載');
-}
-renderAll();
-</script>
-</body>
-</html>
+function exportHTM
