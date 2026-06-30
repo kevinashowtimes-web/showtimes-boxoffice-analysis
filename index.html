@@ -192,6 +192,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
 .region-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
 .region-tbl-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
 
+/* ── HISTORY SUMMARY GRID ── */
+.hist-summary-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px; }
+@media (max-width: 600px) {
+  .hist-summary-grid { grid-template-columns:repeat(2,1fr) !important; }
+}
+
 /* ── MOBILE COMMON (≤900px) ── */
 @media (max-width: 900px) {
   /* Date text: never wrap, ellipsis if too long */
@@ -1818,7 +1824,7 @@ function renderHistory() {
   const summaryEl = document.getElementById('histRangeSummary');
   if (summaryEl) {
     summaryEl.innerHTML = `
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">
+      <div class="hist-summary-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">
         <div style="background:var(--st-lt);border-radius:8px;padding:10px;text-align:center;">
           <div style="font-size:11px;color:var(--sub);margin-bottom:2px;">區間秀泰票房</div>
           <div style="font-size:18px;font-weight:700;color:var(--st);">${fmtW(sumSt)}<span style="font-size:11px;">萬</span></div>
@@ -1866,13 +1872,15 @@ function renderHistory() {
   }).join('');
 
   document.getElementById('historyContent').innerHTML = `
-    <table class="tbl">
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;">
+    <table class="tbl" style="min-width:480px;">
       <thead><tr>
         <th>日期</th><th class="r">秀泰票房(萬)</th><th class="r">市占</th>
         <th class="r">來客數</th><th class="r">全台票房(萬)</th><th class="r">較前日</th><th class="c">明細</th>
       </tr></thead>
       <tbody>${rows}</tbody>
-    </table>`;
+    </table>
+    </div>`;
 }
 
 // View a historical day — full dashboard overlay
