@@ -1890,7 +1890,7 @@ function renderHistory() {
 
   // ── Table rows ──
   const sortedAllKeys = Object.keys(DATA.history).sort().reverse();
-  const rows = keys.map((k) => {
+  const rows_arr = keys.map((k) => {
     const h = DATA.history[k];
     const isCurrent = k === DATA.date;
     const idx = sortedAllKeys.indexOf(k);
@@ -1913,7 +1913,32 @@ function renderHistory() {
       <td class="r">${chgHtml}</td>
       <td class="c"><button onclick="viewHistoryDay('${k}')" style="border:none;background:${isWeekend?'#FFF3E0':' var(--st-lt)'};color:${isWeekend?'#E65100':'var(--st)'};border-radius:6px;padding:2px 8px;cursor:pointer;font-size:11px;font-weight:700;">${isWeekend?'📊 完整報表':'查看'}</button></td>
     </tr>`;
-  }).join('');
+  });
+
+  // Split: show first 3, collapse the rest
+  const SHOW_COUNT = 3;
+  const visibleRows = rows_arr.slice(0, SHOW_COUNT).join('');
+  const hiddenRows  = rows_arr.slice(SHOW_COUNT).join('');
+  const hiddenCount = rows_arr.length - SHOW_COUNT;
+
+  const hiddenSection = hiddenCount > 0 ? `
+    <tr id="histExpandRow">
+      <td colspan="7" style="padding:0;border:none;">
+        <button onclick="toggleHistExpand()" id="histExpandBtn"
+          style="width:100%;padding:9px;background:var(--gray-lt);border:1px dashed var(--border);border-radius:0 0 8px 8px;cursor:pointer;color:var(--sub);font-size:12px;font-weight:600;">
+          ▼ 展開更多紀錄（${hiddenCount} 天）
+        </button>
+      </td>
+    </tr>
+    <tbody id="histHiddenRows" style="display:none;">${hiddenRows}</tbody>
+    <tr id="histCollapseRow" style="display:none;">
+      <td colspan="7" style="padding:0;border:none;">
+        <button onclick="toggleHistExpand()"
+          style="width:100%;padding:9px;background:var(--gray-lt);border:1px dashed var(--border);border-radius:0 0 8px 8px;cursor:pointer;color:var(--sub);font-size:12px;font-weight:600;">
+          ▲ 收起
+        </button>
+      </td>
+    </tr>` : '';
 
   document.getElementById('historyContent').innerHTML = `
     <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;">
@@ -1922,9 +1947,21 @@ function renderHistory() {
         <th>日期</th><th class="r">秀泰票房(萬)</th><th class="r">市占</th>
         <th class="r">來客數</th><th class="r">全台票房(萬)</th><th class="r">較前日</th><th class="c">明細</th>
       </tr></thead>
-      <tbody>${rows}</tbody>
+      <tbody>${visibleRows}</tbody>
+      ${hiddenSection}
     </table>
     </div>`;
+}
+
+function toggleHistExpand() {
+  const hidden  = document.getElementById('histHiddenRows');
+  const btnRow  = document.getElementById('histExpandRow');
+  const colRow  = document.getElementById('histCollapseRow');
+  if (!hidden) return;
+  const isOpen = hidden.style.display !== 'none';
+  hidden.style.display  = isOpen ? 'none' : '';
+  btnRow.style.display  = isOpen ? '' : 'none';
+  colRow.style.display  = isOpen ? 'none' : '';
 }
 
 // View a historical day — full dashboard overlay
