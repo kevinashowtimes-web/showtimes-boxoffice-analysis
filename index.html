@@ -188,71 +188,125 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
 .hist-quick:hover { background: var(--st-lt); color: var(--st); border-color: var(--st); }
 .hist-quick.active { background: var(--st); color: #fff; border-color: var(--st); font-weight: 600; }
 
-/* ── RESPONSIVE MOBILE ── */
 /* ── REGION GRID (Section 7) ── */
 .region-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
 .region-tbl-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
 
+/* ── TABLE SCROLL WRAPPER (all sections) ── */
+.tbl-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; width:100%; }
+
+/* ── MOBILE: portrait (≤768px) ── */
 @media (max-width: 768px) {
-  /* Prevent horizontal scroll on whole page */
   body { overflow-x: hidden; }
-  .wrap { padding: 10px 12px; overflow-x: hidden; }
+  .wrap { padding: 10px 12px; }
 
-  /* Section 7: stack regions vertically */
-  .region-grid { grid-template-columns: 1fr !important; gap: 10px; }
-  .region-tbl-wrap { overflow-x: auto; }
+  /* ── Section labels: solid visible block dividers ── */
+  .sec-label {
+    margin: 18px 0 10px;
+    font-size: 11px;
+    background: var(--st-lt);
+    color: var(--st);
+    padding: 6px 10px;
+    border-radius: 8px;
+    border-left: 3px solid var(--st);
+  }
+  .sec-label::after { display: none; }
 
-  /* Header: stack vertically */
-  .hdr { flex-direction: column; align-items: flex-start; gap: 8px; padding: 12px 14px; width: 100%; box-sizing: border-box; }
-  .hdr-left { flex-wrap: wrap; }
-  .hdr-btns { flex-wrap: wrap; gap: 6px; width: 100%; }
-  .btn-hdr { font-size: 11px; padding: 6px 10px; flex: 1 1 auto; min-width: 80px; text-align: center; }
-  .hdr-logo { font-size: 16px; }
+  /* ── Cards: clear blocks with bottom gap ── */
+  .card { padding: 12px 10px; margin-bottom: 2px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.09); }
 
-  /* KPI strip: 2 per row */
+  /* ── Header: compact 2-row ── */
+  .hdr { flex-direction: column; align-items: flex-start; gap: 6px; padding: 10px 14px; }
+  .hdr-left { flex-wrap: nowrap; align-items: center; gap: 10px; width: 100%; }
+  .hdr-logo { font-size: 15px; white-space: nowrap; }
+  .hdr-date { font-size: 11px; }
+  .hdr-btns { display: flex; flex-direction: row; gap: 6px; width: 100%; }
+  .btn-hdr { font-size: 11px; padding: 6px 8px; flex: 1; text-align: center; white-space: nowrap; min-width: 0; }
+
+  /* ── KPI strip: 2 per row ── */
   .kpi-strip { grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
-  .kpi-strip > * { min-width: 0; }
+  .kpi { padding: 10px 11px; }
   .kpi-val { font-size: 18px; }
-  .kpi { padding: 11px 12px; }
+  .kpi-lbl { font-size: 11px; }
 
-  /* Main 2-col grid → single column */
+  /* ── 2-col grids → single column ── */
   .grid2 { grid-template-columns: 1fr !important; gap: 10px; }
-  .grid2 > * { min-width: 0; }
 
-  /* Cards: keep padding, NO overflow-x change (prevents chart rendering issues) */
-  .card { padding: 12px 10px; }
-
-  /* Donut chart: allow flex wrap */
+  /* ── Donut chart + legend: stack vertically ── */
   .chart-wrap { height: 140px !important; }
 
-  /* Alert grid: 1 col */
+  /* ── All tables: horizontal scroll ── */
+  .card [style*="overflow-x:auto"],
+  .card > div[style*="overflow"] { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+  .tbl { font-size: 11px; }
+  .tbl th, .tbl td { padding: 6px 8px; white-space: nowrap; }
+
+  /* ── Section 7: regions stack vertically ── */
+  .region-grid { grid-template-columns: 1fr !important; gap: 10px; }
+
+  /* ── Alert grid: 1 col ── */
   .alert-grid { grid-template-columns: 1fr !important; }
 
-  /* Login box */
+  /* ── Accum values ── */
+  .accum-val { font-size: 15px; }
+
+  /* ── Login ── */
   .login-box { width: 92%; padding: 28px 20px; }
 
-  /* Modal */
+  /* ── Modal ── */
   .overlay { padding: 16px 8px; }
   .modal { padding: 16px; }
   .input-grid { grid-template-columns: 1fr 1fr !important; }
-
-  /* VS bar text */
   .vs-bar-val { font-size: 9px; }
-
-  /* Accum rows */
-  .accum-val { font-size: 15px; }
-
-  /* Sec label */
-  .sec-label { margin: 14px 0 8px; font-size: 10px; }
 }
 
+/* ── MOBILE: narrow portrait (≤480px) ── */
 @media (max-width: 480px) {
   .kpi-strip { gap: 6px !important; }
   .kpi-val { font-size: 16px; }
   .kpi-lbl { font-size: 10px; }
   .kpi { padding: 9px 10px; }
-  .hdr-logo { font-size: 14px; }
+  .hdr-logo { font-size: 13px; }
   .input-grid { grid-template-columns: 1fr !important; }
+  .tbl { font-size: 10px; }
+  .tbl th, .tbl td { padding: 5px 6px; }
+}
+
+/* ── MOBILE LANDSCAPE: 2-column layout ── */
+@media (max-width: 900px) and (orientation: landscape) {
+  .wrap { padding: 8px 14px; }
+
+  /* Compact header - single row */
+  .hdr { flex-direction: row; align-items: center; padding: 8px 14px; gap: 10px; }
+  .hdr-left { flex: 1; }
+  .hdr-logo { font-size: 14px; }
+  .hdr-date { font-size: 10px; }
+  .hdr-btns { gap: 5px; }
+  .btn-hdr { padding: 5px 8px; font-size: 10px; }
+
+  /* KPI strip: 3 per row in landscape */
+  .kpi-strip { grid-template-columns: repeat(3, 1fr) !important; gap: 7px; }
+  .kpi { padding: 8px 10px; }
+  .kpi-val { font-size: 16px; }
+  .kpi-lbl { font-size: 10px; }
+
+  /* 2-col layout in landscape */
+  .grid2 { grid-template-columns: 1fr 1fr !important; gap: 10px; }
+
+  /* Section 7: 2 regions side by side */
+  .region-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px; }
+
+  /* Alert grid: 2 cols */
+  .alert-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Section labels compact */
+  .sec-label { margin: 12px 0 8px; padding: 5px 10px; font-size: 10px; }
+
+  /* Cards compact */
+  .card { padding: 10px; }
+  .chart-wrap { height: 130px !important; }
+  .tbl { font-size: 11px; }
+  .tbl th, .tbl td { padding: 5px 7px; }
 }
 </style>
 
@@ -1915,39 +1969,7 @@ function viewHistoryDay(date) {
     + '<div class="card" style="margin:0 0 12px;padding:14px;">'
     + '<div style="font-size:10px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">④ 影城業績排行</div>'
     + '<div style="overflow-x:auto;"><table class="tbl"><thead><tr><th class="c">#</th><th>影城</th><th class="r">票房(萬)</th><th class="r">餐飲(萬)</th><th class="r">來客數</th><th class="r">場次</th><th class="r">均票</th><th class="r">滿座%</th></tr></thead><tbody>' + rankHtml + '</tbody></table></div>'
-    + '</div>'
-    + (alertHtml ? '<div class="card" style="margin:0;padding:14px;"><div style="font-size:10px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">⑥ 異常波動警示 vs 前日（±15%）</div>' + alertHtml + '</div>' : '')
-    + '</div>';
-
-  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
-  document.body.appendChild(overlay);
-
-  // Init donut chart
-  if (comp && Object.values(comp).some(function(v){return v>0;})) {
-    setTimeout(function() {
-      const colors={'秀泰':'#572d88','威秀':'#1A237E','國賓':'#00695C','美麗華':'#4A148C','in89':'#E65100','其他':'#607D8B'};
-      const labels=Object.keys(comp).filter(function(k){return comp[k]>0;});
-      const vals=labels.map(function(k){return comp[k];});
-      const ctx=document.getElementById('histDonut_'+date);
-      if (ctx) {
-        new Chart(ctx.getContext('2d'),{
-          type:'doughnut',
-          data:{labels:labels,datasets:[{data:vals,backgroundColor:labels.map(function(k){return colors[k]||'#607D8B';}),borderWidth:2,borderColor:'#fff'}]},
-          options:{cutout:'65%',responsive:true,maintainAspectRatio:false,
-            plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.label+': '+c.parsed.toFixed(1)+'萬 ('+( c.parsed/vals.reduce(function(a,b){return a+b;},0)*100).toFixed(1)+'%)';} }}}}
-        });
-      }
-    }, 50);
-  }
-}
-
-function scrollToHistory() {
-  document.getElementById('historyCard').scrollIntoView({behavior:'smooth', block:'start'});
-}
-
-// ════════════════════════════════════
-//  EXPORT
-// ════════════════════════════════════
+    + ════════════════════════════════════
 function exportHTML() {
   const blob = new Blob([document.documentElement.outerHTML], {type:'text/html'});
   const a = document.createElement('a');
