@@ -604,15 +604,15 @@ const DATA = {
     { rank:3,  name:'台南南紡威秀',   region:'S', st:false, bo:16425.9, visitors:569145,  mktPct:3.91 },
     { rank:4,  name:'台北京站威秀',   region:'N', st:false, bo:15025.2, visitors:489722,  mktPct:3.58 },
     { rank:5,  name:'板橋大遠百威秀', region:'N', st:false, bo:14146.3, visitors:436964,  mktPct:3.37 },
-    { rank:6,  name:'台中文心秀泰',   region:'C', st:true,  bo:13527.8, visitors:434227,  mktPct:3.22 },
+    { rank:6,  name:'台中文心秀泰',   region:'C', st:true,  bo:13572.5, visitors:435749,  mktPct:3.23 },
     { rank:7,  name:'新竹巨城威秀',   region:'N', st:false, bo:13073.7, visitors:423311,  mktPct:3.11 },
     { rank:8,  name:'台中大遠百威秀', region:'C', st:false, bo:12991.4, visitors:432814,  mktPct:3.09 },
-    { rank:9,  name:'台北大巨蛋秀泰', region:'N', st:true,  bo:12004.1, visitors:255001,  mktPct:2.86 },
-    { rank:10, name:'台中站前秀泰',   region:'C', st:true,  bo:10651.8, visitors:348196,  mktPct:2.54 },
+    { rank:9,  name:'台北大巨蛋秀泰', region:'N', st:true,  bo:12075.5, visitors:256471,  mktPct:2.87 },
+    { rank:10, name:'台中站前秀泰',   region:'C', st:true,  bo:10686.0, visitors:349354,  mktPct:2.54 },
     { rank:11, name:'新店裕隆城威秀', region:'N', st:false, bo:10497.1, visitors:334470,  mktPct:2.50 },
-    { rank:12, name:'高雄夢時代秀泰', region:'S', st:true,  bo:10261.5, visitors:340811,  mktPct:2.44 },
+    { rank:12, name:'高雄夢時代秀泰', region:'S', st:true,  bo:10302.9, visitors:342256,  mktPct:2.45 },
   ],
-  ytdMktTotal: 419759.4, // 全台全年累計（萬元）
+  ytdMktTotal: 420839.2, // 全台全年累計（萬元）
 
   // 月累計排行 MTD 2026-06-01～06-28（資料來源：taipeitheater.org.tw）
   mtdRanking: [
@@ -622,12 +622,12 @@ const DATA = {
     { rank:4,  name:'台南南紡威秀',   region:'S', st:false, bo:2351.7, visitors:82016,  mktPct:3.70 },
     { rank:5,  name:'板橋大遠百威秀', region:'N', st:false, bo:2133.4, visitors:67066,  mktPct:3.36 },
     { rank:6,  name:'新竹巨城威秀',   region:'N', st:false, bo:2062.5, visitors:67251,  mktPct:3.25 },
-    { rank:7,  name:'台中文心秀泰',   region:'C', st:true,  bo:1962.6, visitors:62937,  mktPct:3.09 },
-    { rank:8,  name:'台北大巨蛋秀泰', region:'N', st:true,  bo:1949.6, visitors:39995,  mktPct:3.07 },
+    { rank:7,  name:'台中文心秀泰',   region:'C', st:true,  bo:2007.3, visitors:64459,  mktPct:3.11 },
+    { rank:8,  name:'台北大巨蛋秀泰', region:'N', st:true,  bo:2021.0, visitors:41465,  mktPct:3.13 },
     { rank:9,  name:'台中大遠百威秀', region:'C', st:false, bo:1925.2, visitors:65025,  mktPct:3.03 },
-    { rank:10, name:'高雄夢時代秀泰', region:'S', st:true,  bo:1690.0, visitors:56121,  mktPct:2.66 },
+    { rank:10, name:'高雄夢時代秀泰', region:'S', st:true,  bo:1731.4, visitors:57566,  mktPct:2.68 },
   ],
-  mtdMktTotal: 63480.2,
+  mtdMktTotal: 64560.0,
 
   competitors: { '秀泰':319.1, '威秀':483.8, '國賓':48.7, '美麗華':23.6, 'in89':21.3, '其他':183.3 },
 
@@ -651,16 +651,16 @@ const DATA = {
 
   movies: [
     // wisonMtdBO = mktMtdBO × (威秀鏈MTD 30467.3萬 / 全台MTD 63480.2萬) = ×0.4799，確保威秀 < 全台
-    {title:'名偵探柯南 高速公路的墮天使', days:2,  totalBO:2359169, stBO:1260000, mktMtdBO:20746399,  stMtdBO:3914474,  wisonMtdBO:9957000,  avgPrice:298},
-    {title:'玩具總動員5',                 days:10, totalBO:1862832, stBO:977000,  mktMtdBO:113929156, stMtdBO:22890925, wisonMtdBO:54680000, avgPrice:279},
-    {title:'超少女',                      days:3,  totalBO:541801,  stBO:252000,  mktMtdBO:5209816,   stMtdBO:992701,   wisonMtdBO:2500000,  avgPrice:295},
-    {title:'屍速禁區',                    days:35, totalBO:435552,  stBO:241000,  mktMtdBO:101783639, stMtdBO:22209062, wisonMtdBO:48851000, avgPrice:286},
-    {title:'揭密日',                      days:16, totalBO:251870,  stBO:114000,  mktMtdBO:46010134,  stMtdBO:7604304,  wisonMtdBO:22083000, avgPrice:274},
-    {title:'超人再起',                    days:68, totalBO:191730,  stBO:0,       mktMtdBO:2496585,   stMtdBO:301750,   wisonMtdBO:1198000,  avgPrice:233},
-    {title:'後室',                        days:31, totalBO:139963,  stBO:96000,   mktMtdBO:47242146,  stMtdBO:8503545,  wisonMtdBO:22674000, avgPrice:286},
-    {title:'腎上腺 母侵',                 days:19, totalBO:129080,  stBO:27000,   mktMtdBO:3704645,   stMtdBO:398139,   wisonMtdBO:1778000,  avgPrice:214},
-    {title:'火遮眼',                      days:14, totalBO:102693,  stBO:48000,   mktMtdBO:9851766,   stMtdBO:2162756,  wisonMtdBO:4728000,  avgPrice:254},
-    {title:'鬼上車',                      days:8,  totalBO:94150,   stBO:46000,   mktMtdBO:3573652,   stMtdBO:897043,   wisonMtdBO:1715000,  avgPrice:272},
+    {title:'名偵探柯南 高速公路的墮天使', days:6,  totalBO:2359169, stBO:1260000, mktMtdBO:20746399,  stMtdBO:3914474,  wisonMtdBO:9957000,  avgPrice:298},
+    {title:'玩具總動員5',                 days:13, totalBO:1862832, stBO:977000,  mktMtdBO:113929156, stMtdBO:22890925, wisonMtdBO:54680000, avgPrice:279},
+    {title:'超少女',                      days:6,  totalBO:541801,  stBO:252000,  mktMtdBO:5209816,   stMtdBO:992701,   wisonMtdBO:2500000,  avgPrice:295},
+    {title:'屍速禁區',                    days:39, totalBO:435552,  stBO:241000,  mktMtdBO:101783639, stMtdBO:22209062, wisonMtdBO:48851000, avgPrice:286},
+    {title:'揭密日',                      days:20, totalBO:251870,  stBO:114000,  mktMtdBO:46010134,  stMtdBO:7604304,  wisonMtdBO:22083000, avgPrice:274},
+    {title:'超人再起',                    days:53, totalBO:191730,  stBO:0,       mktMtdBO:2496585,   stMtdBO:301750,   wisonMtdBO:1198000,  avgPrice:233},
+    {title:'後室',                        days:34, totalBO:139963,  stBO:96000,   mktMtdBO:47242146,  stMtdBO:8503545,  wisonMtdBO:22674000, avgPrice:286},
+    {title:'腎上腺 母侵',                 days:18, totalBO:129080,  stBO:27000,   mktMtdBO:3704645,   stMtdBO:398139,   wisonMtdBO:1778000,  avgPrice:214},
+    {title:'火遮眼',                      days:18, totalBO:102693,  stBO:48000,   mktMtdBO:9851766,   stMtdBO:2162756,  wisonMtdBO:4728000,  avgPrice:254},
+    {title:'鬼上車',                      days:12,  totalBO:94150,   stBO:46000,   mktMtdBO:3573652,   stMtdBO:897043,   wisonMtdBO:1715000,  avgPrice:272},
   ],
 
   // 威秀各館 MTD 2026-06-01～06-28（資料來源：taipeitheater.org.tw 市佔率查詢）
