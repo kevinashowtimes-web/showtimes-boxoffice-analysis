@@ -177,8 +177,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
 
 .hist-quick {
   border: 1px solid var(--border);
-  background: var(--bg-2);
-  color: var(--txt);
+  background: var(--gray-lt);
+  color: var(--text);
   border-radius: 6px;
   padding: 4px 10px;
   font-size: 12px;
@@ -403,6 +403,26 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
     <button class="btn-hdr primary" onclick="openUpload()">📂 上傳資料</button>
     <button class="btn-hdr" onclick="exportHTML()">📤 匯出 HTML</button>
     <button class="btn-hdr" onclick="scrollToHistory()" id="histBtn" style="display:none;">🗂 歷史紀錄 <span id="histCount"></span></button>
+    <button class="btn-hdr" onclick="openHallDB()">🎬 影廳資料庫</button>
+  </div>
+</div>
+
+
+<!-- ── HALL DB MODAL ── -->
+<div id="hallDBModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.65);overflow-y:auto;" onclick="if(event.target===this)closeHallDB()">
+  <div style="background:var(--card);max-width:860px;margin:40px auto;border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.5);">
+    <div style="background:var(--st);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-weight:700;font-size:1.05rem;color:#fff;">🎬 影廳資料庫　<span style="font-size:.8rem;opacity:.8;font-weight:400;">來源：影廳銀幕資料 2026-06-12（座位數不含輪椅席）</span></div>
+      <button onclick="closeHallDB()" style="background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;line-height:1;">✕</button>
+    </div>
+    <div style="padding:20px;">
+      <!-- Summary table -->
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:.88rem;" id="hallSummaryTbl"></table>
+      </div>
+      <!-- Detail accordion -->
+      <div id="hallDetail" style="margin-top:16px;"></div>
+    </div>
   </div>
 </div>
 
@@ -535,9 +555,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
   </div>
   <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
     <span style="font-size:13px;color:var(--sub);">日期區間</span>
-    <input type="date" id="histFrom" onchange="onHistDateChange()" style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;color:var(--txt);background:var(--bg);">
+    <input type="date" id="histFrom" onchange="onHistDateChange()" style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;color:var(--text);background:var(--bg);">
     <span style="color:var(--sub);">～</span>
-    <input type="date" id="histTo"   onchange="onHistDateChange()" style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;color:var(--txt);background:var(--bg);">
+    <input type="date" id="histTo"   onchange="onHistDateChange()" style="border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;color:var(--text);background:var(--bg);">
     <span id="histFilterInfo" style="font-size:12px;color:var(--sub);"></span>
   </div>
   <div id="histRangeSummary" style="margin-bottom:10px;"></div>
@@ -632,21 +652,21 @@ const DATA = {
   competitors: { '秀泰':319.1, '威秀':483.8, '國賓':48.7, '美麗華':23.6, 'in89':21.3, '其他':183.3 },
 
   cinemas: [
-    { name:'秀泰巨蛋', bo:71.4, fb:10.5, visitors:1470, shows:72, avgPrice:486, ystBO:133.3, ytdBO:12075.5, ytdVisitors:256471, mtdBO:2021.0, mtdVisitors:41465 },
-    { name:'秀泰欣欣', bo:23.2, fb:4.1, visitors:810, shows:85, avgPrice:286, ystBO:64.2, ytdBO:6875.4, ytdVisitors:230808, mtdBO:1075.0, mtdVisitors:35912 },
-    { name:'秀泰土城', bo:9.6, fb:1.8, visitors:341, shows:56, avgPrice:283, ystBO:38.4, ytdBO:3145.4, ytdVisitors:112827, mtdBO:480.2, mtdVisitors:17236 },
-    { name:'秀泰樹林', bo:16.6, fb:4.1, visitors:589, shows:70, avgPrice:282, ystBO:64.8, ytdBO:5479.9, ytdVisitors:186925, mtdBO:849.4, mtdVisitors:28606 },
-    { name:'秀泰基隆', bo:10.1, fb:1.6, visitors:379, shows:45, avgPrice:268, ystBO:32.7, ytdBO:2879.0, ytdVisitors:107796, mtdBO:402.7, mtdVisitors:14936 },
-    { name:'秀泰文心', bo:44.7, fb:6.8, visitors:1522, shows:89, avgPrice:294, ystBO:139.8, ytdBO:13572.5, ytdVisitors:435749, mtdBO:2007.3, mtdVisitors:64459 },
-    { name:'秀泰站前', bo:34.2, fb:7.0, visitors:1158, shows:108, avgPrice:295, ystBO:108.1, ytdBO:10686.0, ytdVisitors:349354, mtdBO:1616.9, mtdVisitors:52442 },
-    { name:'秀泰麗寶', bo:7.0, fb:1.5, visitors:239, shows:49, avgPrice:294, ystBO:32.9, ytdBO:2608.5, ytdVisitors:88454, mtdBO:347.1, mtdVisitors:11832 },
-    { name:'秀泰北港', bo:2.7, fb:0.6, visitors:107, shows:16, avgPrice:257, ystBO:7.9, ytdBO:871.0, ytdVisitors:32705, mtdBO:99.8, mtdVisitors:3741 },
-    { name:'秀泰嘉義', bo:20.2, fb:4.3, visitors:727, shows:63, avgPrice:278, ystBO:48.5, ytdBO:5139.8, ytdVisitors:182040, mtdBO:729.6, mtdVisitors:25646 },
-    { name:'秀泰仁德', bo:1.2, fb:0.2, visitors:41, shows:20, avgPrice:282, ystBO:10.3, ytdBO:732.4, ytdVisitors:26679, mtdBO:95.5, mtdVisitors:3430 },
-    { name:'秀泰夢時代', bo:41.4, fb:9.4, visitors:1445, shows:81, avgPrice:286, ystBO:110.9, ytdBO:10302.9, ytdVisitors:342256, mtdBO:1731.4, mtdVisitors:57566 },
-    { name:'秀泰岡山', bo:23.1, fb:5.1, visitors:841, shows:67, avgPrice:275, ystBO:60.1, ytdBO:6357.8, ytdVisitors:215087, mtdBO:983.8, mtdVisitors:33760 },
-    { name:'秀泰台東', bo:7.2, fb:2.1, visitors:276, shows:39, avgPrice:261, ystBO:19.2, ytdBO:1987.8, ytdVisitors:75364, mtdBO:278.8, mtdVisitors:10641 },
-    { name:'秀泰花蓮', bo:6.4, fb:1.7, visitors:244, shows:47, avgPrice:262, ystBO:16.3, ytdBO:2012.1, ytdVisitors:75562, mtdBO:293.8, mtdVisitors:10937 }
+    { name:'秀泰巨蛋', bo:71.4, fb:10.5, visitors:1470, shows:72, avgPrice:486, seats:120, halls:14, totalSeats:1683, ystBO:133.3, ytdBO:12075.5, ytdVisitors:256471, mtdBO:2021.0, mtdVisitors:41465 },
+    { name:'秀泰欣欣', bo:23.2, fb:4.1, visitors:810, shows:85, avgPrice:286, seats:106, halls:14, totalSeats:1488, ystBO:64.2, ytdBO:6875.4, ytdVisitors:230808, mtdBO:1075.0, mtdVisitors:35912 },
+    { name:'秀泰土城', bo:9.6, fb:1.8, visitors:341, shows:56, avgPrice:283, seats:97, halls:11, totalSeats:1063, ystBO:38.4, ytdBO:3145.4, ytdVisitors:112827, mtdBO:480.2, mtdVisitors:17236 },
+    { name:'秀泰樹林', bo:16.6, fb:4.1, visitors:589, shows:70, avgPrice:282, seats:127, halls:12, totalSeats:1524, ystBO:64.8, ytdBO:5479.9, ytdVisitors:186925, mtdBO:849.4, mtdVisitors:28606 },
+    { name:'秀泰基隆', bo:10.1, fb:1.6, visitors:379, shows:45, avgPrice:268, seats:127, halls:8, totalSeats:1013, ystBO:32.7, ytdBO:2879.0, ytdVisitors:107796, mtdBO:402.7, mtdVisitors:14936 },
+    { name:'秀泰文心', bo:44.7, fb:6.8, visitors:1522, shows:89, avgPrice:294, seats:131, halls:16, totalSeats:2098, ystBO:139.8, ytdBO:13572.5, ytdVisitors:435749, mtdBO:2007.3, mtdVisitors:64459 },
+    { name:'秀泰站前', bo:34.2, fb:7.0, visitors:1158, shows:108, avgPrice:295, seats:157, halls:17, totalSeats:2670, ystBO:108.1, ytdBO:10686.0, ytdVisitors:349354, mtdBO:1616.9, mtdVisitors:52442 },
+    { name:'秀泰麗寶', bo:7.0, fb:1.5, visitors:239, shows:49, avgPrice:294, seats:79, halls:10, totalSeats:793, ystBO:32.9, ytdBO:2608.5, ytdVisitors:88454, mtdBO:347.1, mtdVisitors:11832 },
+    { name:'秀泰北港', bo:2.7, fb:0.6, visitors:107, shows:16, avgPrice:257, seats:69, halls:4, totalSeats:276, ystBO:7.9, ytdBO:871.0, ytdVisitors:32705, mtdBO:99.8, mtdVisitors:3741 },
+    { name:'秀泰嘉義', bo:20.2, fb:4.3, visitors:727, shows:63, avgPrice:278, seats:124, halls:11, totalSeats:1360, ystBO:48.5, ytdBO:5139.8, ytdVisitors:182040, mtdBO:729.6, mtdVisitors:25646 },
+    { name:'秀泰仁德', bo:1.2, fb:0.2, visitors:41, shows:20, avgPrice:282, seats:76, halls:5, totalSeats:379, ystBO:10.3, ytdBO:732.4, ytdVisitors:26679, mtdBO:95.5, mtdVisitors:3430 },
+    { name:'秀泰夢時代', bo:41.4, fb:9.4, visitors:1445, shows:81, avgPrice:286, seats:145, halls:13, totalSeats:1886, ystBO:110.9, ytdBO:10302.9, ytdVisitors:342256, mtdBO:1731.4, mtdVisitors:57566 },
+    { name:'秀泰岡山', bo:23.1, fb:5.1, visitors:841, shows:67, avgPrice:275, seats:108, halls:13, totalSeats:1400, ystBO:60.1, ytdBO:6357.8, ytdVisitors:215087, mtdBO:983.8, mtdVisitors:33760 },
+    { name:'秀泰台東', bo:7.2, fb:2.1, visitors:276, shows:39, avgPrice:261, seats:109, halls:8, totalSeats:870, ystBO:19.2, ytdBO:1987.8, ytdVisitors:75364, mtdBO:278.8, mtdVisitors:10641 },
+    { name:'秀泰花蓮', bo:6.4, fb:1.7, visitors:244, shows:47, avgPrice:262, seats:120, halls:9, totalSeats:1083, ystBO:16.3, ytdBO:2012.1, ytdVisitors:75562, mtdBO:293.8, mtdVisitors:10937 }
   ],
 
   movies: [
@@ -872,6 +892,30 @@ const DATA = {
   },
   },
 };
+
+  // ════════════════════════════════════════════════════
+  //  CINEMA HALL DATABASE (官方影廳資料 2026-06-12)
+  //  來源：影廳銀幕資料_依影城分類_含投影機機型_20260612
+  //  seats欄不含輪椅席；avgSeats = totalSeats ÷ halls
+  // ════════════════════════════════════════════════════
+  const HALL_DB = {
+    '秀泰巨蛋':  { halls:14, totalSeats:1683, avgSeats:120, hallSeats:[128,148,148,0,0,93,130,159,159,274,105,105,122,112] },
+    '秀泰欣欣':  { halls:14, totalSeats:1488, avgSeats:106, hallSeats:[374,344,70,70,70,70,52,63,64,64,71,71,59,46] },
+    '秀泰土城':  { halls:11, totalSeats:1063, avgSeats:97,  hallSeats:[94,115,100,69,124,93,116,77,87,94,94] },
+    '秀泰樹林':  { halls:12, totalSeats:1524, avgSeats:127, hallSeats:[295,120,72,72,88,88,76,74,169,148,159,163] },
+    '秀泰基隆':  { halls:8,  totalSeats:1013, avgSeats:127, hallSeats:[97,77,116,155,116,171,112,169] },
+    '秀泰文心':  { halls:16, totalSeats:2098, avgSeats:131, hallSeats:[312,81,75,64,64,64,64,32,96,102,259,259,147,165,149,165] },
+    '秀泰站前':  { halls:17, totalSeats:2670, avgSeats:157, hallSeats:[339,162,73,57,68,64,221,227,194,217,227,199,94,93,193,193,49] },
+    '秀泰麗寶':  { halls:10, totalSeats:793,  avgSeats:79,  hallSeats:[278,103,45,61,45,45,92,21,25,78] },
+    '秀泰北港':  { halls:4,  totalSeats:276,  avgSeats:69,  hallSeats:[69,69,69,69] },
+    '秀泰嘉義':  { halls:11, totalSeats:1360, avgSeats:124, hallSeats:[318,88,88,131,131,131,131,72,94,86,90] },
+    '秀泰仁德':  { halls:5,  totalSeats:379,  avgSeats:76,  hallSeats:[81,57,81,79,81] },
+    '秀泰夢時代': { halls:13, totalSeats:1886, avgSeats:145, hallSeats:[251,35,152,154,160,179,30,177,132,121,134,201,160] },
+    '秀泰岡山':  { halls:13, totalSeats:1400, avgSeats:108, hallSeats:[340,95,81,87,51,97,89,74,67,108,129,108,74] },
+    '秀泰台東':  { halls:8,  totalSeats:870,  avgSeats:109, hallSeats:[174,87,76,99,87,173,75,99] },
+    '秀泰花蓮':  { halls:9,  totalSeats:1083, avgSeats:120, hallSeats:[178,101,136,102,146,102,172,73,73] },
+  };
+
 
 // ════════════════════════════════════
 //  HELPERS
@@ -2065,6 +2109,84 @@ function exportHTML() {
   a.click();
 }
 renderAll();
+
+// ════════════════════════════════════
+//  HALL DB MODAL
+// ════════════════════════════════════
+function openHallDB() {
+  const tbl = document.getElementById('hallSummaryTbl');
+  const detail = document.getElementById('hallDetail');
+
+  // Build summary table
+  let html = '<thead><tr style="background:var(--st);color:#fff;">'
+    + '<th style="padding:8px 10px;text-align:left;">影城</th>'
+    + '<th style="padding:8px 10px;text-align:center;">廳數</th>'
+    + '<th style="padding:8px 10px;text-align:right;">總座位</th>'
+    + '<th style="padding:8px 10px;text-align:right;">平均座位/廳</th>'
+    + '<th style="padding:8px 10px;text-align:left;">各廳座位分佈</th>'
+    + '</tr></thead><tbody>';
+
+  const order = ['秀泰文心','秀泰站前','秀泰夢時代','秀泰巨蛋','秀泰岡山','秀泰樹林','秀泰嘉義','秀泰欣欣','秀泰基隆','秀泰麗寶','秀泰土城','秀泰花蓮','秀泰台東','秀泰仁德','秀泰北港'];
+  let totalHalls = 0, totalSeats = 0;
+
+  order.forEach((name, idx) => {
+    const d = HALL_DB[name];
+    if (!d) return;
+    totalHalls += d.halls;
+    totalSeats += d.totalSeats;
+    const bg = idx % 2 === 0 ? 'var(--card)' : 'var(--gray-lt)';
+    const maxS = Math.max(...d.hallSeats.filter(s=>s>0));
+    const bars = d.hallSeats.map(s => {
+      if (!s) return '<span style="display:inline-block;width:6px;height:14px;background:var(--border);border-radius:2px;margin:0 1px;" title="未開放"></span>';
+      const h = Math.round(s / maxS * 28);
+      return `<span style="display:inline-block;width:6px;height:${h}px;background:var(--st);border-radius:2px;margin:0 1px;vertical-align:bottom;" title="${s}座"></span>`;
+    }).join('');
+    html += `<tr style="background:${bg};">
+      <td style="padding:7px 10px;font-weight:600;">${name}</td>
+      <td style="padding:7px 10px;text-align:center;">${d.halls}</td>
+      <td style="padding:7px 10px;text-align:right;">${d.totalSeats.toLocaleString()}</td>
+      <td style="padding:7px 10px;text-align:right;">${d.avgSeats}</td>
+      <td style="padding:7px 10px;">${bars}</td>
+    </tr>`;
+  });
+
+  html += `<tr style="background:var(--st-lt);font-weight:700;">
+    <td style="padding:7px 10px;">合計</td>
+    <td style="padding:7px 10px;text-align:center;">${totalHalls}</td>
+    <td style="padding:7px 10px;text-align:right;">${totalSeats.toLocaleString()}</td>
+    <td style="padding:7px 10px;text-align:right;">${Math.round(totalSeats/totalHalls)}</td>
+    <td style="padding:7px 10px;"></td>
+  </tr>`;
+  html += '</tbody>';
+  tbl.innerHTML = html;
+
+  // Build detail (each cinema expandable)
+  let dhtml = '<div style="font-size:.8rem;color:var(--sub);margin-bottom:8px;">點擊影城名稱可展開各廳明細</div>';
+  order.forEach(name => {
+    const d = HALL_DB[name];
+    if (!d) return;
+    const hallRows = d.hallSeats.map((s,i) => {
+      const label = `${i+1}廳`;
+      const pct = d.totalSeats > 0 ? (s/d.totalSeats*100).toFixed(1) : 0;
+      return `<td style="padding:4px 8px;text-align:center;color:${s?'var(--text)':'var(--sub)'};">${label}<br><b>${s||'—'}</b>${s?`<br><span style="font-size:.7rem;color:var(--sub);">${pct}%</span>`:''}</td>`;
+    }).join('');
+    dhtml += `<details style="margin-bottom:6px;border:1px solid var(--border);border-radius:6px;overflow:hidden;">
+      <summary style="padding:9px 14px;cursor:pointer;background:var(--gray-lt);font-weight:600;list-style:none;display:flex;justify-content:space-between;">
+        <span>${name}</span>
+        <span style="color:var(--sub);font-weight:400;">${d.halls}廳｜${d.totalSeats.toLocaleString()}座｜平均${d.avgSeats}座/廳</span>
+      </summary>
+      <div style="padding:10px;overflow-x:auto;"><table style="border-collapse:collapse;font-size:.82rem;"><tr>${hallRows}</tr></table></div>
+    </details>`;
+  });
+  detail.innerHTML = dhtml;
+
+  document.getElementById('hallDBModal').style.display = 'block';
+}
+
+function closeHallDB() {
+  document.getElementById('hallDBModal').style.display = 'none';
+}
+
 </script>
 </body>
 </html>
