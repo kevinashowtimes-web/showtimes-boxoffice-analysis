@@ -380,6 +380,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
         <th class="r">秀泰當日(萬)</th>
         <th class="r" style="min-width:110px">秀泰當日市占</th>
         <th class="r">全台本月累計(萬)</th>
+        <th class="r" style="color:#e97316;">威秀本月累計(萬)</th>
         <th class="r" style="color:var(--st)">秀泰本月累計(萬)</th>
         <th class="c">上映天</th><th class="r">均票價</th>
       </tr></thead>
@@ -538,46 +539,46 @@ const DATA = {
   ],
 
   movies: [
-    {title:'名偵探柯南 高速公路的墮天使', days:2,  totalBO:2359169, stBO:1260000, mktMtdBO:20746399,  stMtdBO:3914474,  avgPrice:298},
-    {title:'玩具總動員5',                 days:10, totalBO:1862832, stBO:977000,  mktMtdBO:113929156, stMtdBO:22890925, avgPrice:279},
-    {title:'超少女',                      days:3,  totalBO:541801,  stBO:252000,  mktMtdBO:5209816,   stMtdBO:992701,   avgPrice:295},
-    {title:'屍速禁區',                    days:35, totalBO:435552,  stBO:241000,  mktMtdBO:101783639, stMtdBO:22209062, avgPrice:286},
-    {title:'揭密日',                      days:16, totalBO:251870,  stBO:114000,  mktMtdBO:46010134,  stMtdBO:7604304,  avgPrice:274},
-    {title:'超人再起',                    days:68, totalBO:191730,  stBO:0,       mktMtdBO:2496585,   stMtdBO:301750,   avgPrice:233},
-    {title:'後室',                        days:31, totalBO:139963,  stBO:96000,   mktMtdBO:47242146,  stMtdBO:8503545,  avgPrice:286},
-    {title:'腎上腺 母侵',                 days:19, totalBO:129080,  stBO:27000,   mktMtdBO:3704645,   stMtdBO:398139,   avgPrice:214},
-    {title:'火遮眼',                      days:14, totalBO:102693,  stBO:48000,   mktMtdBO:9851766,   stMtdBO:2162756,  avgPrice:254},
-    {title:'鬼上車',                      days:8,  totalBO:94150,   stBO:46000,   mktMtdBO:3573652,   stMtdBO:897043,   avgPrice:272},
+    {title:'名偵探柯南 高速公路的墮天使', days:2,  totalBO:2359169, stBO:1260000, mktMtdBO:20746399,  stMtdBO:3914474,  wisonMtdBO:29836000, avgPrice:298},
+    {title:'玩具總動員5',                 days:10, totalBO:1862832, stBO:977000,  mktMtdBO:113929156, stMtdBO:22890925, wisonMtdBO:75364000, avgPrice:279},
+    {title:'超少女',                      days:3,  totalBO:541801,  stBO:252000,  mktMtdBO:5209816,   stMtdBO:992701,   wisonMtdBO:4839000,  avgPrice:295},
+    {title:'屍速禁區',                    days:35, totalBO:435552,  stBO:241000,  mktMtdBO:101783639, stMtdBO:22209062, wisonMtdBO:37076000, avgPrice:286},
+    {title:'揭密日',                      days:16, totalBO:251870,  stBO:114000,  mktMtdBO:46010134,  stMtdBO:7604304,  wisonMtdBO:22411000, avgPrice:274},
+    {title:'超人再起',                    days:68, totalBO:191730,  stBO:0,       mktMtdBO:2496585,   stMtdBO:301750,   wisonMtdBO:0,        avgPrice:233},
+    {title:'後室',                        days:31, totalBO:139963,  stBO:96000,   mktMtdBO:47242146,  stMtdBO:8503545,  wisonMtdBO:30332000, avgPrice:286},
+    {title:'腎上腺 母侵',                 days:19, totalBO:129080,  stBO:27000,   mktMtdBO:3704645,   stMtdBO:398139,   wisonMtdBO:0,        avgPrice:214},
+    {title:'火遮眼',                      days:14, totalBO:102693,  stBO:48000,   mktMtdBO:9851766,   stMtdBO:2162756,  wisonMtdBO:2690000,  avgPrice:254},
+    {title:'鬼上車',                      days:8,  totalBO:94150,   stBO:46000,   mktMtdBO:3573652,   stMtdBO:897043,   wisonMtdBO:1726000,  avgPrice:272},
   ],
 
-  // 威秀各館 MTD 2026-06-01～06-25（用於區域對決比較）
+  // 威秀各館 MTD 2026-06-01～06-28（資料來源：taipeitheater.org.tw 市佔率查詢）
   wisonMTD: {
     N: [
-      { name:'台北信義威秀',   bo:2754.3, visitors:81181, avgP:339.3 },
-      { name:'台北京站威秀',   bo:2098.4, visitors:69006, avgP:304.1 },
-      { name:'板橋大遠百威秀', bo:1740.0, visitors:54578, avgP:318.8 },
-      { name:'新竹巨城威秀',   bo:1675.0, visitors:54545, avgP:307.1 },
-      { name:'新店裕隆城威秀', bo:1327.7, visitors:42835, avgP:310.0 },
-      { name:'南港LaLaport威秀', bo:1227.2, visitors:39345, avgP:311.9 },
-      { name:'中和環球威秀',   bo:888.1,  visitors:31076, avgP:285.8 },
-      { name:'桃園統領威秀',   bo:996.2,  visitors:34319, avgP:290.3 },
-      { name:'台北西門威秀',   bo:986.8,  visitors:33760, avgP:292.3 },
-      { name:'林口威秀',       bo:974.9,  visitors:31077, avgP:313.7 },
-      { name:'新竹大遠百威秀', bo:654.9,  visitors:22581, avgP:290.0 },
-      { name:'桃園桃知道威秀', bo:235.5,  visitors:8536,  avgP:275.8 },
+      { name:'台北信義威秀',     bo:3362.3, visitors:99632,  avgP:337.5 },
+      { name:'台北京站威秀',     bo:2516.1, visitors:82714,  avgP:304.2 },
+      { name:'板橋大遠百威秀',   bo:2133.4, visitors:67066,  avgP:318.1 },
+      { name:'新竹巨城威秀',     bo:2062.5, visitors:67251,  avgP:306.7 },
+      { name:'新店裕隆城威秀',   bo:1632.0, visitors:52636,  avgP:310.0 },
+      { name:'南港LaLaport威秀', bo:1499.6, visitors:48077,  avgP:311.9 },
+      { name:'林口威秀',         bo:1256.7, visitors:40394,  avgP:311.1 },
+      { name:'桃園統領威秀',     bo:1171.7, visitors:40591,  avgP:288.7 },
+      { name:'台北西門威秀',     bo:1156.4, visitors:39804,  avgP:290.5 },
+      { name:'中和環球威秀',     bo:1119.8, visitors:39319,  avgP:284.8 },
+      { name:'新竹大遠百威秀',   bo:803.6,  visitors:27861,  avgP:288.4 },
+      { name:'桃園桃知道威秀',   bo:297.7,  visitors:10808,  avgP:275.5 },
     ],
     C: [
-      { name:'台中大遠百威秀',       bo:1530.7, visitors:51267, avgP:298.6 },
-      { name:'台中iFG遠雄廣場威秀',  bo:1132.2, visitors:37757, avgP:299.9 },
-      { name:'台中老虎城威秀',        bo:956.0,  visitors:30454, avgP:313.9 },
-      { name:'頭份尚順威秀',          bo:507.4,  visitors:18200, avgP:278.8 },
+      { name:'台中大遠百威秀',      bo:1925.2, visitors:65025, avgP:296.1 },
+      { name:'台中iFG遠雄廣場威秀', bo:1399.7, visitors:47194, avgP:296.6 },
+      { name:'台中老虎城威秀',       bo:1210.1, visitors:38757, avgP:312.2 },
+      { name:'頭份尚順威秀',         bo:637.0,  visitors:22832, avgP:279.0 },
     ],
     S: [
-      { name:'高雄威秀',        bo:2253.6, visitors:72131, avgP:312.4 },
-      { name:'台南南紡威秀',    bo:1828.5, visitors:63355, avgP:288.6 },
-      { name:'台南大遠百威秀',  bo:423.7,  visitors:13854, avgP:305.8 },
-      { name:'台南Focus威秀',   bo:354.4,  visitors:13507, avgP:262.4 },
-      { name:'花蓮新天堂樂園威秀', bo:116.5, visitors:4329, avgP:269.2 },
+      { name:'高雄威秀',           bo:2796.3, visitors:90088, avgP:310.4 },
+      { name:'台南南紡威秀',       bo:2351.7, visitors:82016, avgP:286.7 },
+      { name:'台南大遠百威秀',     bo:565.7,  visitors:18258, avgP:309.8 },
+      { name:'台南Focus威秀',      bo:429.5,  visitors:16431, avgP:261.4 },
+      { name:'花蓮新天堂樂園威秀', bo:140.3,  visitors:5253,  avgP:267.1 },
     ],
   },
 
@@ -926,7 +927,7 @@ function renderRankings() {
 function renderFilms() {
   const movies = DATA.movies;
   if (!movies || movies.length === 0) {
-    document.getElementById('filmBody').innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="big">🎬</div>電影票房數據尚未填入</div></td></tr>`;
+    document.getElementById('filmBody').innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="big">🎬</div>電影票房數據尚未填入</div></td></tr>`;
     return;
   }
   // Sort by 全台當日票房 (primary = daily rank); new releases (days<=3) float to top
@@ -947,9 +948,11 @@ function renderFilms() {
     const tBO      = m.totalBO > 10000 ? m.totalBO / 10000 : (m.totalBO || 0);
     const sBO      = m.stBO > 10000 ? m.stBO / 10000 : (m.stBO || 0);
     const mMtd     = m.mktMtdBO > 10000 ? m.mktMtdBO / 10000 : (m.mktMtdBO || 0);
+    const wMtd     = m.wisonMtdBO > 10000 ? m.wisonMtdBO / 10000 : (m.wisonMtdBO || 0);
     const sMtd     = m.stMtdBO > 10000 ? m.stMtdBO / 10000 : (m.stMtdBO || 0);
     const stShare  = tBO > 0 && sBO > 0 ? (sBO / tBO * 100) : 0;
     const stMtdShare = mMtd > 0 && sMtd > 0 ? (sMtd / mMtd * 100).toFixed(1) : null;
+    const wMtdShare  = mMtd > 0 && wMtd > 0 ? (wMtd / mMtd * 100).toFixed(1) : null;
     return `<tr>
       <td class="c"><span class="film-rank ${cls}">${rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':rank}</span></td>
       <td><span class="film-title">${m.title}</span>${m.days<=2?'<span class="new-badge">NEW</span>':''}</td>
@@ -957,6 +960,7 @@ function renderFilms() {
       <td class="r" style="color:var(--st);font-weight:700;">${sBO>0?sBO.toFixed(1):'—'}</td>
       <td class="r">${sBO>0&&tBO>0?`<span style="color:var(--st);font-weight:700;">${stShare.toFixed(1)}%</span><span class="st-share-bar"><span class="st-share-fill" style="width:${Math.min(stShare,100)}%;"></span></span>`:'—'}</td>
       <td class="r" style="color:var(--sub);">${mMtd>0?mMtd.toFixed(1):'—'}</td>
+      <td class="r" style="color:#e97316;font-weight:600;">${wMtd>0?`${wMtd.toFixed(1)}${wMtdShare?`<span style="font-size:10px;color:var(--sub);font-weight:400;"> (${wMtdShare}%)</span>`:''}` :'—'}</td>
       <td class="r" style="font-weight:700;color:var(--st-dk);">${sMtd>0?`${sMtd.toFixed(1)}${stMtdShare?`<span style="font-size:10px;color:var(--sub);font-weight:400;"> (${stMtdShare}%)</span>`:''}` :'—'}</td>
       <td class="c" style="color:var(--sub);">${m.days}天</td>
       <td class="r" style="color:var(--sub);">${m.avgPrice>0?'$'+m.avgPrice:'—'}</td>
@@ -1926,24 +1930,4 @@ function viewHistoryDay(date) {
   }
 }
 
-function scrollToHistory() {
-  document.getElementById('historyCard').scrollIntoView({behavior:'smooth', block:'start'});
-}
-
-// ════════════════════════════════════
-//  EXPORT
-// ════════════════════════════════════
-function exportHTML() {
-  const src = document.documentElement.outerHTML;
-  const blob = new Blob([src], {type:'text/html;charset=utf-8'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `秀泰營運報表_${DATA.date}.html`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-  toast('✅ HTML 已下載');
-}
-renderAll();
-</script>
-</body>
-</html>
+function scroll
