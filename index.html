@@ -84,6 +84,19 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
 .bm-val.ms-hi{color:var(--up);}
 .bm-val.ms-st{color:var(--st);}
 .bm-val.ms-ws{color:#C62828;}
+/* ── 院線市佔排行表 ── */
+.ms-row{display:grid;grid-template-columns:28px 90px 1fr 70px 70px;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--border);}
+.ms-row:last-child{border-bottom:none;}
+.ms-row.ms-st-row{background:var(--st-lt);border-radius:6px;border-bottom:none;margin:2px 0;}
+.ms-rank{font-size:12px;font-weight:700;color:var(--sub);text-align:center;}
+.ms-name{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;}
+.ms-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.ms-bar-wrap{height:10px;background:var(--gray-lt);border-radius:5px;overflow:hidden;}
+.ms-bar-fill{height:100%;border-radius:5px;transition:width .4s;}
+.ms-bo{font-size:12px;font-weight:700;color:var(--text);text-align:right;}
+.ms-pct{font-size:13px;font-weight:800;text-align:right;}
+.ms-hdr{display:grid;grid-template-columns:28px 90px 1fr 70px 70px;gap:8px;padding:0 4px 8px;border-bottom:2px solid var(--border);margin-bottom:4px;}
+.ms-hdr span{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;}
 .delta{font-size:11px;font-weight:700;padding:1px 5px;border-radius:4px;}
 .delta.up{color:var(--up);background:#E8F5E9;}
 .delta.dn{color:var(--dn);background:#FFEBEE;}
@@ -552,27 +565,15 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
 
 </div>
 
-<!-- ② Market + Mix -->
-<div class="sec-label">② 院線市占 ／ 各館收入結構</div>
-<div class="grid2">
-  <div class="card">
-    <div style="font-weight:800;font-size:13px;margin-bottom:12px;display:flex;justify-content:space-between;">
-      院線競爭格局
-      <span style="font-size:11px;font-weight:400;color:var(--sub);">當日票房佔比</span>
-    </div>
-    <div style="display:flex;gap:16px;align-items:center;">
-      <div style="width:150px;flex-shrink:0;"><div class="chart-wrap" style="height:150px;"><canvas id="chartDonut"></canvas></div></div>
-      <div style="flex:1;" id="compLegend"></div>
-    </div>
-    <div id="vsBar" style="margin-top:14px;"></div>
+<!-- ② Market Share -->
+<div class="sec-label">② 院線市佔率排行</div>
+<div class="card" style="padding:20px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+    <div style="font-weight:800;font-size:13px;">當日院線票房市佔排行</div>
+    <span style="font-size:11px;color:var(--sub);" id="mktShareNote">— 來源：台北票房觀測站</span>
   </div>
-  <div class="card">
-    <div style="font-weight:800;font-size:13px;margin-bottom:12px;display:flex;justify-content:space-between;">
-      各館收入結構（票房 vs 賣品）
-      <span style="font-size:11px;font-weight:400;color:var(--sub);">依票房排序</span>
-    </div>
-    <div id="revMix" style="max-height:240px;overflow-y:auto;"></div>
-  </div>
+  <div id="mktShareTable"></div>
+  <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);display:flex;gap:24px;flex-wrap:wrap;" id="mktShareSummary"></div>
 </div>
 
 <!-- ③ Rankings -->
@@ -707,6 +708,19 @@ const DATA = {
   },
 
   wison: { bo: 1366.6, visitors: 0, atp: 0 },
+
+  // 院線競爭對手當日票房（來源：台北票房觀測站 / 手動填入）
+  competitors: [
+    { name:'威秀影城',  short:'威秀',  bo:1366.6, color:'#C62828' },
+    { name:'國賓影城',  short:'國賓',  bo:0,      color:'#1565C0' },
+    { name:'美麗華影城',short:'美麗華',bo:0,      color:'#00695C' },
+    { name:'IN89豪華',  short:'IN89',  bo:0,      color:'#4527A0' },
+    { name:'美麗新影城',short:'美麗新',bo:0,      color:'#AD1457' },
+    { name:'新光影城',  short:'新光',  bo:0,      color:'#E65100' },
+    { name:'喜樂時代',  short:'喜樂',  bo:0,      color:'#2E7D32' },
+    { name:'絕色影城',  short:'絕色',  bo:0,      color:'#5D4037' },
+    { name:'其他院線',  short:'其他',  bo:0,      color:'#78909C' },
+  ],
 
   // 全台排行榜 YTD (2026-01-01~06-30，資料來源：taipeitheater.org.tw；06-30當日為部分入帳)
   // region: N=北, C=中, S=南; st=true 表示秀泰
@@ -1044,7 +1058,7 @@ function renderAll() {
   renderHeader();
   renderKPIs();
   renderDonut();
-  renderRevMix();
+  renderMktShare();
   renderRankings();
   renderFilms();
   renderMTDYTD();
@@ -1190,28 +1204,98 @@ function renderKPIs() {
   }
 }
 
-function renderRevMix() {
-  const cinemas = [...DATA.cinemas].filter(c=>c.bo>0||c.fb>0).sort((a,b)=>(b.bo+b.fb)-(a.bo+a.fb));
-  if (cinemas.length === 0) {
-    document.getElementById('revMix').innerHTML = '<div class="empty-state"><div class="big">📊</div>填入數據後顯示</div>';
+function renderMktShare() {
+  const mkt  = DATA.mkt;
+  const st   = DATA.st;
+  const comp = DATA.competitors || [];
+
+  // 建立完整院線清單（秀泰排第一）
+  const stBO = st.bo;
+  const allChains = [
+    { name:'秀泰影城', short:'秀泰', bo:stBO, color:'var(--st)', isST:true },
+    ...comp.map(c=>({...c, isST:false}))
+  ].filter(c=>c.bo>0);
+
+  // 排序：票房高到低
+  allChains.sort((a,b)=>b.bo-a.bo);
+
+  const totalKnown = allChains.reduce((s,c)=>s+c.bo, 0);
+  const mktBO = mkt.bo > 0 ? mkt.bo : totalKnown;
+  const maxBO = allChains.length > 0 ? allChains[0].bo : 1;
+
+  const tbl = document.getElementById('mktShareTable');
+  const note = document.getElementById('mktShareNote');
+  const summary = document.getElementById('mktShareSummary');
+  if (!tbl) return;
+
+  if (allChains.length === 0) {
+    tbl.innerHTML = '<div class="empty-state"><div class="big">🏟️</div>填入院線數據後顯示</div>';
+    if (summary) summary.innerHTML = '';
     return;
   }
-  const maxRev = Math.max(...cinemas.map(c=>c.bo+c.fb));
-  document.getElementById('revMix').innerHTML = cinemas.map(c => {
-    const tot = c.bo + c.fb;
-    const boPct = tot > 0 ? c.bo/tot*100 : 0;
-    const barW  = maxRev > 0 ? tot/maxRev*100 : 0;
-    return `<div class="mix-row">
-      <div class="mix-label">
-        <span style="font-weight:700;font-size:11px;">${c.name}</span>
-        <span style="font-size:10px;color:var(--sub);">${fmtW(c.bo)}萬${c.fb>0?' + '+fmtW(c.fb)+'萬':''}</span>
+
+  if (note) note.textContent = `資料日期：${DATA.date}　來源：台北票房觀測站`;
+
+  // Header
+  let html = `<div class="ms-hdr">
+    <span style="text-align:center;">#</span>
+    <span>院線</span>
+    <span>市佔比例</span>
+    <span style="text-align:right;">票房(萬)</span>
+    <span style="text-align:right;">市佔率</span>
+  </div>`;
+
+  allChains.forEach((c, i) => {
+    const ms    = mktBO > 0 ? (c.bo / mktBO * 100) : 0;
+    const barW  = (c.bo / maxBO * 100).toFixed(1);
+    const color = c.isST ? 'var(--st)' : c.color;
+    const rowCls = c.isST ? 'ms-row ms-st-row' : 'ms-row';
+    const msColor = c.isST ? 'color:var(--st);' : `color:${c.color};`;
+    html += `<div class="${rowCls}">
+      <div class="ms-rank">${i+1}</div>
+      <div class="ms-name">
+        <span class="ms-dot" style="background:${color};"></span>
+        <span>${c.short || c.name}${c.isST ? ' ★' : ''}</span>
       </div>
-      <div class="mix-track" style="width:${Math.max(barW,4)}%;">
-        <div class="mix-bo" style="width:${boPct}%;"></div>
-        <div class="mix-fb" style="width:${100-boPct}%;"></div>
+      <div class="ms-bar-wrap">
+        <div class="ms-bar-fill" style="width:${barW}%;background:${color};"></div>
       </div>
+      <div class="ms-bo">${fmtW(c.bo)}</div>
+      <div class="ms-pct" style="${msColor}">${ms>0 ? ms.toFixed(1)+'%' : '—'}</div>
     </div>`;
-  }).join('');
+  });
+
+  // 已知合計 vs 全台
+  const knownPct = mktBO > 0 ? (totalKnown/mktBO*100).toFixed(1) : '—';
+  const otherBO  = mktBO > totalKnown ? mktBO - totalKnown : 0;
+  if (otherBO > 0) {
+    html += `<div class="ms-row" style="opacity:.6;">
+      <div class="ms-rank">—</div>
+      <div class="ms-name"><span class="ms-dot" style="background:#B0BEC5;"></span><span>其他/未統計</span></div>
+      <div class="ms-bar-wrap"><div class="ms-bar-fill" style="width:${(otherBO/maxBO*100).toFixed(1)}%;background:#B0BEC5;"></div></div>
+      <div class="ms-bo">${fmtW(otherBO)}</div>
+      <div class="ms-pct" style="color:var(--sub);">${(otherBO/mktBO*100).toFixed(1)}%</div>
+    </div>`;
+  }
+  tbl.innerHTML = html;
+
+  // Summary strip
+  const stMS = mktBO > 0 ? (stBO/mktBO*100) : 0;
+  const wsComp = comp.find(c=>c.short==='威秀'||c.name==='威秀影城');
+  const wsMS = wsComp && mktBO > 0 ? (wsComp.bo/mktBO*100) : 0;
+  if (summary) {
+    summary.innerHTML = [
+      { label:'全台總票房',  val: mkt.bo > 0 ? fmtW(mkt.bo)+'萬' : '— 萬', sub:'當日大盤' },
+      { label:'秀泰市佔',   val: stMS>0 ? stMS.toFixed(1)+'%' : '—', sub:'★', color:'var(--st)' },
+      { label:'威秀市佔',   val: wsMS>0 ? wsMS.toFixed(1)+'%' : '—', sub:'對手', color:'#C62828' },
+      { label:'已統計院線', val: knownPct+'%', sub:'佔全台', color:'var(--sub)' },
+    ].map(item=>`
+      <div style="text-align:center;min-width:80px;">
+        <div style="font-size:10px;color:var(--sub);font-weight:600;margin-bottom:2px;">${item.label}</div>
+        <div style="font-size:18px;font-weight:800;color:${item.color||'var(--text)'};">${item.val}</div>
+        <div style="font-size:10px;color:var(--sub);">${item.sub}</div>
+      </div>`).join('<div style="width:1px;background:var(--border);"></div>');
+  }
 }
 
 function renderRankings() {
