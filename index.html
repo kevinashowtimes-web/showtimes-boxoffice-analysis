@@ -621,6 +621,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
           <th class="r">BO(萬)</th>
           <th class="r">ADM</th>
           <th class="r">ATP</th>
+          <th class="r">MS%</th>
         </tr></thead>
         <tbody id="rankBodyMkt"></tbody>
       </table>
@@ -778,15 +779,20 @@ const DATA = {
   // 月累計排行 MTD 2026-06-01～06-30（資料來源：taipeitheater.org.tw；06-30當日為部分入帳）
   mtdRanking: [
     { rank:1,  name:'台北信義威秀',   region:'N', st:false, bo:3645.7, visitors:108272,  mktPct:5.38 },
-    { rank:2,  name:'高雄威秀',       region:'S', st:false, bo:2992.7, visitors:96666,  mktPct:4.42 },
-    { rank:3,  name:'台北京站威秀',   region:'N', st:false, bo:2711.3, visitors:89256,  mktPct:4.00 },
-    { rank:4,  name:'台南南紡威秀',   region:'S', st:false, bo:2517.1, visitors:87982,  mktPct:3.72 },
-    { rank:5,  name:'板橋大遠百威秀', region:'N', st:false, bo:2280.8, visitors:71911,  mktPct:3.37 },
-    { rank:6,  name:'新竹巨城威秀',   region:'N', st:false, bo:2234.0, visitors:73001,  mktPct:3.30 },
-    { rank:7,  name:'台北大巨蛋秀泰', region:'N', st:true,  bo:2103.4, visitors:43159,  mktPct:3.11 },
-    { rank:8,  name:'台中文心秀泰',   region:'C', st:true,  bo:2083.8, visitors:66960,  mktPct:3.08 },
-    { rank:9,  name:'台中大遠百威秀', region:'C', st:false, bo:2051.1, visitors:69394,  mktPct:3.03 },
-    { rank:10, name:'高雄夢時代秀泰', region:'S', st:true,  bo:1794.3, visitors:59722,  mktPct:2.65 },
+    { rank:2,  name:'高雄威秀',       region:'S', st:false, bo:2992.7, visitors:96666,   mktPct:4.42 },
+    { rank:3,  name:'台北京站威秀',   region:'N', st:false, bo:2711.3, visitors:89256,   mktPct:4.00 },
+    { rank:4,  name:'台南南紡威秀',   region:'S', st:false, bo:2517.1, visitors:87982,   mktPct:3.72 },
+    { rank:5,  name:'板橋大遠百威秀', region:'N', st:false, bo:2280.8, visitors:71911,   mktPct:3.37 },
+    { rank:6,  name:'新竹巨城威秀',   region:'N', st:false, bo:2234.0, visitors:73001,   mktPct:3.30 },
+    { rank:7,  name:'台北大巨蛋秀泰', region:'N', st:true,  bo:2103.4, visitors:43159,   mktPct:3.11 },
+    { rank:8,  name:'台中文心秀泰',   region:'C', st:true,  bo:2083.8, visitors:66960,   mktPct:3.08 },
+    { rank:9,  name:'台中大遠百威秀', region:'C', st:false, bo:2051.1, visitors:69394,   mktPct:3.03 },
+    { rank:10, name:'高雄夢時代秀泰', region:'S', st:true,  bo:1794.3, visitors:59722,   mktPct:2.65 },
+    { rank:11, name:'台中站前秀泰',   region:'C', st:true,  bo:0,      visitors:0,        mktPct:0    },
+    { rank:12, name:'新店裕隆城威秀', region:'N', st:false, bo:0,      visitors:0,        mktPct:0    },
+    { rank:13, name:'⚠ 待更新',      region:'-', st:false, bo:0,      visitors:0,        mktPct:0    },
+    { rank:14, name:'⚠ 待更新',      region:'-', st:false, bo:0,      visitors:0,        mktPct:0    },
+    { rank:15, name:'⚠ 待更新',      region:'-', st:false, bo:0,      visitors:0,        mktPct:0    },
   ],
   mtdMktTotal: 67703.4,
 
@@ -1437,19 +1443,21 @@ function renderRankings() {
   const bodyMktEl = document.getElementById('rankBodyMkt');
   if (bodyMktEl) {
     if (mktData.length === 0) {
-      bodyMktEl.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="big">🎬</div>全台排行數據待更新</div></td></tr>`;
+      bodyMktEl.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="big">🎬</div>全台排行數據待更新</div></td></tr>`;
     } else {
       bodyMktEl.innerHTML = mktData.map((c) => {
         const atp   = c.visitors > 0 ? Math.round(c.bo * 10000 / c.visitors) : 0;
         const isST  = c.st === true;
         const cls   = c.rank===1?'r1':c.rank===2?'r2':c.rank===3?'r3':'';
         const badge = isST ? '<span style="font-size:9px;background:rgba(87,45,136,.18);color:var(--st);padding:1px 5px;border-radius:3px;margin-left:5px;font-weight:800;">秀泰</span>' : '';
-        return `<tr style="${isST?'background:var(--st-lt);':''}">
+        const hasBO = c.bo > 0;
+        return `<tr style="${isST?'background:var(--st-lt);':''}${!hasBO?'opacity:.6;':''}">
           <td class="c"><span class="rank-num ${cls}">${c.rank}</span></td>
           <td><span style="font-size:12px;font-weight:${isST?800:600};">${c.name}</span>${badge}</td>
-          <td class="r" style="font-weight:700;${isST?'color:var(--st);':''}">${fmtW(c.bo)}</td>
+          <td class="r" style="font-weight:700;${isST&&hasBO?'color:var(--st);':''}">${hasBO ? fmtW(c.bo) : '⚠ 待填'}</td>
           <td class="r">${c.visitors > 0 ? fmt(c.visitors) : '—'}</td>
           <td class="r">${atp > 0 ? '$'+atp : '—'}</td>
+          <td class="r" style="${isST&&hasBO?'color:var(--st);font-weight:800;':'color:var(--sub);'}">${c.mktPct > 0 ? c.mktPct.toFixed(2)+'%' : '—'}</td>
         </tr>`;
       }).join('');
     }
