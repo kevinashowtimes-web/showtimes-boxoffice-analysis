@@ -2194,4 +2194,53 @@ function openHallDB() {
     </tr>`;
   });
 
-  html += `<tr style="background:var(--st-lt);fo
+  html += nt-weight:700;">
+    <td style="padding:7px 10px;">合計</td>
+    <td style="padding:7px 10px;text-align:center;">${totalHalls}</td>
+    <td style="padding:7px 10px;text-align:right;">${totalSeats.toLocaleString()}</td>
+    <td style="padding:7px 10px;text-align:right;">${Math.round(totalSeats/totalHalls)}</td>
+    <td style="padding:7px 10px;"></td>
+  </tr>`;
+  html += '</tbody>';
+  tbl.innerHTML = html;
+
+  // Build detail (each cinema expandable)
+  let dhtml = '<div style="font-size:.8rem;color:var(--sub);margin-bottom:8px;">點擊影城名稱可展開各廳明細</div>';
+  order.forEach(name => {
+    const d = HALL_DB[name];
+    if (!d) return;
+    const hallRows = d.hallSeats.map((s,i) => {
+      const label = `${i+1}廳`;
+      const pct = d.totalSeats > 0 ? (s/d.totalSeats*100).toFixed(1) : 0;
+      return `<td style="padding:4px 8px;text-align:center;color:${s?'var(--text)':'var(--sub)'};">${label}<br><b>${s||'—'}</b>${s?`<br><span style="font-size:.7rem;color:var(--sub);">${pct}%</span>`:''}</td>`;
+    }).join('');
+    dhtml += `<details style="margin-bottom:6px;border:1px solid var(--border);border-radius:6px;overflow:hidden;">
+      <summary style="padding:9px 14px;cursor:pointer;background:var(--gray-lt);font-weight:600;list-style:none;display:flex;justify-content:space-between;">
+        <span>${name}</span>
+        <span style="color:var(--sub);font-weight:400;">${d.halls}廳｜${d.totalSeats.toLocaleString()}座｜平均${d.avgSeats}座/廳</span>
+      </summary>
+      <div style="padding:10px;overflow-x:auto;"><table style="border-collapse:collapse;font-size:.82rem;"><tr>${hallRows}</tr></table></div>
+    </details>`;
+  });
+  detail.innerHTML = dhtml;
+
+  document.getElementById('hallDBModal').style.display = 'block';
+}
+
+function closeHallDB() {
+  document.getElementById('hallDBModal').style.display = 'none';
+}
+
+function toggleHistExpand() {
+  const hidden  = document.getElementById('histHiddenRows');
+  const btnRow  = document.getElementById('histExpandRow');
+  const colRow  = document.getElementById('histCollapseRow');
+  if (!hidden) return;
+  const isOpen = hidden.style.display !== 'none';
+  hidden.style.display  = isOpen ? 'none' : '';
+  btnRow.style.display  = isOpen ? '' : 'none';
+  colRow.style.display  = isOpen ? 'none' : '';
+}
+</script>
+</body>
+</html>
