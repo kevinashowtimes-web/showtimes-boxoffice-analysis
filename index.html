@@ -59,6 +59,31 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
 .kpi-breakdown{font-size:10px;margin-top:2px;display:flex;gap:8px;}
 .kpi-breakdown .bo{color:var(--st);}
 .kpi-breakdown .fb{color:var(--green);}
+/* ── 品牌對比KPI卡（第①區塊） ── */
+.kpi-date-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.kpi-date-txt{font-size:13px;font-weight:700;color:var(--text);}
+.kpi-holiday-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:#FFF3E0;color:#E65100;border:1px solid #FFB74D;}
+.kpi-weekend-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:#E8F5E9;color:#2E7D32;border:1px solid #81C784;}
+.brand-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;}
+.brand-card{background:var(--card);border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.08);overflow:hidden;}
+.brand-card-hdr{padding:12px 16px 10px;display:flex;align-items:center;justify-content:space-between;}
+.brand-card-hdr .brand-name{font-size:14px;font-weight:800;color:#fff;letter-spacing:.3px;}
+.brand-card-hdr .brand-ms-badge{font-size:12px;font-weight:700;background:rgba(255,255,255,.25);color:#fff;padding:2px 8px;border-radius:12px;}
+.brand-card.mkt .brand-card-hdr{background:linear-gradient(135deg,#1A237E,#283593);}
+.brand-card.st  .brand-card-hdr{background:linear-gradient(135deg,#572d88,#7c52b3);}
+.brand-card.ws  .brand-card-hdr{background:linear-gradient(135deg,#B71C1C,#D32F2F);}
+.brand-metrics{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.brand-metric{padding:11px 14px;border-bottom:1px solid var(--border);}
+.brand-metric:nth-child(odd){border-right:1px solid var(--border);}
+.brand-metric:last-child,.brand-metric:nth-last-child(2):nth-child(odd){border-bottom:none;}
+.brand-metric:nth-last-child(2){border-bottom:none;}
+.bm-lbl{font-size:10px;color:var(--sub);font-weight:600;margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px;}
+.bm-val{font-size:19px;font-weight:800;color:var(--text);line-height:1.15;}
+.bm-val .unit{font-size:11px;font-weight:400;color:var(--sub);margin-left:2px;}
+.bm-sub{font-size:10px;color:var(--sub);margin-top:2px;}
+.bm-val.ms-hi{color:var(--up);}
+.bm-val.ms-st{color:var(--st);}
+.bm-val.ms-ws{color:#C62828;}
 .delta{font-size:11px;font-weight:700;padding:1px 5px;border-radius:4px;}
 .delta.up{color:var(--up);background:#E8F5E9;}
 .delta.dn{color:var(--dn);background:#FFEBEE;}
@@ -430,34 +455,101 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
 <div class="wrap">
 
 <!-- ① KPIs -->
-<div class="sec-label">① 今日關鍵指標</div>
-<div class="kpi-strip">
-  <div class="kpi blue">
-    <div class="kpi-lbl">全台票房市場</div>
-    <div class="kpi-val" id="kv-mkt">—<span class="unit">萬</span></div>
-    <div class="kpi-sub" id="ks-mkt">—</div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+  <div class="sec-label" style="margin-bottom:0;">① 今日關鍵指標</div>
+  <div id="kpiDateRow" style="display:flex;align-items:center;gap:8px;">
+    <span id="kpiDateTxt" style="font-size:13px;font-weight:700;color:var(--text);">—</span>
+    <span id="kpiHolidayBadge" style="display:none;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:#FFF3E0;color:#E65100;border:1px solid #FFB74D;"></span>
   </div>
-  <div class="kpi accent">
-    <div class="kpi-lbl">秀泰 票房</div>
-    <div class="kpi-val" id="kv-bo">—<span class="unit">萬</span></div>
-    <div class="kpi-breakdown"><span class="bo" id="kb-bo">—</span><span class="fb" id="kb-fb">—</span></div>
-    <div class="kpi-sub" id="ks-bo">— vs 昨日</div>
+</div>
+<div class="brand-grid">
+
+  <!-- 全台市場 -->
+  <div class="brand-card mkt">
+    <div class="brand-card-hdr">
+      <span class="brand-name">🇹🇼 全台市場</span>
+      <span class="brand-ms-badge" id="b-mkt-ms-badge">MS 100%</span>
+    </div>
+    <div class="brand-metrics">
+      <div class="brand-metric">
+        <div class="bm-lbl">票房 BO</div>
+        <div class="bm-val" id="b-mkt-bo">—<span class="unit">萬</span></div>
+      </div>
+      <div class="brand-metric">
+        <div class="bm-lbl">來客數 ADM</div>
+        <div class="bm-val" id="b-mkt-adm">—<span class="unit">人</span></div>
+      </div>
+      <div class="brand-metric">
+        <div class="bm-lbl">平均票價 ATP</div>
+        <div class="bm-val" id="b-mkt-atp">—<span class="unit">元</span></div>
+      </div>
+      <div class="brand-metric">
+        <div class="bm-lbl">市佔率 MS</div>
+        <div class="bm-val ms-hi">100<span class="unit">%</span></div>
+        <div class="bm-sub">全台基準</div>
+      </div>
+    </div>
   </div>
-  <div class="kpi green">
-    <div class="kpi-lbl">市場市占率</div>
-    <div class="kpi-val" id="kv-share">—<span class="unit">%</span></div>
-    <div class="kpi-sub" id="ks-share">vs 威秀 —%</div>
+
+  <!-- 秀泰影城 -->
+  <div class="brand-card st">
+    <div class="brand-card-hdr">
+      <span class="brand-name">🎬 秀泰影城</span>
+      <span class="brand-ms-badge" id="b-st-ms-badge">MS —%</span>
+    </div>
+    <div class="brand-metrics">
+      <div class="brand-metric">
+        <div class="bm-lbl">票房 BO</div>
+        <div class="bm-val" id="b-st-bo">—<span class="unit">萬</span></div>
+        <div class="bm-sub" id="b-st-bo-sub">— vs 昨日</div>
+      </div>
+      <div class="brand-metric">
+        <div class="bm-lbl">來客數 ADM</div>
+        <div class="bm-val" id="b-st-adm">—<span class="unit">人</span></div>
+        <div class="bm-sub">15館合計</div>
+      </div>
+      <div class="brand-metric">
+        <div class="bm-lbl">平均票價 ATP</div>
+        <div class="bm-val" id="b-st-atp">—<span class="unit">元</span></div>
+        <div class="bm-sub">BO÷ADM</div>
+      </div>
+      <div class="brand-metric">
+        <div class="bm-lbl">市佔率 MS</div>
+        <div class="bm-val ms-st" id="b-st-ms">—<span class="unit">%</span></div>
+        <div class="bm-sub" id="b-st-ms-sub">秀泰÷全台</div>
+      </div>
+    </div>
   </div>
-  <div class="kpi amber">
-    <div class="kpi-lbl">來客數</div>
-    <div class="kpi-val" id="kv-vis">—<span class="unit">人</span></div>
-    <div class="kpi-sub" id="ks-vis">全集團</div>
+
+  <!-- 威秀影城 -->
+  <div class="brand-card ws">
+    <div class="brand-card-hdr">
+      <span class="brand-name">🏟️ 威秀影城</span>
+      <span class="brand-ms-badge" id="b-ws-ms-badge">MS —%</span>
+    </div>
+    <div class="brand-metrics">
+      <div class="brand-metric">
+        <div class="bm-lbl">票房 BO</div>
+        <div class="bm-val" id="b-ws-bo">—<span class="unit">萬</span></div>
+      </div>
+      <div class="brand-metric">
+        <div class="bm-lbl">來客數 ADM</div>
+        <div class="bm-val" id="b-ws-adm">—<span class="unit">人</span></div>
+        <div class="bm-sub" id="b-ws-adm-sub">⚠ 待確認</div>
+      </div>
+      <div class="brand-metric">
+        <div class="bm-lbl">平均票價 ATP</div>
+        <div class="bm-val" id="b-ws-atp">—<span class="unit">元</span></div>
+        <div class="bm-sub" id="b-ws-atp-sub">⚠ 待確認</div>
+      </div>
+      <div class="brand-metric">
+        <div class="bm-lbl">市佔率 MS</div>
+        <div class="bm-val ms-ws" id="b-ws-ms">—<span class="unit">%</span></div>
+        <div class="bm-sub">威秀÷全台</div>
+      </div>
+    </div>
   </div>
-  <div class="kpi gold">
-    <div class="kpi-lbl">平均票價</div>
-    <div class="kpi-val" id="kv-avg">—<span class="unit">元</span></div>
-    <div class="kpi-sub" id="ks-avg">票房 ÷ 來客</div>
-  </div>
+
 </div>
 
 <!-- ② Market + Mix -->
@@ -603,70 +695,70 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
 // ════════════════════════════════════
 const DATA = {
   date: '2026-06-30', weekday: '二',
-  lastUpdate: '自動更新 2026-06-30 全日票房（秀泰內部系統數據已確認；全國大盤與威秀/國賓/美麗華/in89僅55/96家戲院入帳，市占率⚠待確認）',
+  lastUpdate: '自動更新 2026-06-30 全日票房（秀泰內部系統數據已確認；全國大盤94/104家戲院已入帳，較上次更新更完整，市占率已回補；賣品消費結構維持前次估算值 ⚠待確認）',
 
-  mkt: { bo: 1002.2, lastWeekBO: 0 },
+  mkt: { bo: 2536.8, visitors: 0, atp: 0, lastWeekBO: 0 },
 
   st: {
-    bo: 484.5, fb: 109.4, visitors: 15769,
+    bo: 484.5, fb: 109.4, visitors: 15674,
     ystBO: 319.1,
-    mtdBO: 13796.8, mtdLastMonthBO: 14606.9, mtdLastYearBO: 9303.8,
-    ytdBO: 85809.0, ytdLastYearBO: 21385.7,
+    mtdBO: 13496.9, mtdLastMonthBO: 14481.1, mtdLastYearBO: 12111.7,
+    ytdBO: 85210.6, ytdLastYearBO: 49923.2,
   },
 
-  wison: { bo: 18.9 },
+  wison: { bo: 1366.6, visitors: 0, atp: 0 },
 
   // 全台排行榜 YTD (2026-01-01~06-30，資料來源：taipeitheater.org.tw；06-30當日為部分入帳)
   // region: N=北, C=中, S=南; st=true 表示秀泰
   ytdRanking: [
-    { rank:1,  name:'台北信義威秀',   region:'N', st:false, bo:20103.4, visitors:598012,  mktPct:4.76 },
-    { rank:2,  name:'高雄威秀',       region:'S', st:false, bo:18711.3, visitors:606544,  mktPct:4.43 },
-    { rank:3,  name:'台南南紡威秀',   region:'S', st:false, bo:16483.2, visitors:571219,  mktPct:3.90 },
-    { rank:4,  name:'台北京站威秀',   region:'N', st:false, bo:15098.9, visitors:492232,  mktPct:3.57 },
-    { rank:5,  name:'板橋大遠百威秀', region:'N', st:false, bo:14199.9, visitors:438726,  mktPct:3.36 },
-    { rank:6,  name:'台中文心秀泰',   region:'C', st:true,  bo:13649.0, visitors:438250,  mktPct:3.23 },
-    { rank:7,  name:'新竹巨城威秀',   region:'N', st:false, bo:13134.2, visitors:425369,  mktPct:3.11 },
-    { rank:8,  name:'台中大遠百威秀', region:'C', st:false, bo:13040.0, visitors:434510,  mktPct:3.09 },
-    { rank:9,  name:'台北大巨蛋秀泰', region:'N', st:true,  bo:12157.9, visitors:258165,  mktPct:2.88 },
-    { rank:10, name:'台中站前秀泰',   region:'C', st:true,  bo:10740.2, visitors:351184,  mktPct:2.54 },
-    { rank:11, name:'新店裕隆城威秀', region:'N', st:false, bo:10542.1, visitors:335945,  mktPct:2.50 },
-    { rank:12, name:'高雄夢時代秀泰', region:'S', st:true,  bo:10365.7, visitors:344412,  mktPct:2.45 },
+    { rank:1,  name:'台北信義威秀',   region:'N', st:false, bo:20267.9, visitors:603046,  mktPct:4.78 },
+    { rank:2,  name:'高雄威秀',       region:'S', st:false, bo:18814.3, visitors:609986,  mktPct:4.44 },
+    { rank:3,  name:'台南南紡威秀',   region:'S', st:false, bo:16591.3, visitors:575111,  mktPct:3.91 },
+    { rank:4,  name:'台北京站威秀',   region:'N', st:false, bo:15220.3, visitors:496264,  mktPct:3.59 },
+    { rank:5,  name:'板橋大遠百威秀', region:'N', st:false, bo:14293.7, visitors:441809,  mktPct:3.37 },
+    { rank:6,  name:'台中文心秀泰',   region:'C', st:true,  bo:13649.0, visitors:438250,  mktPct:3.22 },
+    { rank:7,  name:'新竹巨城威秀',   region:'N', st:false, bo:13245.2, visitors:429061,  mktPct:3.12 },
+    { rank:8,  name:'台中大遠百威秀', region:'C', st:false, bo:13117.4, visitors:437183,  mktPct:3.09 },
+    { rank:9,  name:'台北大巨蛋秀泰', region:'N', st:true,  bo:12157.9, visitors:258165,  mktPct:2.87 },
+    { rank:10, name:'台中站前秀泰',   region:'C', st:true,  bo:10740.2, visitors:351184,  mktPct:2.53 },
+    { rank:11, name:'新店裕隆城威秀', region:'N', st:false, bo:10615.4, visitors:338428,  mktPct:2.50 },
+    { rank:12, name:'高雄夢時代秀泰', region:'S', st:true,  bo:10365.7, visitors:344412,  mktPct:2.44 },
   ],
-  ytdMktTotal: 422448.7, // 全台全年累計（萬元）
+  ytdMktTotal: 423982.6, // 全台全年累計（萬元）
 
   // 月累計排行 MTD 2026-06-01～06-30（資料來源：taipeitheater.org.tw；06-30當日為部分入帳）
   mtdRanking: [
-    { rank:1,  name:'台北信義威秀',   region:'N', st:false, bo:3481.2, visitors:103238,  mktPct:5.26 },
-    { rank:2,  name:'高雄威秀',       region:'S', st:false, bo:2889.7, visitors:93224,  mktPct:4.37 },
-    { rank:3,  name:'台北京站威秀',   region:'N', st:false, bo:2589.8, visitors:85224,  mktPct:3.91 },
-    { rank:4,  name:'台南南紡威秀',   region:'S', st:false, bo:2409.0, visitors:84090,  mktPct:3.64 },
-    { rank:5,  name:'板橋大遠百威秀', region:'N', st:false, bo:2187.0, visitors:68828,  mktPct:3.31 },
-    { rank:6,  name:'新竹巨城威秀',   region:'N', st:false, bo:2123.0, visitors:69309,  mktPct:3.21 },
-    { rank:7,  name:'台北大巨蛋秀泰', region:'N', st:true,  bo:2103.4, visitors:43159,  mktPct:3.18 },
-    { rank:8,  name:'台中文心秀泰',   region:'C', st:true,  bo:2083.8, visitors:66960,  mktPct:3.15 },
-    { rank:9,  name:'台中大遠百威秀', region:'C', st:false, bo:1973.7, visitors:66721,  mktPct:2.98 },
-    { rank:10, name:'高雄夢時代秀泰', region:'S', st:true,  bo:1794.3, visitors:59722,  mktPct:2.71 },
+    { rank:1,  name:'台北信義威秀',   region:'N', st:false, bo:3645.7, visitors:108272,  mktPct:5.38 },
+    { rank:2,  name:'高雄威秀',       region:'S', st:false, bo:2992.7, visitors:96666,  mktPct:4.42 },
+    { rank:3,  name:'台北京站威秀',   region:'N', st:false, bo:2711.3, visitors:89256,  mktPct:4.00 },
+    { rank:4,  name:'台南南紡威秀',   region:'S', st:false, bo:2517.1, visitors:87982,  mktPct:3.72 },
+    { rank:5,  name:'板橋大遠百威秀', region:'N', st:false, bo:2280.8, visitors:71911,  mktPct:3.37 },
+    { rank:6,  name:'新竹巨城威秀',   region:'N', st:false, bo:2234.0, visitors:73001,  mktPct:3.30 },
+    { rank:7,  name:'台北大巨蛋秀泰', region:'N', st:true,  bo:2103.4, visitors:43159,  mktPct:3.11 },
+    { rank:8,  name:'台中文心秀泰',   region:'C', st:true,  bo:2083.8, visitors:66960,  mktPct:3.08 },
+    { rank:9,  name:'台中大遠百威秀', region:'C', st:false, bo:2051.1, visitors:69394,  mktPct:3.03 },
+    { rank:10, name:'高雄夢時代秀泰', region:'S', st:true,  bo:1794.3, visitors:59722,  mktPct:2.65 },
   ],
-  mtdMktTotal: 66169.9,
+  mtdMktTotal: 67703.4,
 
-  competitors: { '秀泰':484.5, '威秀':18.9, '國賓':123.0, '美麗華':50.5, 'in89':0.0, '其他':325.3 },
+  competitors: { '秀泰':484.5, '威秀':1366.6, '國賓':123.0, '美麗華':50.5, 'in89':45.1, '其他':467.1 },
 
   cinemas: [
-    { name:'秀泰巨蛋', bo:82.5, fb:15.3, visitors:1710, shows:76, avgPrice:482, seats:120, halls:14, totalSeats:1683, ystBO:71.4, ytdBO:12392.9, ytdVisitors:261914, mtdBO:2180.1, mtdVisitors:44215 },
-    { name:'秀泰欣欣', bo:30.8, fb:6.8, visitors:1061, shows:91, avgPrice:291, seats:106, halls:14, totalSeats:1488, ystBO:23.2, ytdBO:7129.7, ytdVisitors:234731, mtdBO:1146.5, mtdVisitors:37490 },
-    { name:'秀泰土城', bo:19.5, fb:4.3, visitors:733, shows:60, avgPrice:267, seats:97, halls:11, totalSeats:1063, ystBO:9.6, ytdBO:3160.7, ytdVisitors:113974, mtdBO:499.8, mtdVisitors:18059 },
-    { name:'秀泰樹林', bo:36.5, fb:11.4, visitors:1281, shows:69, avgPrice:285, seats:127, halls:12, totalSeats:1524, ystBO:16.6, ytdBO:5596.2, ytdVisitors:189414, mtdBO:900.9, mtdVisitors:30083 },
-    { name:'秀泰基隆', bo:14.6, fb:2.7, visitors:539, shows:47, avgPrice:271, seats:127, halls:8, totalSeats:1013, ystBO:10.1, ytdBO:2893.7, ytdVisitors:108520, mtdBO:417.3, mtdVisitors:15486 },
-    { name:'秀泰文心', bo:76.5, fb:15.2, visitors:2514, shows:94, avgPrice:304, seats:131, halls:16, totalSeats:2098, ystBO:44.7, ytdBO:13809.2, ytdVisitors:439708, mtdBO:2144.0, mtdVisitors:67806 },
-    { name:'秀泰站前', bo:54.2, fb:11.7, visitors:1854, shows:107, avgPrice:292, seats:157, halls:17, totalSeats:2670, ystBO:34.2, ytdBO:10837.0, ytdVisitors:352999, mtdBO:1689.4, mtdVisitors:54661 },
-    { name:'秀泰麗寶', bo:13.0, fb:3.3, visitors:440, shows:51, avgPrice:295, seats:79, halls:10, totalSeats:793, ystBO:7.0, ytdBO:2621.5, ytdVisitors:89008, mtdBO:360.1, mtdVisitors:12282 },
-    { name:'秀泰北港', bo:3.7, fb:0.7, visitors:141, shows:17, avgPrice:261, seats:69, halls:4, totalSeats:276, ystBO:2.7, ytdBO:871.9, ytdVisitors:32878, mtdBO:103.5, mtdVisitors:3883 },
-    { name:'秀泰嘉義', bo:38.8, fb:8.2, visitors:1420, shows:63, avgPrice:273, seats:124, halls:11, totalSeats:1360, ystBO:20.2, ytdBO:5261.0, ytdVisitors:184325, mtdBO:785.4, mtdVisitors:27198 },
-    { name:'秀泰仁德', bo:2.2, fb:0.9, visitors:81, shows:25, avgPrice:270, seats:76, halls:5, totalSeats:379, ystBO:1.2, ytdBO:188.1, ytdVisitors:6777, mtdBO:97.7, mtdVisitors:3520 },
-    { name:'秀泰夢時代', bo:62.8, fb:14.8, visitors:2162, shows:85, avgPrice:291, seats:145, halls:13, totalSeats:1886, ystBO:41.4, ytdBO:10576.9, ytdVisitors:346722, mtdBO:1853.3, mtdVisitors:60487 },
-    { name:'秀泰岡山', bo:27.4, fb:7.2, visitors:989, shows:62, avgPrice:277, seats:108, halls:13, totalSeats:1400, ystBO:23.1, ytdBO:6448.5, ytdVisitors:217912, mtdBO:1028.6, mtdVisitors:34928 },
-    { name:'秀泰台東', bo:8.0, fb:3.0, visitors:313, shows:41, avgPrice:257, seats:109, halls:8, totalSeats:870, ystBO:7.2, ytdBO:1991.7, ytdVisitors:75892, mtdBO:282.6, mtdVisitors:10795 },
-    { name:'秀泰花蓮', bo:14.0, fb:3.9, visitors:531, shows:48, avgPrice:264, seats:120, halls:9, totalSeats:1083, ystBO:6.4, ytdBO:2030.1, ytdVisitors:76167, mtdBO:307.8, mtdVisitors:11481 }
+    { name:'秀泰巨蛋', bo:82.5, fb:15.3, visitors:1694, shows:76, avgPrice:487, seats:120, halls:14, totalSeats:1683, ystBO:71.4, ytdBO:12157.9, ytdVisitors:258165, mtdBO:2103.4, mtdVisitors:43159 },
+    { name:'秀泰欣欣', bo:30.8, fb:6.8, visitors:1058, shows:91, avgPrice:291, seats:106, halls:14, totalSeats:1488, ystBO:23.2, ytdBO:6906.2, ytdVisitors:231866, mtdBO:1105.8, mtdVisitors:36970 },
+    { name:'秀泰土城', bo:19.5, fb:4.3, visitors:721, shows:60, avgPrice:271, seats:97, halls:11, totalSeats:1063, ystBO:9.6, ytdBO:3165.0, ytdVisitors:113548, mtdBO:499.8, mtdVisitors:17957 },
+    { name:'秀泰樹林', bo:36.5, fb:11.4, visitors:1266, shows:69, avgPrice:288, seats:127, halls:12, totalSeats:1524, ystBO:16.6, ytdBO:5516.3, ytdVisitors:188191, mtdBO:885.8, mtdVisitors:29872 },
+    { name:'秀泰基隆', bo:14.6, fb:2.7, visitors:539, shows:47, avgPrice:271, seats:127, halls:8, totalSeats:1013, ystBO:10.1, ytdBO:2893.7, ytdVisitors:108335, mtdBO:417.3, mtdVisitors:15475 },
+    { name:'秀泰文心', bo:76.5, fb:15.2, visitors:2501, shows:94, avgPrice:306, seats:131, halls:16, totalSeats:2098, ystBO:44.7, ytdBO:13649.0, ytdVisitors:438250, mtdBO:2083.8, mtdVisitors:66960 },
+    { name:'秀泰站前', bo:54.2, fb:11.7, visitors:1830, shows:107, avgPrice:296, seats:157, halls:17, totalSeats:2670, ystBO:34.2, ytdBO:10740.2, ytdVisitors:351184, mtdBO:1671.1, mtdVisitors:54272 },
+    { name:'秀泰麗寶', bo:13.0, fb:3.3, visitors:440, shows:51, avgPrice:295, seats:79, halls:10, totalSeats:793, ystBO:7.0, ytdBO:2621.5, ytdVisitors:88894, mtdBO:360.1, mtdVisitors:12272 },
+    { name:'秀泰北港', bo:3.7, fb:0.7, visitors:141, shows:17, avgPrice:261, seats:69, halls:4, totalSeats:276, ystBO:2.7, ytdBO:874.7, ytdVisitors:32846, mtdBO:103.5, mtdVisitors:3882 },
+    { name:'秀泰嘉義', bo:38.8, fb:8.2, visitors:1420, shows:63, avgPrice:273, seats:124, halls:11, totalSeats:1360, ystBO:20.2, ytdBO:5178.6, ytdVisitors:183460, mtdBO:768.4, mtdVisitors:27066 },
+    { name:'秀泰仁德', bo:2.2, fb:0.9, visitors:81, shows:25, avgPrice:270, seats:76, halls:5, totalSeats:379, ystBO:1.2, ytdBO:734.6, ytdVisitors:26760, mtdBO:97.7, mtdVisitors:3511 },
+    { name:'秀泰夢時代', bo:62.8, fb:14.8, visitors:2156, shows:85, avgPrice:291, seats:145, halls:13, totalSeats:1886, ystBO:41.4, ytdBO:10365.7, ytdVisitors:344412, mtdBO:1794.3, mtdVisitors:59722 },
+    { name:'秀泰岡山', bo:27.4, fb:7.2, visitors:983, shows:62, avgPrice:279, seats:108, halls:13, totalSeats:1400, ystBO:23.1, ytdBO:6385.2, ytdVisitors:216070, mtdBO:1011.2, mtdVisitors:34743 },
+    { name:'秀泰台東', bo:8.0, fb:3.0, visitors:313, shows:41, avgPrice:257, seats:109, halls:8, totalSeats:870, ystBO:7.2, ytdBO:1995.9, ytdVisitors:75677, mtdBO:286.9, mtdVisitors:10954 },
+    { name:'秀泰花蓮', bo:14.0, fb:3.9, visitors:531, shows:48, avgPrice:264, seats:120, halls:9, totalSeats:1083, ystBO:6.4, ytdBO:2026.1, ytdVisitors:76093, mtdBO:307.8, mtdVisitors:11468 }
   ],
 
   movies: [
@@ -717,11 +809,11 @@ const DATA = {
   // 每日歷史快照（key = 'YYYY-MM-DD'，匯出 HTML 後永久保存）
   history: {
   '2026-06-30': {
-    date:'2026-06-30', mktBO:1002.2, stBO:484.5, stFB:109.4, stVisitors:15769,
-    ystBO:319.1, mtdBO:13796.8, ytdBO:85809.0, wisonBO:18.9, mktShare:48.3,
-    mktNote:'⚠待確認：全國僅55/96家戲院入帳，威秀/in89等競品數據不完整，市占率將於下次更新回補',
-    competitors:{'秀泰':484.5,'威秀':18.9,'國賓':123.0,'美麗華':50.5,'in89':0.0,'其他':325.3},
-        cinemas:[{"name":"秀泰巨蛋","bo":82.5,"fb":15.3,"visitors":1710,"shows":76,"avgPrice":482},{"name":"秀泰欣欣","bo":30.8,"fb":6.8,"visitors":1061,"shows":91,"avgPrice":291},{"name":"秀泰土城","bo":19.5,"fb":4.3,"visitors":733,"shows":60,"avgPrice":267},{"name":"秀泰樹林","bo":36.5,"fb":11.4,"visitors":1281,"shows":69,"avgPrice":285},{"name":"秀泰基隆","bo":14.6,"fb":2.7,"visitors":539,"shows":47,"avgPrice":271},{"name":"秀泰文心","bo":76.5,"fb":15.2,"visitors":2514,"shows":94,"avgPrice":304},{"name":"秀泰站前","bo":54.2,"fb":11.7,"visitors":1854,"shows":107,"avgPrice":292},{"name":"秀泰麗寶","bo":13.0,"fb":3.3,"visitors":440,"shows":51,"avgPrice":295},{"name":"秀泰北港","bo":3.7,"fb":0.7,"visitors":141,"shows":17,"avgPrice":261},{"name":"秀泰嘉義","bo":38.8,"fb":8.2,"visitors":1420,"shows":63,"avgPrice":273},{"name":"秀泰仁德","bo":2.2,"fb":0.9,"visitors":81,"shows":25,"avgPrice":270},{"name":"秀泰夢時代","bo":62.8,"fb":14.8,"visitors":2162,"shows":85,"avgPrice":291},{"name":"秀泰岡山","bo":27.4,"fb":7.2,"visitors":989,"shows":62,"avgPrice":277},{"name":"秀泰台東","bo":8.0,"fb":3.0,"visitors":313,"shows":41,"avgPrice":257},{"name":"秀泰花蓮","bo":14.0,"fb":3.9,"visitors":531,"shows":48,"avgPrice":264}],
+    date:'2026-06-30', mktBO:2536.8, stBO:484.5, stFB:109.4, stVisitors:15674,
+    ystBO:319.1, mtdBO:13496.9, ytdBO:85210.6, wisonBO:1366.6, mktShare:19.1,
+    mktNote:'94/104家戲院已入帳，數據較上次更新更完整；賣品消費結構(stFB)維持前次估算值 ⚠待確認',
+    competitors:{'秀泰':484.5,'威秀':1366.6,'國賓':123.0,'美麗華':50.5,'in89':45.1,'其他':467.1},
+        cinemas:[{"name": "秀泰巨蛋", "bo": 82.5, "fb": 15.3, "visitors": 1694, "shows": 76, "avgPrice": 487}, {"name": "秀泰欣欣", "bo": 30.8, "fb": 6.8, "visitors": 1058, "shows": 91, "avgPrice": 291}, {"name": "秀泰土城", "bo": 19.5, "fb": 4.3, "visitors": 721, "shows": 60, "avgPrice": 271}, {"name": "秀泰樹林", "bo": 36.5, "fb": 11.4, "visitors": 1266, "shows": 69, "avgPrice": 288}, {"name": "秀泰基隆", "bo": 14.6, "fb": 2.7, "visitors": 539, "shows": 47, "avgPrice": 271}, {"name": "秀泰文心", "bo": 76.5, "fb": 15.2, "visitors": 2501, "shows": 94, "avgPrice": 306}, {"name": "秀泰站前", "bo": 54.2, "fb": 11.7, "visitors": 1830, "shows": 107, "avgPrice": 296}, {"name": "秀泰麗寶", "bo": 13.0, "fb": 3.3, "visitors": 440, "shows": 51, "avgPrice": 295}, {"name": "秀泰北港", "bo": 3.7, "fb": 0.7, "visitors": 141, "shows": 17, "avgPrice": 261}, {"name": "秀泰嘉義", "bo": 38.8, "fb": 8.2, "visitors": 1420, "shows": 63, "avgPrice": 273}, {"name": "秀泰仁德", "bo": 2.2, "fb": 0.9, "visitors": 81, "shows": 25, "avgPrice": 270}, {"name": "秀泰夢時代", "bo": 62.8, "fb": 14.8, "visitors": 2156, "shows": 85, "avgPrice": 291}, {"name": "秀泰岡山", "bo": 27.4, "fb": 7.2, "visitors": 983, "shows": 62, "avgPrice": 279}, {"name": "秀泰台東", "bo": 8.0, "fb": 3.0, "visitors": 313, "shows": 41, "avgPrice": 257}, {"name": "秀泰花蓮", "bo": 14.0, "fb": 3.9, "visitors": 531, "shows": 48, "avgPrice": 264}],
   },
   '2026-06-29': {
     date:'2026-06-29', mktBO:1079.8, stBO:319.1, stFB:60.8, stVisitors:10189,
@@ -970,73 +1062,131 @@ function renderHeader() {
 }
 
 function renderKPIs() {
-  const st = DATA.st;
+  const st  = DATA.st;
   const mkt = DATA.mkt;
+  const ws  = DATA.wison;
+
+  // 計算秀泰各項
   const totalVis = DATA.cinemas.reduce((s,c)=>s+c.visitors, 0);
   const totalBO  = DATA.cinemas.reduce((s,c)=>s+c.bo, 0);
-  const mktShare = mkt.bo > 0 ? (st.bo / mkt.bo * 100) : 0;
-  const wiShare  = mkt.bo > 0 ? (DATA.wison.bo / mkt.bo * 100) : 0;
+  const stATP    = totalVis > 0 ? Math.round(totalBO * 10000 / totalVis) : 0;
+  const stMS     = mkt.bo > 0 ? (st.bo / mkt.bo * 100) : 0;
+  const wsMS     = mkt.bo > 0 ? (ws.bo  / mkt.bo * 100) : 0;
+  const mktATP   = mkt.visitors > 0 ? Math.round(mkt.bo * 10000 / mkt.visitors) : 0;
+  const wsATP    = ws.visitors  > 0 ? Math.round(ws.bo  * 10000 / ws.visitors)  : 0;
   const ystChg   = st.ystBO > 0 ? (st.bo - st.ystBO) / st.ystBO * 100 : null;
-  const avgPrice = totalVis > 0 ? Math.round(totalBO * 10000 / totalVis) : 0;
 
-  document.getElementById('kv-mkt').innerHTML  = fmtW(mkt.bo) + '<span class="unit">萬</span>';
-  document.getElementById('ks-mkt').innerHTML  = '全台 ' + fmt(Math.round(mkt.bo / 100)) + '百萬';
-  document.getElementById('kv-bo').innerHTML   = fmtW(st.bo) + '<span class="unit">萬</span>';
-  document.getElementById('kb-bo').textContent = '票房 ' + fmtW(st.bo) + '萬';
-  document.getElementById('kb-fb').textContent = st.fb > 0 ? '賣品 ' + fmtW(st.fb) + '萬' : '';
-  document.getElementById('ks-bo').innerHTML   = ystChg !== null ? deltaHtml(ystChg) + ' vs 昨日' : '— vs 昨日';
-  document.getElementById('kv-share').innerHTML = (mktShare > 0 ? mktShare.toFixed(1) : '—') + '<span class="unit">%</span>';
-  document.getElementById('ks-share').innerHTML = `vs 威秀 <strong>${wiShare > 0 ? wiShare.toFixed(1) + '%' : '—'}</strong>`;
-  document.getElementById('kv-vis').innerHTML   = fmt(totalVis) + '<span class="unit">人</span>';
-  document.getElementById('ks-vis').textContent = '全 15 館合計';
-  document.getElementById('kv-avg').innerHTML   = (avgPrice > 0 ? avgPrice : '—') + '<span class="unit">元</span>';
-  document.getElementById('ks-avg').textContent = '票房÷來客';
-}
+  // ── 日期 + 假日標示 ──────────────────────────────────────────
+  const dateStr = DATA.date;
+  const d = new Date(dateStr);
+  const weekdays = ['日','一','二','三','四','五','六'];
+  const wd = weekdays[d.getDay()];
+  const yy = d.getFullYear(), mm = d.getMonth()+1, dd = d.getDate();
+  const dateDisp = `今日 ${yy}/${mm}/${dd}（${wd}）`;
+  // 台灣國定假日 (MMDD)
+  const twHolidays = {
+    '0101':'元旦','0228':'和平紀念日','0403':'兒童節','0404':'清明節',
+    '0405':'清明節','0501':'勞動節','0619':'端午節','0912':'中秋節','1010':'國慶日',
+    '0121':'農曆春節','0122':'農曆春節','0123':'農曆春節','0124':'農曆春節',
+    '0125':'農曆春節','0126':'農曆春節',
+  };
+  const mmdd = String(mm).padStart(2,'0') + String(dd).padStart(2,'0');
+  const isHoliday = twHolidays[mmdd];
+  const isWeekend = d.getDay() === 0 || d.getDay() === 6;
 
-let _donutChart = null;
-function renderDonut() {
-  const comp = DATA.competitors;
-  const labels = Object.keys(comp).filter(k => comp[k] > 0);
-  const vals   = labels.map(k => comp[k]);
-  if (vals.length === 0 || vals.every(v => v === 0)) {
-    document.getElementById('compLegend').innerHTML = '<div class="empty-state"><div class="big">📊</div>填入院線數據後顯示</div>';
-    return;
+  const dateTxt = document.getElementById('kpiDateTxt');
+  const badge   = document.getElementById('kpiHolidayBadge');
+  if (dateTxt) dateTxt.textContent = dateDisp;
+  if (badge) {
+    if (isHoliday) {
+      badge.style.display = '';
+      badge.style.background = '#FFF3E0'; badge.style.color = '#E65100'; badge.style.border = '1px solid #FFB74D';
+      badge.textContent = '🎌 ' + isHoliday;
+    } else if (isWeekend) {
+      badge.style.display = '';
+      badge.style.background = '#E8F5E9'; badge.style.color = '#2E7D32'; badge.style.border = '1px solid #81C784';
+      badge.textContent = '🌟 週末';
+    } else {
+      badge.style.display = 'none';
+    }
   }
-  const colors = {'秀泰':'#572d88','威秀':'#1A237E','國賓':'#00695C','美麗華':'#4A148C','in89':'#E65100','其他':'#607D8B'};
-  const bg = labels.map(k => colors[k] || '#607D8B');
-  const ctx = document.getElementById('chartDonut').getContext('2d');
-  if (_donutChart) _donutChart.destroy();
-  _donutChart = new Chart(ctx, {
-    type: 'doughnut',
-    data: { labels, datasets: [{ data: vals, backgroundColor: bg, borderWidth: 2, borderColor: '#fff' }] },
-    options: { cutout:'65%', responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx => ` ${ctx.label}: ${ctx.parsed.toFixed(1)}萬 (${(ctx.parsed/vals.reduce((a,b)=>a+b)*100).toFixed(1)}%)` }}} }
-  });
-  const total = vals.reduce((a,b)=>a+b,0);
-  document.getElementById('compLegend').innerHTML = labels.map((k,i)=>{
-    const p = (vals[i]/total*100).toFixed(1);
-    return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px;">
-      <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${bg[i]};margin-right:6px;"></span><strong style="${k==='秀泰'?'color:var(--st)':''}">${k}</strong></span>
-      <span><strong style="${k==='秀泰'?'color:var(--st)':''}">${p}%</strong> <span style="color:var(--sub);font-size:10px;">${vals[i].toFixed(1)}萬</span></span>
-    </div>`;
-  }).join('');
 
-  // VS bar
-  const st = DATA.st, wi = DATA.wison;
-  if (st.bo > 0 && wi.bo > 0) {
-    const tot = st.bo + wi.bo;
-    const stP = Math.round(st.bo/tot*100);
-    document.getElementById('vsBar').innerHTML = `
-      <div style="font-size:11px;font-weight:700;margin-bottom:6px;color:var(--sub);">秀泰 vs 威秀 直球對決</div>
-      <div class="vs-metric">
-        <div class="vs-names"><span class="st-name">秀泰 ${fmtW(st.bo)}萬</span><span class="wi-name">威秀 ${fmtW(wi.bo)}萬</span></div>
-        <div class="vs-bar-track">
-          <div class="vs-bar-st" style="width:${stP}%"><span class="vs-bar-val">${stP}%</span></div>
-          <div class="vs-bar-wi" style="width:${100-stP}%"><span class="vs-bar-val">${100-stP}%</span></div>
+  // ── 全台 ────────────────────────────────────────────────────
+  const setEl = (id,v) => { const el=document.getElementById(id); if(el) el.innerHTML=v; };
+
+  setEl('b-mkt-bo',  mkt.bo > 0 ? fmtW(mkt.bo)+'<span class="unit">萬</span>' : '—<span class="unit">萬</span>');
+  setEl('b-mkt-adm', mkt.visitors > 0 ? fmt(mkt.visitors)+'<span class="unit">人</span>' : '—<span class="unit">人</span>');
+  setEl('b-mkt-atp', mktATP > 0 ? fmt(mktATP)+'<span class="unit">元</span>' : '⚠ 待確認');
+
+  // ── 秀泰 ────────────────────────────────────────────────────
+  setEl('b-st-bo',   fmtW(st.bo)+'<span class="unit">萬</span>');
+  setEl('b-st-adm',  fmt(totalVis)+'<span class="unit">人</span>');
+  setEl('b-st-atp',  stATP > 0 ? fmt(stATP)+'<span class="unit">元</span>' : '—<span class="unit">元</span>');
+  setEl('b-st-ms',   (stMS > 0 ? stMS.toFixed(1) : '—')+'<span class="unit">%</span>');
+  setEl('b-st-ms-badge', 'MS ' + (stMS > 0 ? stMS.toFixed(1)+'%' : '—'));
+  const boSubEl = document.getElementById('b-st-bo-sub');
+  if (boSubEl) boSubEl.innerHTML = ystChg !== null ? deltaHtml(ystChg)+' vs 昨日' : '— vs 昨日';
+
+  // ── 威秀 ────────────────────────────────────────────────────
+  setEl('b-ws-bo',   ws.bo > 0 ? fmtW(ws.bo)+'<span class="unit">萬</span>' : '—<span class="unit">萬</span>');
+  setEl('b-ws-adm',  ws.visitors > 0 ? fmt(ws.visitors)+'<span class="unit">人</span>' : '—<span class="unit">人</span>');
+  setEl('b-ws-atp',  wsATP > 0 ? fmt(wsATP)+'<span class="unit">元</span>' : '—<span class="unit">元</span>');
+  setEl('b-ws-ms',   (wsMS > 0 ? wsMS.toFixed(1) : '—')+'<span class="unit">%</span>');
+  setEl('b-ws-ms-badge', 'MS ' + (wsMS > 0 ? wsMS.toFixed(1)+'%' : '—'));
+  // 待確認提示
+  const wsAdmSub = document.getElementById('b-ws-adm-sub');
+  const wsAtpSub = document.getElementById('b-ws-atp-sub');
+  if (wsAdmSub) wsAdmSub.textContent = ws.visitors > 0 ? '' : '⚠ 待確認';
+  if (wsAtpSub) wsAtpSub.textContent = wsATP > 0 ? '' : '⚠ 待確認';
+
+  // ── 院線競爭格局圖（保留原有 donut chart + vsBar 邏輯） ──────
+  const wiShare = wsMS;
+  const others  = 100 - stMS - wiShare;
+  if (typeof Chart !== 'undefined') {
+    const ctx = document.getElementById('chartDonut');
+    if (ctx) {
+      if (window._donutChart) { window._donutChart.destroy(); }
+      window._donutChart = new Chart(ctx, {
+        type:'doughnut',
+        data:{ labels:['秀泰','威秀','其他'],
+               datasets:[{data:[stMS,wiShare,others>0?others:0],
+                          backgroundColor:['#572d88','#C62828','#90A4AE'],
+                          borderWidth:0}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.label+': '+c.parsed.toFixed(1)+'%'}}}}
+      });
+    }
+  }
+
+  // legend
+  const leg = document.getElementById('compLegend');
+  if (leg) {
+    const rows = [
+      {label:'秀泰',  pct:stMS,   color:'var(--st)'},
+      {label:'威秀',  pct:wiShare, color:'#C62828'},
+      {label:'其他',  pct:others,  color:'#90A4AE'},
+    ];
+    leg.innerHTML = rows.map(r=>`
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+        <span style="width:10px;height:10px;border-radius:50%;background:${r.color};flex-shrink:0;"></span>
+        <span style="font-size:12px;flex:1;">${r.label}</span>
+        <strong style="font-size:13px;">${r.pct>0?r.pct.toFixed(1)+'%':'—'}</strong>
+      </div>`).join('');
+  }
+
+  // vsBar
+  const vsBar = document.getElementById('vsBar');
+  if (vsBar && stMS > 0 && wiShare > 0) {
+    vsBar.innerHTML = `
+      <div style="font-size:11px;color:var(--sub);margin-bottom:4px;">秀泰 vs 威秀 直接比較</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span style="font-size:11px;font-weight:700;color:var(--st);width:30px;text-align:right;">${stMS.toFixed(1)}%</span>
+        <div style="flex:1;height:10px;background:var(--gray-lt);border-radius:5px;overflow:hidden;">
+          <div style="height:100%;width:${(stMS/(stMS+wiShare)*100).toFixed(1)}%;background:var(--st);border-radius:5px;"></div>
         </div>
+        <span style="font-size:11px;font-weight:700;color:#C62828;width:30px;">${wiShare.toFixed(1)}%</span>
       </div>`;
   } else {
-    document.getElementById('vsBar').innerHTML = '';
+    vsBar.innerHTML = '';
   }
 }
 
