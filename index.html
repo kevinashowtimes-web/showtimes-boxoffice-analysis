@@ -1217,7 +1217,9 @@ function renderKPIs() {
 function renderDonut() {
   const mkt  = DATA.mkt;
   const st   = DATA.st;
-  const comp = DATA.competitors || [];
+  const _raw = DATA.competitors || [];
+  const _clr = {'威秀':'#C62828','國賓':'#1565C0','美麗華':'#00695C','IN89':'#4527A0','in89':'#4527A0','美麗新':'#AD1457','新光':'#E65100','喜樂':'#2E7D32','絕色':'#5D4037','其他':'#78909C'};
+  const comp = Array.isArray(_raw) ? _raw : Object.entries(_raw).filter(([n])=>n!=='秀泰').map(([n,b])=>({name:n,short:n,bo:+b,color:_clr[n]||'#78909C'}));
   const mktBO = mkt.bo > 0 ? mkt.bo : 1;
 
   // 建立各院線數據
@@ -1272,7 +1274,9 @@ function renderDonut() {
 function renderMktShare() {
   const mkt  = DATA.mkt;
   const st   = DATA.st;
-  const comp = DATA.competitors || [];
+  const _raw = DATA.competitors || [];
+  const _clr = {'威秀':'#C62828','國賓':'#1565C0','美麗華':'#00695C','IN89':'#4527A0','in89':'#4527A0','美麗新':'#AD1457','新光':'#E65100','喜樂':'#2E7D32','絕色':'#5D4037','其他':'#78909C'};
+  const comp = Array.isArray(_raw) ? _raw : Object.entries(_raw).filter(([n])=>n!=='秀泰').map(([n,b])=>({name:n,short:n,bo:+b,color:_clr[n]||'#78909C'}));
 
   // 完整院線清單（秀泰固定第一，其他依照 DATA.competitors 順序，最後依票房排序）
   const allChains = [
