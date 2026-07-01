@@ -572,7 +572,17 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
     <div style="font-weight:800;font-size:13px;">當日院線票房市佔排行</div>
     <span style="font-size:11px;color:var(--sub);" id="mktShareNote">— 來源：台北票房觀測站</span>
   </div>
-  <div id="mktShareTable"></div>
+  <div style="display:grid;grid-template-columns:200px 1fr;gap:24px;align-items:start;">
+    <!-- 左：圓餅圖 -->
+    <div>
+      <div class="chart-wrap" style="height:180px;"><canvas id="chartDonut"></canvas></div>
+      <div id="compLegend" style="margin-top:12px;font-size:11px;"></div>
+    </div>
+    <!-- 右：橫bar排行 -->
+    <div>
+      <div id="mktShareTable"></div>
+    </div>
+  </div>
   <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);display:flex;gap:24px;flex-wrap:wrap;" id="mktShareSummary"></div>
 </div>
 
@@ -1201,6 +1211,61 @@ function renderKPIs() {
       </div>`;
   } else {
     vsBar.innerHTML = '';
+  }
+}
+
+function renderDonut() {
+  const mkt  = DATA.mkt;
+  const st   = DATA.st;
+  const comp = DATA.competitors || [];
+  const mktBO = mkt.bo > 0 ? mkt.bo : 1;
+
+  // 建立各院線數據
+  const chains = [
+    { name:'秀泰', bo:st.bo,    color:'#572d88' },
+    ...comp.filter(c=>c.bo>0).map(c=>({ name:c.short||c.name, bo:c.bo, color:c.color }))
+  ];
+  const knownBO = chains.reduce((s,c)=>s+c.bo, 0);
+  const otherBO = mktBO > knownBO ? mktBO - knownBO : 0;
+  if (otherBO > 0) chains.push({ name:'其他', bo:otherBO, color:'#B0BEC5' });
+
+  const ctx = document.getElementById('chartDonut');
+  if (!ctx || chains.length === 0) return;
+
+  if (window._donutChart) { try { window._donutChart.destroy(); } catch(e){} }
+  window._donutChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: chains.map(c=>c.name),
+      datasets: [{
+        data: chains.map(c=>+(c.bo/mktBO*100).toFixed(2)),
+        backgroundColor: chains.map(c=>c.color),
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '62%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: c => c.label + ': ' + c.parsed.toFixed(1) + '%' } }
+      }
+    }
+  });
+
+  // Legend
+  const leg = document.getElementById('compLegend');
+  if (leg) {
+    leg.innerHTML = chains.map(c => {
+      const pct = (c.bo / mktBO * 100).toFixed(1);
+      return `<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;">
+        <span style="width:9px;height:9px;border-radius:50%;background:${c.color};flex-shrink:0;"></span>
+        <span style="flex:1;color:var(--sub);">${c.name}</span>
+        <strong>${pct}%</strong>
+      </div>`;
+    }).join('');
   }
 }
 
