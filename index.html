@@ -96,6 +96,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
 .ms-bo{font-size:12px;font-weight:700;color:var(--text);text-align:right;}
 .ms-pct{font-size:13px;font-weight:800;text-align:right;}
 .rank-hdr{padding:12px 18px;font-size:12px;font-weight:800;letter-spacing:.3px;}
+.brand-mtd{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.15);display:flex;gap:8px;flex-wrap:wrap;}
+.brand-mtd-item{flex:1;min-width:55px;}
+.brand-mtd-lbl{font-size:9.5px;color:rgba(255,255,255,.6);letter-spacing:.3px;margin-bottom:2px;white-space:nowrap;}
+.brand-mtd-val{font-size:12.5px;font-weight:700;color:#fff;}
 .rank-hdr-st{background:linear-gradient(135deg,#572d88,#7c52b3);color:#fff;border-radius:0;}
 .rank-hdr-mkt{background:linear-gradient(135deg,#1A237E,#283593);color:#fff;border-radius:0;}
 .ms-hdr{display:grid;grid-template-columns:28px 90px 1fr 70px 70px;gap:8px;padding:0 4px 8px;border-bottom:2px solid var(--border);margin-bottom:4px;}
@@ -505,6 +509,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
         <div class="bm-sub">全台基準</div>
       </div>
     </div>
+    <div class="brand-mtd">
+      <div class="brand-mtd-item"><div class="brand-mtd-lbl">本月累計 BO</div><div class="brand-mtd-val" id="b-mkt-mtd-bo">—</div></div>
+      <div class="brand-mtd-item"><div class="brand-mtd-lbl">月累計場數</div><div class="brand-mtd-val" id="b-mkt-mtd-days">6月</div></div>
+      <div class="brand-mtd-item"><div class="brand-mtd-lbl">資料期間</div><div class="brand-mtd-val" id="b-mkt-mtd-period">2026-06</div></div>
+    </div>
   </div>
 
   <!-- 秀泰影城 -->
@@ -535,6 +544,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
         <div class="bm-sub" id="b-st-ms-sub">秀泰÷全台</div>
       </div>
     </div>
+    <div class="brand-mtd">
+      <div class="brand-mtd-item"><div class="brand-mtd-lbl">本月累計 BO</div><div class="brand-mtd-val" id="b-st-mtd-bo">—</div></div>
+      <div class="brand-mtd-item"><div class="brand-mtd-lbl">月累計 ADM</div><div class="brand-mtd-val" id="b-st-mtd-adm">—</div></div>
+      <div class="brand-mtd-item"><div class="brand-mtd-lbl">月累計 MS</div><div class="brand-mtd-val" id="b-st-mtd-ms">—</div></div>
+      <div class="brand-mtd-item"><div class="brand-mtd-lbl">vs 上月</div><div class="brand-mtd-val" id="b-st-mtd-mom">—</div></div>
+      <div class="brand-mtd-item"><div class="brand-mtd-lbl">vs 去年</div><div class="brand-mtd-val" id="b-st-mtd-yoy">—</div></div>
+    </div>
   </div>
 
   <!-- 威秀影城 -->
@@ -563,6 +579,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
         <div class="bm-val ms-ws" id="b-ws-ms">—<span class="unit">%</span></div>
         <div class="bm-sub">威秀÷全台</div>
       </div>
+    </div>
+    <div class="brand-mtd">
+      <div class="brand-mtd-item"><div class="brand-mtd-lbl">本月累計 BO</div><div class="brand-mtd-val" id="b-ws-mtd-bo">—</div></div>
+      <div class="brand-mtd-item"><div class="brand-mtd-lbl">月累計 MS</div><div class="brand-mtd-val" id="b-ws-mtd-ms">—</div></div>
+      <div class="brand-mtd-item"><div class="brand-mtd-lbl">資料來源</div><div class="brand-mtd-val" style="font-size:10px;opacity:.8;">台北票房觀測站</div></div>
     </div>
   </div>
 
@@ -607,6 +628,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
           <th class="r">vs昨</th>
         </tr></thead>
         <tbody id="rankBodyST"></tbody>
+        <tfoot id="rankFootST"></tfoot>
       </table>
     </div>
   </div>
@@ -743,7 +765,7 @@ const DATA = {
     ytdBO: 85210.6, ytdLastYearBO: 49923.2,
   },
 
-  wison: { bo: 1366.6, visitors: 0, atp: 0 },
+  wison: { bo: 1366.6, visitors: 0, atp: 0, mtdBO: 32234.7 },
 
   // 院線競爭對手當日票房（來源：台北票房觀測站 / 手動填入）
   competitors: [
@@ -1194,6 +1216,29 @@ function renderKPIs() {
   if (wsAdmSub) wsAdmSub.textContent = ws.visitors > 0 ? '' : '⚠ 待確認';
   if (wsAtpSub) wsAtpSub.textContent = wsATP > 0 ? '' : '⚠ 待確認';
 
+  // ── 月累計統計
+  const mtdMkt   = DATA.mtdMktTotal || 0;
+  const stMtdBO  = DATA.st.mtdBO || 0;
+  const stMtdVis = DATA.cinemas.reduce((s,c2)=>s+(c2.mtdVisitors||0), 0);
+  const stMtdMS  = mtdMkt > 0 ? (stMtdBO / mtdMkt * 100) : 0;
+  const stMom    = DATA.st.mtdLastMonthBO > 0 ? (stMtdBO-DATA.st.mtdLastMonthBO)/DATA.st.mtdLastMonthBO*100 : null;
+  const stYoy    = DATA.st.mtdLastYearBO  > 0 ? (stMtdBO-DATA.st.mtdLastYearBO) /DATA.st.mtdLastYearBO *100 : null;
+  const wsMtdBO  = ws.mtdBO || 0;
+  const wsMtdMS  = mtdMkt > 0 ? (wsMtdBO / mtdMkt * 100) : 0;
+  const chgHtml  = (v) => v===null?'—':v>=0?'<span style="color:#81C784;font-weight:800;">▲'+Math.abs(v).toFixed(1)+'%</span>':'<span style="color:#EF9A9A;font-weight:800;">▼'+Math.abs(v).toFixed(1)+'%</span>';
+  const dtMtd = new Date(DATA.date);
+  const mtdPeriod = dtMtd.getFullYear()+'-'+String(dtMtd.getMonth()+1).padStart(2,'0');
+  setEl('b-mkt-mtd-bo', mtdMkt>0?fmtW(mtdMkt)+' 萬':'⚠ 待確認');
+  setEl('b-mkt-mtd-days', dtMtd.getDate()+' 日份');
+  setEl('b-mkt-mtd-period', mtdPeriod);
+  setEl('b-st-mtd-bo',  stMtdBO>0?fmtW(stMtdBO)+' 萬':'—');
+  setEl('b-st-mtd-adm', stMtdVis>0?fmt(stMtdVis)+' 人':'—');
+  setEl('b-st-mtd-ms',  stMtdMS>0?stMtdMS.toFixed(1)+'%':'—');
+  setEl('b-st-mtd-mom', chgHtml(stMom));
+  setEl('b-st-mtd-yoy', chgHtml(stYoy));
+  setEl('b-ws-mtd-bo',  wsMtdBO>0?fmtW(wsMtdBO)+' 萬':'⚠ 待確認');
+  setEl('b-ws-mtd-ms',  wsMtdMS>0?wsMtdMS.toFixed(1)+'%':'—');
+
   // ── 院線競爭格局圖（保留原有 donut chart + vsBar 邏輯） ──────
   const wiShare = wsMS;
   const others  = 100 - stMS - wiShare;
@@ -1439,6 +1484,17 @@ function renderRankings() {
   }
 
   // ── 右：全台月累計排行 ─────────────────────────────────────
+  const footSTEl = document.getElementById('rankFootST');
+  if (footSTEl) {
+    const totBO=DATA.cinemas.reduce((s,c)=>s+c.bo,0);
+    const totVis=DATA.cinemas.reduce((s,c)=>s+c.visitors,0);
+    const totFB=DATA.cinemas.reduce((s,c)=>s+(c.fb||0),0);
+    const totYst=DATA.cinemas.reduce((s,c)=>s+(c.ystBO||0),0);
+    const totATP=totVis>0?Math.round(totBO*10000/totVis):0;
+    const totSPP=totVis>0?Math.round(totFB*10000/totVis):0;
+    const totVsYst=totYst>0?(totBO-totYst)/totYst*100:null;
+    footSTEl.innerHTML='<tr style="background:rgba(87,45,136,.12);border-top:2px solid rgba(87,45,136,.3);"><td class="c" style="font-size:10px;color:var(--sub);font-weight:700;">合計</td><td style="font-size:11px;font-weight:800;color:var(--st);">15館總計</td><td class="r" style="font-weight:800;color:var(--st);">'+(totBO>0?fmtW(totBO):'—')+'</td><td class="r" style="font-weight:700;">'+(totVis>0?fmt(totVis):'—')+'</td><td class="r">'+(totATP>0?'$'+totATP:'—')+'</td><td class="r" style="color:var(--green);">'+(totSPP>0?'$'+totSPP:'—')+'</td><td class="r">'+deltaHtml(totVsYst)+'</td></tr>';
+  }
   const mktData   = DATA.mtdRanking || [];
   const bodyMktEl = document.getElementById('rankBodyMkt');
   if (bodyMktEl) {
