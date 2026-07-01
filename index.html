@@ -1274,30 +1274,27 @@ function renderMktShare() {
   const st   = DATA.st;
   const comp = DATA.competitors || [];
 
-  // 建立完整院線清單（秀泰排第一）
-  const stBO = st.bo;
+  // 完整院線清單（秀泰固定第一，其他依照 DATA.competitors 順序，最後依票房排序）
   const allChains = [
-    { name:'秀泰影城', short:'秀泰', bo:stBO, color:'var(--st)', isST:true },
+    { name:'秀泰影城', short:'秀泰', bo:st.bo, color:'#572d88', isST:true },
     ...comp.map(c=>({...c, isST:false}))
-  ].filter(c=>c.bo>0);
+  ];
 
-  // 排序：票房高到低
-  allChains.sort((a,b)=>b.bo-a.bo);
+  // 依票房高→低排序（bo=0的排後面）
+  allChains.sort((a,b) => {
+    if (a.isST) return -1;  // 秀泰固定最前
+    if (b.isST) return 1;
+    return b.bo - a.bo;
+  });
 
-  const totalKnown = allChains.reduce((s,c)=>s+c.bo, 0);
-  const mktBO = mkt.bo > 0 ? mkt.bo : totalKnown;
-  const maxBO = allChains.length > 0 ? allChains[0].bo : 1;
+  const mktBO  = mkt.bo > 0 ? mkt.bo : allChains.reduce((s,c)=>s+c.bo,0) || 1;
+  const hasData = allChains.filter(c=>c.bo>0);
+  const maxBO  = hasData.length > 0 ? Math.max(...hasData.map(c=>c.bo)) : 1;
 
-  const tbl = document.getElementById('mktShareTable');
-  const note = document.getElementById('mktShareNote');
+  const tbl     = document.getElementById('mktShareTable');
+  const note    = document.getElementById('mktShareNote');
   const summary = document.getElementById('mktShareSummary');
   if (!tbl) return;
-
-  if (allChains.length === 0) {
-    tbl.innerHTML = '<div class="empty-state"><div class="big">🏟️</div>填入院線數據後顯示</div>';
-    if (summary) summary.innerHTML = '';
-    return;
-  }
 
   if (note) note.textContent = `資料日期：${DATA.date}　來源：台北票房觀測站`;
 
@@ -1310,55 +1307,60 @@ function renderMktShare() {
     <span style="text-align:right;">市佔率</span>
   </div>`;
 
-  allChains.forEach((c, i) => {
-    const ms    = mktBO > 0 ? (c.bo / mktBO * 100) : 0;
-    const barW  = (c.bo / maxBO * 100).toFixed(1);
-    const color = c.isST ? 'var(--st)' : c.color;
+  let rank = 0;
+  allChains.forEach((c) => {
+    const hasBO = c.bo > 0;
+    if (hasBO) rank++;
+    const ms    = hasBO && mktBO > 0 ? (c.bo / mktBO * 100) : 0;
+    const barW  = hasBO ? (c.bo / maxBO * 100).toFixed(1) : 0;
+    const color = c.color.startsWith('var(') ? '#572d88' : c.color;
     const rowCls = c.isST ? 'ms-row ms-st-row' : 'ms-row';
-    const msColor = c.isST ? 'color:var(--st);' : `color:${c.color};`;
+    const rankTxt = hasBO ? rank : '—';
+    const msColor = c.isST ? 'color:#572d88;' : `color:${color};`;
+
     html += `<div class="${rowCls}">
-      <div class="ms-rank">${i+1}</div>
+      <div class="ms-rank">${rankTxt}</div>
       <div class="ms-name">
-        <span class="ms-dot" style="background:${color};"></span>
-        <span>${c.short || c.name}${c.isST ? ' ★' : ''}</span>
+        <span class="ms-dot" style="background:${color};${!hasBO?'opacity:.35;':''}"></span>
+        <span style="${!hasBO?'color:var(--sub);':''}">${c.short||c.name}${c.isST?' ★':''}</span>
       </div>
       <div class="ms-bar-wrap">
-        <div class="ms-bar-fill" style="width:${barW}%;background:${color};"></div>
+        <div class="ms-bar-fill" style="width:${barW}%;background:${color};${!hasBO?'opacity:.3;':''}"></div>
       </div>
-      <div class="ms-bo">${fmtW(c.bo)}</div>
-      <div class="ms-pct" style="${msColor}">${ms>0 ? ms.toFixed(1)+'%' : '—'}</div>
+      <div class="ms-bo" style="${!hasBO?'color:var(--sub);':''}">${hasBO ? fmtW(c.bo) : '—'}</div>
+      <div class="ms-pct" style="${hasBO?msColor:'color:var(--sub);'}">${ms>0 ? ms.toFixed(1)+'%' : '⚠ 待填'}</div>
     </div>`;
   });
 
-  // 已知合計 vs 全台
-  const knownPct = mktBO > 0 ? (totalKnown/mktBO*100).toFixed(1) : '—';
-  const otherBO  = mktBO > totalKnown ? mktBO - totalKnown : 0;
-  if (otherBO > 0) {
-    html += `<div class="ms-row" style="opacity:.6;">
+  // 其他/未統計
+  const knownBO  = allChains.reduce((s,c)=>s+c.bo,0);
+  const otherBO  = mktBO > knownBO ? mktBO - knownBO : 0;
+  if (mkt.bo > 0) {
+    html += `<div class="ms-row" style="opacity:.55;border-top:1px dashed var(--border);margin-top:4px;">
       <div class="ms-rank">—</div>
-      <div class="ms-name"><span class="ms-dot" style="background:#B0BEC5;"></span><span>其他/未統計</span></div>
-      <div class="ms-bar-wrap"><div class="ms-bar-fill" style="width:${(otherBO/maxBO*100).toFixed(1)}%;background:#B0BEC5;"></div></div>
-      <div class="ms-bo">${fmtW(otherBO)}</div>
-      <div class="ms-pct" style="color:var(--sub);">${(otherBO/mktBO*100).toFixed(1)}%</div>
+      <div class="ms-name"><span class="ms-dot" style="background:#B0BEC5;"></span><span style="color:var(--sub);">其他/未統計</span></div>
+      <div class="ms-bar-wrap"><div class="ms-bar-fill" style="width:${otherBO>0?(otherBO/maxBO*100).toFixed(1):0}%;background:#B0BEC5;"></div></div>
+      <div class="ms-bo" style="color:var(--sub);">${otherBO>0?fmtW(otherBO):'—'}</div>
+      <div class="ms-pct" style="color:var(--sub);">${otherBO>0?(otherBO/mktBO*100).toFixed(1)+'%':'—'}</div>
     </div>`;
   }
   tbl.innerHTML = html;
 
   // Summary strip
-  const stMS = mktBO > 0 ? (stBO/mktBO*100) : 0;
+  const stMS = mkt.bo > 0 ? (st.bo/mkt.bo*100) : 0;
   const wsComp = comp.find(c=>c.short==='威秀'||c.name==='威秀影城');
-  const wsMS = wsComp && mktBO > 0 ? (wsComp.bo/mktBO*100) : 0;
+  const wsMS   = wsComp && mkt.bo > 0 ? (wsComp.bo/mkt.bo*100) : 0;
+  const knownPct = mkt.bo > 0 ? (knownBO/mkt.bo*100).toFixed(1) : '—';
   if (summary) {
     summary.innerHTML = [
-      { label:'全台總票房',  val: mkt.bo > 0 ? fmtW(mkt.bo)+'萬' : '— 萬', sub:'當日大盤' },
-      { label:'秀泰市佔',   val: stMS>0 ? stMS.toFixed(1)+'%' : '—', sub:'★', color:'var(--st)' },
-      { label:'威秀市佔',   val: wsMS>0 ? wsMS.toFixed(1)+'%' : '—', sub:'對手', color:'#C62828' },
-      { label:'已統計院線', val: knownPct+'%', sub:'佔全台', color:'var(--sub)' },
+      { label:'全台總票房',  val: mkt.bo>0 ? fmtW(mkt.bo)+'萬' : '— 萬',    color:'var(--text)' },
+      { label:'秀泰市佔',   val: stMS>0 ? stMS.toFixed(1)+'%' : '—',          color:'#572d88' },
+      { label:'威秀市佔',   val: wsMS>0 ? wsMS.toFixed(1)+'%' : '—',          color:'#C62828' },
+      { label:'已統計覆蓋', val: knownPct!=='—' ? knownPct+'%' : '—',         color:'var(--sub)' },
     ].map(item=>`
-      <div style="text-align:center;min-width:80px;">
+      <div style="text-align:center;min-width:90px;">
         <div style="font-size:10px;color:var(--sub);font-weight:600;margin-bottom:2px;">${item.label}</div>
-        <div style="font-size:18px;font-weight:800;color:${item.color||'var(--text)'};">${item.val}</div>
-        <div style="font-size:10px;color:var(--sub);">${item.sub}</div>
+        <div style="font-size:18px;font-weight:800;color:${item.color};">${item.val}</div>
       </div>`).join('<div style="width:1px;background:var(--border);"></div>');
   }
 }
