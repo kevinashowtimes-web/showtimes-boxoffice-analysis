@@ -632,7 +632,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <div class="alert-grid" id="alertGrid"></div>
 
 <!-- ⑦ 秀泰 vs 威秀 區域對決 -->
-<div class="sec-label">⑦ 秀泰 vs 威秀 區域對決 <span style="font-weight:400;font-size:10px;color:var(--sub);">MTD 2026-06-01～06-28</span></div>
+<div class="sec-label" id="vsWisonLabel">⑦ 秀泰 vs 威秀 區域對決</div>
 <div id="vsWisonSection"></div>
 
 <!-- ⑧ 歷史紀錄 -->
@@ -2032,10 +2032,18 @@ function renderVsWison() {
   const el = document.getElementById('vsWisonSection');
   if (!el) return;
 
+  // 動態更新標題日期範圍
+  const lbl = document.getElementById('vsWisonLabel');
+  if (lbl && DATA.date) {
+    const ym = DATA.date.slice(0,7);
+    const first = ym + '-01';
+    lbl.innerHTML = `⑦ 秀泰 vs 威秀 區域對決 <span style="font-weight:400;font-size:10px;color:var(--sub);">MTD ${first}～${DATA.date}</span>`;
+  }
+
   const regionMeta = {
-    N: { label:'🔵 北區 (6家)', color:'#1A237E' },
-    C: { label:'🟡 中區 (3家)', color:'#E65100' },
-    S: { label:'🔴 南區 (6家)', color:'#2E7D32' },
+    N: { label:'🔵 北區', color:'#1A237E' },
+    C: { label:'🟡 中區', color:'#E65100' },
+    S: { label:'🔴 南區', color:'#2E7D32' },
   };
 
   // Build ST cinemas by region (using mtdBO)
@@ -2045,7 +2053,7 @@ function renderVsWison() {
     // 北區 6家
     '秀泰巨蛋':'N','秀泰欣欣':'N','秀泰基隆':'N',
     '秀泰樹林':'N','秀泰土城':'N','秀泰花蓮':'N',
-    // 中區 3家
+    // 中區 3家（含麗寶）
     '秀泰文心':'C','秀泰站前':'C','秀泰麗寶':'C',
     // 南區 6家
     '秀泰夢時代':'S','秀泰岡山':'S','秀泰仁德':'S',
@@ -2747,9 +2755,4 @@ function toggleHistExpand() {
   if (!hidden) return;
   const isOpen = hidden.style.display !== 'none';
   hidden.style.display  = isOpen ? 'none' : '';
-  btnRow.style.display  = isOpen ? '' : 'none';
-  colRow.style.display  = isOpen ? 'none' : '';
-}
-</script>
-</body>
-</html>                                                                                                                                                                   
+  btnRow.style.display 
