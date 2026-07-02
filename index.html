@@ -826,7 +826,7 @@ const DATA = {
   date: '2026-07-01', weekday: '三',
   lastUpdate: '2026-07-01 全日票房（秀泰：392.6萬 / 全台：1992.0萬；全台ADM：70,009人 / ATP：285元；威秀：1028.0萬 / ADM：35,089人；資料來源：台北票房觀測站 95/104家完整入帳，21家威秀、15家秀泰全館逐一核實；賣品消費結構(stFB)及MTD去年同期為延伸估算值 ⚠待確認）',
 
-  mkt: { bo: 1992.0, visitors: 70009, atp: 284.5, lastWeekBO: 2666.6 },
+  mkt: { bo: 2003.7, visitors: 70558, atp: 284.0, lastWeekBO: 2666.6 },
 
   st: {
     bo: 392.6, fb: 109.4, visitors: 12647,
@@ -860,20 +860,25 @@ const DATA = {
 
   // 月累計排行 MTD 2026-07-01～07-01（資料來源：taipeitheater.org.tw；月初首日，等同單日排行）
   mtdRanking: [
-    { rank:1, name:'台北信義威秀',   region:'N', st:false, bo:129.8, visitors:3997,   mktPct:6.51 },
-    { rank:2, name:'高雄威秀',   region:'S', st:false, bo:94.2, visitors:3151,   mktPct:4.73 },
-    { rank:3, name:'台北京站威秀',   region:'N', st:false, bo:82.3, visitors:2790,   mktPct:4.13 },
-    { rank:4, name:'新竹巨城威秀',   region:'N', st:false, bo:79.6, visitors:2697,   mktPct:4.0 },
-    { rank:5, name:'台南南紡威秀',   region:'S', st:false, bo:76.0, visitors:2745,   mktPct:3.82 },
-    { rank:6, name:'台北大巨蛋秀泰',   region:'N', st:true, bo:71.7, visitors:1393,   mktPct:3.6 },
-    { rank:7, name:'板橋大遠百威秀',   region:'N', st:false, bo:69.1, visitors:2252,   mktPct:3.47 },
-    { rank:8, name:'台中大遠百威秀',   region:'C', st:false, bo:61.2, visitors:2192,   mktPct:3.07 },
-    { rank:9, name:'高雄夢時代秀泰',   region:'S', st:true, bo:61.0, visitors:2117,   mktPct:3.06 },
-    { rank:10, name:'台中文心秀泰',   region:'C', st:true, bo:58.1, visitors:1928,   mktPct:2.92 },
+    { rank:1,  name:'台北信義威秀',        region:'N', st:false, bo:129.8, visitors:3997,  mktPct:6.5 },
+    { rank:2,  name:'高雄威秀',            region:'S', st:false, bo:94.2,  visitors:3151,  mktPct:4.7 },
+    { rank:3,  name:'台北京站威秀',        region:'N', st:false, bo:82.3,  visitors:2790,  mktPct:4.1 },
+    { rank:4,  name:'新竹巨城威秀',        region:'N', st:false, bo:79.6,  visitors:2697,  mktPct:4.0 },
+    { rank:5,  name:'台南南紡威秀',        region:'S', st:false, bo:76.0,  visitors:2745,  mktPct:3.8 },
+    { rank:6,  name:'台北大巨蛋秀泰',      region:'N', st:true,  bo:71.7,  visitors:1393,  mktPct:3.6 },
+    { rank:7,  name:'板橋大遠百威秀',      region:'N', st:false, bo:69.1,  visitors:2252,  mktPct:3.4 },
+    { rank:8,  name:'台中大遠百威秀',      region:'C', st:false, bo:61.3,  visitors:2192,  mktPct:3.1 },
+    { rank:9,  name:'高雄夢時代秀泰',      region:'S', st:true,  bo:61.0,  visitors:2117,  mktPct:3.0 },
+    { rank:10, name:'台中文心秀泰',        region:'C', st:true,  bo:58.1,  visitors:1928,  mktPct:2.9 },
+    { rank:11, name:'台中iFG遠雄廣場威秀', region:'C', st:false, bo:56.9,  visitors:2017,  mktPct:2.8 },
+    { rank:12, name:'新店裕隆城威秀',      region:'N', st:false, bo:51.7,  visitors:1766,  mktPct:2.6 },
+    { rank:13, name:'南港LaLaport威秀',    region:'N', st:false, bo:44.9,  visitors:1514,  mktPct:2.2 },
+    { rank:14, name:'桃園統領威秀',        region:'N', st:false, bo:42.2,  visitors:1513,  mktPct:2.1 },
+    { rank:15, name:'台中站前秀泰',        region:'C', st:true,  bo:41.8,  visitors:1407,  mktPct:2.1 },
   ],
-  mtdMktTotal: 1992.0, mtdMktAdm: 70009, mtdMktAtp: 284.5,
+  mtdMktTotal: 2003.7, mtdMktAdm: 70558, mtdMktAtp: 284.0,
 
-  competitors: { '秀泰':392.6, '威秀':1028.0, '國賓':86.0, '美麗華':29.6, 'in89':40.6, '新光':0, '美麗新台茂':0, '喜樂':0, '其他':415.1 },
+  competitors: { '秀泰':392.6, '威秀':1028.0, '國賓':107.6, '美麗華':29.6, 'in89':40.6, '新光':97.8, '美麗新台茂':17.5, '喜樂':51.7, '其他':238.3 },
 
   cinemas: [
     { name:'秀泰巨蛋', bo:71.7, fb:15.3, visitors:1393, shows:75, avgPrice:515, seats:120, halls:14, totalSeats:1683, ystBO:82.5, ytdBO:12229.7, ytdVisitors:259558, mtdBO:71.7, mtdVisitors:1393 },
