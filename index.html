@@ -953,6 +953,16 @@ const DATA = {
     ],
   },
 
+  // ── 月份存檔（已結束月份官方數據；每月底系統自動由台北票房觀測站補齊） ──
+  // 格式：{ st:{ bo,adm,atp,ms }, mkt:{ bo,adm,atp }, wison:{ bo,adm,atp,ms } }
+  monthlyArchive: {
+    '2026-06': {
+      st:    { bo: 13497.0, adm: 428283,  atp: 315, ms: 19.9 },
+      mkt:   { bo: 67759.7, adm: 2332389, atp: 291 },
+      wison: { bo: 32704.6, adm: 1077593, atp: 304, ms: 48.3 },
+    },
+  },
+
   // 每日歷史快照（key = 'YYYY-MM-DD'，匯出 HTML 後永久保存）
   history: {
   '2026-06-30': {
@@ -1287,17 +1297,20 @@ function renderKPIs() {
   if (wsAtpSub) wsAtpSub.textContent = wsATP > 0 ? '' : '⚠ 待確認';
 
 
-  // ── 月累計 ──────────────────────────────────────────────────
-  const mtdMkt    = DATA.mtdMktTotal || 0;
-  const mtdMktAdm = DATA.mtdMktAdm   || 0;
-  const mtdMktAtp = DATA.mtdMktAtp   || 0;
-  const stMtdBO   = DATA.st.mtdBO || 0;
-  const stMtdVis  = DATA.cinemas.reduce((s,c)=>s+(c.mtdVisitors||0), 0);
+  // ── 月累計（動態從 history[] 加總；ADM/ATP 由 monthlyArchive 補齊）────────
+  const curYM    = DATA.date.substring(0, 7);
+  const dynMTD   = calcMonthMTD(curYM);    // 從 history[] 實時加總
+  const arc      = getMonthArchive(curYM); // 已結束月份官方存檔（null=當月進行中）
+  const mtdMkt    = dynMTD.mktBO > 0 ? dynMTD.mktBO : (arc ? arc.mkt.bo   : (DATA.mtdMktTotal || 0));
+  const mtdMktAdm = arc ? arc.mkt.adm  : (DATA.mtdMktAdm  || 0);
+  const mtdMktAtp = arc ? arc.mkt.atp  : (DATA.mtdMktAtp  || 0);
+  const stMtdBO   = dynMTD.stBO  > 0 ? dynMTD.stBO  : (arc ? arc.st.bo   : (DATA.st.mtdBO  || 0));
+  const stMtdVis  = dynMTD.stAdm > 0 ? dynMTD.stAdm : (arc ? arc.st.adm  : DATA.cinemas.reduce((s,c)=>s+(c.mtdVisitors||0), 0));
   const stMtdATP  = stMtdVis > 0 ? Math.round(stMtdBO * 10000 / stMtdVis) : 0;
   const stMtdMS   = mtdMkt > 0 ? (stMtdBO / mtdMkt * 100) : 0;
-  const wsMtdBO   = ws.mtdBO       || 0;
-  const wsMtdVis  = ws.mtdVisitors || 0;
-  const wsMtdAtp  = ws.mtdAtp      || 0;
+  const wsMtdBO   = dynMTD.wsBO  > 0 ? dynMTD.wsBO  : (arc ? arc.wison.bo : (ws.mtdBO       || 0));
+  const wsMtdVis  = arc ? arc.wison.adm : (ws.mtdVisitors || 0);
+  const wsMtdAtp  = arc ? arc.wison.atp : (ws.mtdAtp      || 0);
   const wsMtdMS   = mtdMkt > 0 ? (wsMtdBO / mtdMkt * 100) : 0;
   const dtMtd = new Date(DATA.date);
 
@@ -1683,11 +1696,16 @@ function renderMTDYTD() {
     return html;
   }
 
-  // ── MTD ──
+  // ── MTD（動態加總確保新月份數據自動反映）────────────────────────────────
   const d = new Date(DATA.date);
   const dayOfMonth = isNaN(d) ? 0 : d.getDate();
+  const _ym = DATA.date.substring(0, 7);
+  const _dyn = calcMonthMTD(_ym);
+  const _arc = getMonthArchive(_ym);
+  const _mtdMkt = _dyn.mktBO > 0 ? _dyn.mktBO : (_arc ? _arc.mkt.bo : (DATA.mtdMktTotal || 0));
+  const _mtdSt  = _dyn.stBO  > 0 ? _dyn.stBO  : (_arc ? _arc.st.bo  : (st.mtdBO        || 0));
   document.getElementById('mtdContent').innerHTML = DATA.mtdRanking && DATA.mtdRanking.length > 0
-    ? rankTable(DATA.mtdRanking, DATA.mtdMktTotal, st.mtdBO, dayOfMonth)
+    ? rankTable(DATA.mtdRanking, _mtdMkt, _mtdSt, dayOfMonth)
     : '<div class="empty-state"><div class="big">📆</div>上傳月累計排行榜後自動顯示</div>';
 
   // ── YTD ──
@@ -2643,7 +2661,115 @@ function exportHTML() {
   a.download = '秀泰影城每日營運儀表板_' + (DATA.date||'report') + '.html';
   a.click();
 }
+// ════════════════════════════════════════════════════════════
+//  月份自動化管理系統（Month Auto-Archive System）
+//  ▸ MTD BO 由 history[] 動態加總 → 新增歷史紀錄後立即反映
+//  ▸ 已結束月份的 ADM/ATP 由 monthlyArchive + localStorage 補齊
+//  ▸ 頁面載入時靜默補齊所有尚未存檔的過去月份
+// ════════════════════════════════════════════════════════════
+
+/** localStorage 優先 → DATA.monthlyArchive 兜底 */
+function getMonthArchive(ym) {
+  try {
+    const ls = localStorage.getItem('st_monthArchive');
+    if (ls) { const obj = JSON.parse(ls); if (obj[ym]) return obj[ym]; }
+  } catch(e) {}
+  return (DATA.monthlyArchive && DATA.monthlyArchive[ym]) ? DATA.monthlyArchive[ym] : null;
+}
+
+/** 存入 localStorage */
+function storeMonthArchive(ym, data) {
+  try {
+    const ls  = localStorage.getItem('st_monthArchive');
+    const obj = ls ? JSON.parse(ls) : {};
+    obj[ym] = Object.assign({}, data, { _fetchedAt: new Date().toISOString() });
+    localStorage.setItem('st_monthArchive', JSON.stringify(obj));
+    console.log('[AutoArchive] ✅', ym, obj[ym]);
+  } catch(e) { console.warn('[AutoArchive] localStorage 失敗', e); }
+}
+
+/** 從 history[] 動態加總指定月份 */
+function calcMonthMTD(ym) {
+  const entries = Object.values(DATA.history).filter(v => v.date && v.date.startsWith(ym));
+  const stBO  = entries.reduce((s,v) => s + (v.stBO      || 0), 0);
+  const mktBO = entries.reduce((s,v) => s + (v.mktBO     || 0), 0);
+  const wsBO  = entries.reduce((s,v) => s + (v.wisonBO   || 0), 0);
+  const stAdm = entries.reduce((s,v) => s + (v.stVisitors|| 0), 0);
+  const cinemas = {};
+  entries.forEach(v => {
+    (v.cinemas || []).forEach(c => {
+      if (!cinemas[c.name]) cinemas[c.name] = { bo:0, visitors:0 };
+      cinemas[c.name].bo       += (c.bo       || 0);
+      cinemas[c.name].visitors += (c.visitors || 0);
+    });
+  });
+  return { stBO, mktBO, wsBO, stAdm, days: entries.length, cinemas };
+}
+
+/**
+ * 向台北票房觀測站抓取月份完整數據（靜默執行）
+ * GitHub Pages (https) → 觀測站 (http) 可能觸發 Mixed-Content 限制，失敗時靜默跳過
+ */
+async function fetchAndArchiveMonth(ym) {
+  const [yr, mo] = ym.split('-');
+  const lastDay  = new Date(+yr, +mo, 0).getDate();
+  const fd = new FormData();
+  fd.append('region_selected', '0');
+  fd.append('startyear',  yr);        fd.append('startmonth', String(+mo));
+  fd.append('startday',   '1');       fd.append('endyear',    yr);
+  fd.append('endmonth',   String(+mo)); fd.append('endday', String(lastDay));
+  fd.append('query', '查詢');
+  try {
+    const res = await fetch('http://www.taipeitheater.org.tw/taiwan/tbopercentage2.php',
+      { method:'POST', body:fd, mode:'cors' });
+    if (!res.ok) return null;
+    const html = await res.text();
+    const doc  = new DOMParser().parseFromString(html, 'text/html');
+    const theaters = [];
+    Array.from(doc.querySelectorAll('table tr')).forEach(r => {
+      const cells = Array.from(r.querySelectorAll('td')).map(c => (c.textContent||'').trim());
+      if (cells.length >= 9 && /^\d+$/.test(cells[0])) {
+        theaters.push({ name:cells[1],
+          bo:  parseFloat(cells[5].replace(/,/g,'')) || 0,
+          adm: parseInt(cells[7].replace(/,/g,''),10) || 0 });
+      }
+    });
+    if (!theaters.length) return null;
+    const sumBO  = kw => theaters.filter(t=>t.name.includes(kw)).reduce((s,t)=>s+t.bo, 0);
+    const sumAdm = kw => theaters.filter(t=>t.name.includes(kw)).reduce((s,t)=>s+t.adm,0);
+    const gtBO  = theaters.reduce((s,t)=>s+t.bo, 0);
+    const gtAdm = theaters.reduce((s,t)=>s+t.adm,0);
+    const stBO_=sumBO('秀泰'), stAdm_=sumAdm('秀泰');
+    const wsBO_=sumBO('威秀'), wsAdm_=sumAdm('威秀');
+    const archive = {
+      st:    { bo:+stBO_.toFixed(1),  adm:stAdm_, atp:stAdm_>0?Math.round(stBO_*10000/stAdm_):0, ms:gtBO>0?+(stBO_/gtBO*100).toFixed(1):0 },
+      mkt:   { bo:+gtBO.toFixed(1),   adm:gtAdm,  atp:gtAdm >0?Math.round(gtBO *10000/gtAdm ):0 },
+      wison: { bo:+wsBO_.toFixed(1),  adm:wsAdm_, atp:wsAdm_>0?Math.round(wsBO_*10000/wsAdm_):0, ms:gtBO>0?+(wsBO_/gtBO*100).toFixed(1):0 },
+    };
+    storeMonthArchive(ym, archive);
+    return archive;
+  } catch(e) {
+    console.warn('[AutoArchive] 抓取', ym, '失敗:', e.message);
+    return null;
+  }
+}
+
+/** 頁面載入：靜默補齊所有 history[] 中有資料但尚未存檔的過去月份 */
+async function autoArchivePastMonths() {
+  const curYM = DATA.date.substring(0, 7);
+  const missing = [...new Set(
+    Object.values(DATA.history)
+      .filter(v => v.date && v.date.substring(0,7) < curYM)
+      .map(v => v.date.substring(0,7))
+  )].filter(ym => !getMonthArchive(ym));
+  if (!missing.length) return;
+  console.log('[AutoArchive] 補齊：', missing);
+  for (const ym of missing) await fetchAndArchiveMonth(ym);
+  renderKPIs();
+}
+
 renderAll();
+autoArchivePastMonths().catch(() => {});
 
 // ════════════════════════════════════
 //  HALL DB MODAL
