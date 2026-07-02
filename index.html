@@ -2364,7 +2364,13 @@ function renderHistory() {
     if (btn) btn.style.display = 'none';
     return;
   }
-  if (btn) { btn.style.display = ''; cnt.textContent = '(' + allKeys.length + '天)'; }
+  if (btn) {
+    btn.style.display = '';
+    const oldest = allKeys[allKeys.length - 1]; // allKeys 是 reverse sort，最後一筆 = 最舊
+    const newest = allKeys[0];
+    const fmt = d => d ? d.slice(0, 7).replace('-', '/') : '';
+    cnt.textContent = oldest ? '(' + fmt(oldest) + '～' + fmt(newest) + ')' : '';
+  }
 
   // Read filter dates
   const fromVal = (document.getElementById('histFrom')?.value) || '';
@@ -2863,9 +2869,4 @@ function closeHallDB() {
 
 function toggleHistExpand() {
   const hidden  = document.getElementById('histHiddenRows');
-  const btnRow  = document.getElementById('histExpandRow');
-  const colRow  = document.getElementById('histCollapseRow');
-  if (!hidden) return;
-  const isOpen = hidden.style.display !== 'none';
-  hidden.style.display  = isOpen ? 'none' : '';
-  btnRow.style.display  = isOpen ? 
+  const btnRow  = document.getElementById('h
