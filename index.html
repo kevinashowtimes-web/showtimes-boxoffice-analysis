@@ -570,19 +570,23 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
       <div class="brand-metric">
         <div class="bm-lbl">票房 BO</div>
         <div class="bm-val" id="b-mkt-bo">—<span class="unit">萬</span></div>
+        <div class="bm-mtd" id="b-mkt-bo-mtd">月累 —</div>
       </div>
       <div class="brand-metric">
         <div class="bm-lbl">來客數 ADM</div>
         <div class="bm-val" id="b-mkt-adm">—<span class="unit">人</span></div>
+        <div class="bm-mtd" id="b-mkt-adm-mtd">月累 —</div>
       </div>
       <div class="brand-metric">
         <div class="bm-lbl">平均票價 ATP</div>
         <div class="bm-val" id="b-mkt-atp">—<span class="unit">元</span></div>
+        <div class="bm-mtd" id="b-mkt-atp-mtd">月均 —</div>
       </div>
       <div class="brand-metric">
         <div class="bm-lbl">市佔率 MS</div>
         <div class="bm-val ms-hi">100<span class="unit">%</span></div>
         <div class="bm-sub">全台基準</div>
+        <div class="bm-mtd" id="b-mkt-ms-mtd">—</div>
       </div>
     </div>
   </div>
@@ -598,21 +602,25 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
         <div class="bm-lbl">票房 BO</div>
         <div class="bm-val" id="b-st-bo">—<span class="unit">萬</span></div>
         <div class="bm-sub" id="b-st-bo-sub">— vs 昨日</div>
+        <div class="bm-mtd" id="b-st-bo-mtd">月累 —</div>
       </div>
       <div class="brand-metric">
         <div class="bm-lbl">來客數 ADM</div>
         <div class="bm-val" id="b-st-adm">—<span class="unit">人</span></div>
         <div class="bm-sub">15館合計</div>
+        <div class="bm-mtd" id="b-st-adm-mtd">月累 —</div>
       </div>
       <div class="brand-metric">
         <div class="bm-lbl">平均票價 ATP</div>
         <div class="bm-val" id="b-st-atp">—<span class="unit">元</span></div>
         <div class="bm-sub">BO÷ADM</div>
+        <div class="bm-mtd" id="b-st-atp-mtd">月均 —</div>
       </div>
       <div class="brand-metric">
         <div class="bm-lbl">市佔率 MS</div>
         <div class="bm-val ms-st" id="b-st-ms">—<span class="unit">%</span></div>
         <div class="bm-sub" id="b-st-ms-sub">秀泰÷全台</div>
+        <div class="bm-mtd" id="b-st-ms-mtd">月均 —</div>
       </div>
     </div>
   </div>
@@ -627,21 +635,25 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F3F4F6;color:var(--
       <div class="brand-metric">
         <div class="bm-lbl">票房 BO</div>
         <div class="bm-val" id="b-ws-bo">—<span class="unit">萬</span></div>
+        <div class="bm-mtd" id="b-ws-bo-mtd">月累 —</div>
       </div>
       <div class="brand-metric">
         <div class="bm-lbl">來客數 ADM</div>
         <div class="bm-val" id="b-ws-adm">—<span class="unit">人</span></div>
         <div class="bm-sub" id="b-ws-adm-sub">⚠ 待確認</div>
+        <div class="bm-mtd" id="b-ws-adm-mtd">月數據待整合</div>
       </div>
       <div class="brand-metric">
         <div class="bm-lbl">平均票價 ATP</div>
         <div class="bm-val" id="b-ws-atp">—<span class="unit">元</span></div>
         <div class="bm-sub" id="b-ws-atp-sub">⚠ 待確認</div>
+        <div class="bm-mtd" id="b-ws-atp-mtd">月數據待整合</div>
       </div>
       <div class="brand-metric">
         <div class="bm-lbl">市佔率 MS</div>
         <div class="bm-val ms-ws" id="b-ws-ms">—<span class="unit">%</span></div>
         <div class="bm-sub">威秀÷全台</div>
+        <div class="bm-mtd" id="b-ws-ms-mtd">月均 —</div>
       </div>
     </div>
   </div>
@@ -819,11 +831,11 @@ const DATA = {
   st: {
     bo: 484.5, fb: 109.4, visitors: 15769,
     ystBO: 319.1,
-    mtdBO: 13796.8, mtdLastMonthBO: 14606.9, mtdLastYearBO: 12111.7,
+    mtdBO: 13497.0, mtdLastMonthBO: 14606.9, mtdLastYearBO: 12111.7,
     ytdBO: 85210.6, ytdLastYearBO: 49923.2,
   },
 
-  wison: { bo: 1366.6, visitors: 46216, atp: 295.7, mtdBO: 32234.7 },
+  wison: { bo: 1366.6, visitors: 46216, atp: 295.7, mtdBO: 32704.6, mtdVisitors: 1077593, mtdAtp: 303.5 },
 
   // 院線競爭對手當日票房（來源：台北票房觀測站 / 手動填入）
   competitors: [
@@ -874,7 +886,7 @@ const DATA = {
     { rank:14, name:'⚠ 待更新',      region:'-', st:false, bo:0,      visitors:0,        mktPct:0    },
     { rank:15, name:'⚠ 待更新',      region:'-', st:false, bo:0,      visitors:0,        mktPct:0    },
   ],
-  mtdMktTotal: 67819.7,
+  mtdMktTotal: 67759.7, mtdMktAdm: 2332389, mtdMktAtp: 290.5,
 
   competitors: { '秀泰':484.5, '威秀':1366.6, '國賓':123.0, '美麗華':50.5, 'in89':45.1, '其他':523.4 },
 
@@ -1273,6 +1285,34 @@ function renderKPIs() {
   const wsAtpSub = document.getElementById('b-ws-atp-sub');
   if (wsAdmSub) wsAdmSub.textContent = ws.visitors > 0 ? '' : '⚠ 待確認';
   if (wsAtpSub) wsAtpSub.textContent = wsATP > 0 ? '' : '⚠ 待確認';
+
+
+  // ── 月累計 ──────────────────────────────────────────────────
+  const mtdMkt    = DATA.mtdMktTotal || 0;
+  const mtdMktAdm = DATA.mtdMktAdm   || 0;
+  const mtdMktAtp = DATA.mtdMktAtp   || 0;
+  const stMtdBO   = DATA.st.mtdBO || 0;
+  const stMtdVis  = DATA.cinemas.reduce((s,c)=>s+(c.mtdVisitors||0), 0);
+  const stMtdATP  = stMtdVis > 0 ? Math.round(stMtdBO * 10000 / stMtdVis) : 0;
+  const stMtdMS   = mtdMkt > 0 ? (stMtdBO / mtdMkt * 100) : 0;
+  const wsMtdBO   = ws.mtdBO       || 0;
+  const wsMtdVis  = ws.mtdVisitors || 0;
+  const wsMtdAtp  = ws.mtdAtp      || 0;
+  const wsMtdMS   = mtdMkt > 0 ? (wsMtdBO / mtdMkt * 100) : 0;
+  const dtMtd = new Date(DATA.date);
+
+  setEl('b-mkt-bo-mtd',  mtdMkt    > 0 ? `月累 ${fmtW(mtdMkt)} 萬（${dtMtd.getDate()}日份）` : '月數據待整合');
+  setEl('b-mkt-adm-mtd', mtdMktAdm > 0 ? `月累 ${fmt(mtdMktAdm)} 人` : '月數據待整合');
+  setEl('b-mkt-atp-mtd', mtdMktAtp > 0 ? `月均 ${fmt(mtdMktAtp)} 元` : '月數據待整合');
+  setEl('b-mkt-ms-mtd',  `${dtMtd.getMonth()+1}/${dtMtd.getDate()} 全台基準`);
+  setEl('b-st-bo-mtd',  stMtdBO  > 0 ? `月累 ${fmtW(stMtdBO)} 萬` : '—');
+  setEl('b-st-adm-mtd', stMtdVis > 0 ? `月累 ${fmt(stMtdVis)} 人` : '—');
+  setEl('b-st-atp-mtd', stMtdATP > 0 ? `月均 ${stMtdATP.toLocaleString()} 元` : '—');
+  setEl('b-st-ms-mtd',  stMtdMS  > 0 ? `月均 ${stMtdMS.toFixed(1)}%` : '—');
+  setEl('b-ws-bo-mtd',  wsMtdBO  > 0 ? `月累 ${fmtW(wsMtdBO)} 萬` : '⚠ 待確認');
+  setEl('b-ws-adm-mtd', wsMtdVis > 0 ? `月累 ${fmt(wsMtdVis)} 人` : '月數據待整合');
+  setEl('b-ws-atp-mtd', wsMtdAtp > 0 ? `月均 ${fmt(wsMtdAtp)} 元` : '月數據待整合');
+  setEl('b-ws-ms-mtd',  wsMtdMS  > 0 ? `月均 ${wsMtdMS.toFixed(1)}%` : '—');
 
   // ── 院線競爭格局圖（保留原有 donut chart + vsBar 邏輯） ──────
   const wiShare = wsMS;
