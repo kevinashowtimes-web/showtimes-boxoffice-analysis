@@ -1189,6 +1189,7 @@ function toast(msg) {
 //  RENDER
 // ════════════════════════════════════
 function renderAll() {
+  saveSnapshot();   // 確保當天資料同步進 history[]（每次渲染都更新）
   renderHeader();
   renderKPIs();
   renderDonut();
@@ -2867,9 +2868,4 @@ function toggleHistExpand() {
   if (!hidden) return;
   const isOpen = hidden.style.display !== 'none';
   hidden.style.display  = isOpen ? 'none' : '';
-  btnRow.style.display  = isOpen ? '' : 'none';
-  colRow.style.display  = isOpen ? 'none' : '';
-}
-</script>
-</body>
-</html>
+  btnRow.style.display  = isOpen ? 
