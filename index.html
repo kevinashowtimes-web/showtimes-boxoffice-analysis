@@ -36,16 +36,6 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 
 /* ── LOGIN ── */
-#loginOverlay{position:fixed;inset:0;background:rgba(10,15,28,.97);display:flex;align-items:center;justify-content:center;z-index:9999;}
-.login-box{background:#131929;border:1px solid #2a3a5c;border-radius:var(--r-lg);padding:40px 48px;width:360px;text-align:center;}
-.login-box h2{color:#e8f0ff;font-size:var(--fs-lg);font-weight:800;margin-bottom:6px;letter-spacing:.2px;}
-.login-box p{color:#8899bb;font-size:var(--fs-sm);margin-bottom:24px;}
-.login-box input{width:100%;padding:10px 14px;margin-bottom:10px;background:#0d1424;border:1px solid #2a3a5c;border-radius:var(--r-sm);color:#e8f0ff;font-size:var(--fs-md);box-sizing:border-box;}
-.login-box input:focus{outline:none;border-color:#4f8ef7;}
-.login-btn{width:100%;padding:11px;background:linear-gradient(135deg,#1a4fd6,#4f8ef7);border:none;border-radius:var(--r-sm);color:#fff;font-size:var(--fs-md);cursor:pointer;font-weight:700;letter-spacing:.2px;}
-.login-btn:hover{opacity:.9;}
-#lgErr{color:#ff6b6b;font-size:var(--fs-sm);margin-top:8px;min-height:18px;}
-
 /* ── BASE ── */
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:var(--fs-md);line-height:1.5;}
 
@@ -351,7 +341,18 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   .ranking-grid { grid-template-columns:1fr 1fr !important; }
 }
 
+
+#loginOverlay{position:fixed;inset:0;background:rgba(87,45,136,.92);display:none;align-items:center;justify-content:center;z-index:9999;}
+.login-box{background:#fff;border-radius:16px;padding:36px 32px;width:320px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.3);}
+.login-box h2{color:var(--st);margin:0 0 6px;font-size:20px;}
+.login-box p{color:var(--sub);font-size:13px;margin:0 0 20px;}
+.login-box input{width:100%;box-sizing:border-box;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;margin-bottom:10px;outline:none;}
+.login-box input:focus{border-color:var(--st);}
+.login-btn{width:100%;padding:11px;background:var(--st);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px;}
+.login-btn:hover{background:var(--st-dk);}
+#lgErr{color:#c62828;font-size:12px;min-height:18px;margin-top:8px;}
 </style>
+
 
 <script>
 (function(){
@@ -378,7 +379,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <body>
 <div id="loginOverlay">
   <div class="login-box">
-    <h2>秀泰影城 營運報表系統</h2>
+    <h2>🎬 秀泰影城</h2>
     <p>請輸入您的帳號與密碼</p>
     <input id="lgUser" type="text" placeholder="帳號" autocomplete="username">
     <input id="lgPass" type="password" placeholder="密碼" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
@@ -1351,6 +1352,9 @@ function renderST() {
         <td style="text-align:right;padding:7px 8px;">${chip}</td>
       </tr>`;
     });
+    const totBO=sorted.reduce((s,c)=>s+c.bo,0),totVis=sorted.reduce((s,c)=>s+c.visitors,0),totFB=sorted.reduce((s,c)=>s+(c.fb||0),0),totYst=sorted.reduce((s,c)=>s+(c.ystBO||0),0);
+    const totATP=totVis>0?Math.round(totBO*10000/totVis):0,totSPP=totVis>0?Math.round(totFB*10000/totVis):0,totChg=totYst>0?deltaHtml((totBO-totYst)/totYst*100):'—';
+    bodyD.innerHTML+=`<tr style="background:var(--st-lt);border-top:2px solid var(--st);"><td style="text-align:center;padding:7px 8px;font-weight:800;color:var(--st);">合計</td><td style="padding:7px 8px;font-weight:800;color:var(--st);">15館合計</td><td style="text-align:right;padding:7px 8px;font-weight:800;color:var(--st);">${fmtW(totBO)}</td><td style="text-align:right;padding:7px 8px;font-weight:800;color:var(--st);">${fmt(totVis)}</td><td style="text-align:right;padding:7px 8px;font-weight:800;color:var(--st);">${totATP}</td><td style="text-align:right;padding:7px 8px;font-weight:800;color:var(--green);">${totSPP}</td><td style="text-align:right;padding:7px 8px;">${totChg}</td></tr>`;
   }
   const sortedMTD = [...DATA.cinemas].sort((a,b) => (b.mtdBO||b.bo) - (a.mtdBO||a.bo));
   const bodyM = document.getElementById('stMTDBody');
@@ -1369,6 +1373,9 @@ function renderST() {
         <td style="text-align:right;padding:7px 8px;">${mtdAtp > 0 ? fmt(mtdAtp) : '—'}</td>
       </tr>`;
     });
+    const mTotBO=sortedMTD.reduce((s,c)=>s+(c.mtdBO||c.bo),0),mTotVis=sortedMTD.reduce((s,c)=>s+(c.mtdVisitors||c.visitors),0);
+    const mTotATP=mTotVis>0?Math.round(mTotBO*10000/mTotVis):0;
+    bodyM.innerHTML+=`<tr style="background:var(--st-lt);border-top:2px solid var(--st);"><td style="text-align:center;padding:7px 8px;font-weight:800;color:var(--st);">合計</td><td style="padding:7px 8px;font-weight:800;color:var(--st);">15館合計</td><td style="text-align:right;padding:7px 8px;font-weight:800;color:var(--st);">${fmtW(mTotBO)}</td><td style="text-align:right;padding:7px 8px;font-weight:800;color:var(--st);">${fmt(mTotVis)}</td><td style="text-align:right;padding:7px 8px;font-weight:800;color:var(--st);">${mTotATP>0?fmt(mTotATP):'—'}</td></tr>`;
   }
 }
 
