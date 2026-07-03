@@ -365,7 +365,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   window.doLogin=async function(){
     const u=document.getElementById('lgUser').value.trim(),p=document.getElementById('lgPass').value;
     const uh=await sha256(u),ph=await sha256(p);
-    if(_users.some(x=>x.u===uh&&x.p===ph)){document.getElementById('loginOverlay').style.display='none';sessionStorage.setItem('st_auth','1');}
+    if(_users.some(x=>x.u===uh&&x.p===ph)){document.getElementById('loginOverlay').style.display='none';sessionStorage.setItem('st_auth','1');if(typeof renderAll==='function')renderAll();}
     else{document.getElementById('lgErr').textContent='帳號或密碼錯誤';document.getElementById('lgPass').value='';}
   };
   document.addEventListener('DOMContentLoaded',function(){
@@ -2607,8 +2607,4 @@ function toggleHistExpand() {
   const isOpen = hidden.style.display !== 'none';
   hidden.style.display  = isOpen ? 'none' : '';
   btnRow.style.display  = isOpen ? '' : 'none';
-  colRow.style.display  = isOpen ? 'none' : '';
-}
-</script>
-</body>
-</html>
+  colRow.style.display  = isOp
