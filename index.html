@@ -1178,11 +1178,11 @@ function renderKPIs() {
   // 計算秀泰各項
   const totalVis = DATA.cinemas.reduce((s,c)=>s+c.visitors, 0);
   const totalBO  = DATA.cinemas.reduce((s,c)=>s+c.bo, 0);
-  const stATP    = totalVis > 0 ? Math.round(totalBO * 10000 / totalVis) : 0;
+  const stATP    = totalVis > 0 ? +(totalBO * 10000 / totalVis).toFixed(1) : 0;
   const stMS     = mkt.bo > 0 ? (st.bo / mkt.bo * 100) : 0;
   const wsMS     = mkt.bo > 0 ? (ws.bo  / mkt.bo * 100) : 0;
-  const mktATP   = mkt.visitors > 0 ? Math.round(mkt.bo * 10000 / mkt.visitors) : 0;
-  const wsATP    = ws.visitors  > 0 ? Math.round(ws.bo  * 10000 / ws.visitors)  : 0;
+  const mktATP   = mkt.visitors > 0 ? +(mkt.bo * 10000 / mkt.visitors).toFixed(1) : 0;
+  const wsATP    = ws.visitors  > 0 ? +(ws.bo  * 10000 / ws.visitors).toFixed(1) : 0;
   const ystChg   = st.ystBO > 0 ? (st.bo - st.ystBO) / st.ystBO * 100 : null;
 
   // ── 日期 + 假日標示 ──────────────────────────────────────────
@@ -1258,7 +1258,7 @@ function renderKPIs() {
   const mtdMktAtp = arc ? arc.mkt.atp  : (DATA.mtdMktAtp  || 0);
   const stMtdBO   = dynMTD.stBO  > 0 ? dynMTD.stBO  : (arc ? arc.st.bo   : (DATA.st.mtdBO  || 0));
   const stMtdVis  = dynMTD.stAdm > 0 ? dynMTD.stAdm : (arc ? arc.st.adm  : DATA.cinemas.reduce((s,c)=>s+(c.mtdVisitors||0), 0));
-  const stMtdATP  = stMtdVis > 0 ? Math.round(stMtdBO * 10000 / stMtdVis) : 0;
+  const stMtdATP  = stMtdVis > 0 ? +(stMtdBO * 10000 / stMtdVis).toFixed(1) : 0;
   const stMtdMS   = mtdMkt > 0 ? (stMtdBO / mtdMkt * 100) : 0;
   const wsMtdBO   = dynMTD.wsBO  > 0 ? dynMTD.wsBO  : (arc ? arc.wison.bo : (ws.mtdBO       || 0));
   const wsMtdVis  = arc ? arc.wison.adm : (ws.mtdVisitors || 0);
@@ -1337,24 +1337,24 @@ function renderST() {
   if (bodyD) {
     bodyD.innerHTML = '';
     sorted.forEach((c, i) => {
-      const spp = c.visitors > 0 ? Math.round(c.fb * 10000 / c.visitors) : 0;
+      const spp = c.visitors > 0 ? +(c.fb * 10000 / c.visitors).toFixed(1) : 0;
       const chg = c.ystBO > 0 ? (c.bo - c.ystBO) / c.ystBO * 100 : null;
       const chip = chg !== null ? deltaHtml(chg) : '—';
-      const atp = c.avgPrice || Math.round(c.bo * 10000 / (c.visitors || 1));
+      const atp = c.avgPrice ? +(+c.avgPrice).toFixed(1) : +(c.bo * 10000 / (c.visitors || 1)).toFixed(1);
       const cls = i < 3 ? 'rank-num r' + (i+1) : 'rank-num';
       bodyD.innerHTML += `<tr style="${i%2===1?'background:var(--gray-lt);':''}">
         <td style="text-align:center;padding:7px 8px;"><span class="${cls}">${i+1}</span></td>
         <td style="padding:7px 8px;font-weight:600;">${c.name}</td>
         <td style="text-align:right;padding:7px 8px;font-weight:700;">${fmtW(c.bo)}</td>
         <td style="text-align:right;padding:7px 8px;">${fmt(c.visitors)}</td>
-        <td style="text-align:right;padding:7px 8px;">${atp}</td>
-        <td style="text-align:right;padding:7px 8px;color:var(--green);font-weight:700;">${spp}</td>
+        <td style="text-align:right;padding:7px 8px;">${atp > 0 ? (+atp).toFixed(1) : '—'}</td>
+        <td style="text-align:right;padding:7px 8px;color:var(--green);font-weight:700;">${spp > 0 ? (+spp).toFixed(1) : '—'}</td>
         <td style="text-align:right;padding:7px 8px;">${chip}</td>
       </tr>`;
     });
     const totBO=sorted.reduce((s,c)=>s+c.bo,0),totVis=sorted.reduce((s,c)=>s+c.visitors,0),totFB=sorted.reduce((s,c)=>s+(c.fb||0),0),totYst=sorted.reduce((s,c)=>s+(c.ystBO||0),0);
-    const totATP=totVis>0?Math.round(totBO*10000/totVis):0,totSPP=totVis>0?Math.round(totFB*10000/totVis):0,totChg=totYst>0?deltaHtml((totBO-totYst)/totYst*100):'—';
-    bodyD.innerHTML+=`<tr style="background:var(--st-lt);border-top:2px solid var(--st);"><td style="text-align:center;padding:7px 8px;font-weight:800;color:var(--st);">合計</td><td style="padding:7px 8px;font-weight:800;color:var(--st);">15館合計</td><td style="text-align:right;padding:7px 8px;font-weight:800;color:var(--st);">${fmtW(totBO)}</td><td style="text-align:right;padding:7px 8px;font-weight:800;color:var(--st);">${fmt(totVis)}</td><td style="text-align:right;padding:7px 8px;font-weight:800;color:var(--st);">${totATP}</td><td style="text-align:right;padding:7px 8px;font-weight:800;color:var(--green);">${totSPP}</td><td style="text-align:right;padding:7px 8px;">${totChg}</td></tr>`;
+    const totATP=totVis>0?+(totBO*10000/totVis).toFixed(1):0,totSPP=totVis>0?+(totFB*10000/totVis).toFixed(1):0,totChg=totYst>0?deltaHtml((totBO-totYst)/totYst*100):'—';
+    bodyD.innerHTML+=`<tr style="background:var(--st-lt);border-top:2px solid var(--st);"><td style="text-align:center;padding:7px 8px;font-weight:800;color:var(--st);">合計</td><td style="padding:7px 8px;font-weight:800;color:var(--st);">15館合計</td><td style="text-align:right;padding:7px 8px;font-weight:800;color:var(--st);">${fmtW(totBO)}</td><td style="text-align:right;padding:7px 8px;font-weight:800;color:var(--st);">${fmt(totVis)}</td><td style="text-align:right;padding:7px 8px;font-weight:800;color:var(--st);">${totATP > 0 ? (+totATP).toFixed(1) : '—'}</td><td style="text-align:right;padding:7px 8px;font-weight:800;color:var(--green);">${totSPP > 0 ? (+totSPP).toFixed(1) : '—'}</td><td style="text-align:right;padding:7px 8px;">${totChg}</td></tr>`;
   }
   const sortedMTD = [...DATA.cinemas].sort((a,b) => (b.mtdBO||b.bo) - (a.mtdBO||a.bo));
   const bodyM = document.getElementById('stMTDBody');
@@ -1363,19 +1363,19 @@ function renderST() {
     sortedMTD.forEach((c, i) => {
       const mtdBO = c.mtdBO || c.bo;
       const mtdVis = c.mtdVisitors || c.visitors;
-      const mtdAtp = mtdVis > 0 ? Math.round(mtdBO * 10000 / mtdVis) : 0;
+      const mtdAtp = mtdVis > 0 ? +(mtdBO * 10000 / mtdVis).toFixed(1) : 0;
       const cls = i < 3 ? 'rank-num r' + (i+1) : 'rank-num';
       bodyM.innerHTML += `<tr style="${i%2===1?'background:var(--gray-lt);':''}">
         <td style="text-align:center;padding:7px 8px;"><span class="${cls}">${i+1}</span></td>
         <td style="padding:7px 8px;font-weight:600;">${c.name}</td>
         <td style="text-align:right;padding:7px 8px;font-weight:700;color:var(--st);">${fmtW(mtdBO)}</td>
         <td style="text-align:right;padding:7px 8px;">${fmt(mtdVis)}</td>
-        <td style="text-align:right;padding:7px 8px;">${mtdAtp > 0 ? fmt(mtdAtp) : '—'}</td>
+        <td style="text-align:right;padding:7px 8px;">${mtdAtp > 0 ? (+mtdAtp).toFixed(1) : '—'}</td>
       </tr>`;
     });
     const mTotBO=sortedMTD.reduce((s,c)=>s+(c.mtdBO||c.bo),0),mTotVis=sortedMTD.reduce((s,c)=>s+(c.mtdVisitors||c.visitors),0);
-    const mTotATP=mTotVis>0?Math.round(mTotBO*10000/mTotVis):0;
-    bodyM.innerHTML+=`<tr style="background:var(--st-lt);border-top:2px solid var(--st);"><td style="text-align:center;padding:7px 8px;font-weight:800;color:var(--st);">合計</td><td style="padding:7px 8px;font-weight:800;color:var(--st);">15館合計</td><td style="text-align:right;padding:7px 8px;font-weight:800;color:var(--st);">${fmtW(mTotBO)}</td><td style="text-align:right;padding:7px 8px;font-weight:800;color:var(--st);">${fmt(mTotVis)}</td><td style="text-align:right;padding:7px 8px;font-weight:800;color:var(--st);">${mTotATP>0?fmt(mTotATP):'—'}</td></tr>`;
+    const mTotATP=mTotVis>0?+(mTotBO*10000/mTotVis).toFixed(1):0;
+    bodyM.innerHTML+=`<tr style="background:var(--st-lt);border-top:2px solid var(--st);"><td style="text-align:center;padding:7px 8px;font-weight:800;color:var(--st);">合計</td><td style="padding:7px 8px;font-weight:800;color:var(--st);">15館合計</td><td style="text-align:right;padding:7px 8px;font-weight:800;color:var(--st);">${fmtW(mTotBO)}</td><td style="text-align:right;padding:7px 8px;font-weight:800;color:var(--st);">${fmt(mTotVis)}</td><td style="text-align:right;padding:7px 8px;font-weight:800;color:var(--st);">${mTotATP>0?(+mTotATP).toFixed(1):'—'}</td></tr>`;
   }
 }
 
@@ -1839,7 +1839,7 @@ function applyParsed() {
     if (p.ystBO    != null) c.ystBO    = p.ystBO;
     if (p.ytdBO    != null) c.ytdBO    = p.ytdBO;
     if (p.ytdVisitors != null) c.ytdVisitors = p.ytdVisitors;
-    if (c.visitors > 0 && c.bo > 0) c.avgPrice = Math.round(c.bo * 10000 / c.visitors);
+    if (c.visitors > 0 && c.bo > 0) c.avgPrice = +(c.bo * 10000 / c.visitors).toFixed(1);
   });
 
   // Recalc daily totals from cinemas
@@ -1937,7 +1937,7 @@ function renderRegional() {
     // Cinema rows
     const rows = list.map((c,i) => {
       const w = Math.round(c.bo/maxBO*100);
-      const atp = c.vis>0 ? Math.round(c.bo*10000/c.vis) : 0;
+      const atp = c.vis>0 ? +(c.bo*10000/c.vis).toFixed(1) : 0;
       const isST = c.chain==='ST';
       const isWS = c.chain==='WS';
       const nearbyNames = isST ? (NEARBY[c.name]||[]) : [];
@@ -2266,7 +2266,7 @@ function viewHistoryDay(date) {
   const totalVis = cinemas.reduce((s, c) => s + (c.visitors||0), 0) || h.stVisitors || 0;
   const totalBO  = cinemas.reduce((s, c) => s + (c.bo||0), 0);
   const totalFB  = cinemas.reduce((s, c) => s + (c.fb||0), 0);
-  const avgPrice = totalVis > 0 ? Math.round(totalBO * 10000 / totalVis) : 0;
+  const avgPrice = totalVis > 0 ? +(totalBO * 10000 / totalVis).toFixed(1) : 0;
   const ystChg   = h.ystBO > 0 ? (h.stBO - h.ystBO) / h.ystBO * 100 : null;
 
   // KPIs
@@ -2501,7 +2501,7 @@ async function fetchAndArchiveMonth(ym) {
     const wsBO_=sumBO('威秀'), wsAdm_=sumAdm('威秀');
     const archive = {
       st:    { bo:+stBO_.toFixed(1),  adm:stAdm_, atp:stAdm_>0?+((stBO_*10000/stAdm_).toFixed(1)):0, ms:gtBO>0?+(stBO_/gtBO*100).toFixed(1):0 },
-      mkt:   { bo:+gtBO.toFixed(1),   adm:gtAdm,  atp:gtAdm >0?Math.round(gtBO *10000/gtAdm ):0 },
+      mkt:   { bo:+gtBO.toFixed(1),   adm:gtAdm,  atp:gtAdm >0?+(gtBO *10000/gtAdm).toFixed(1):0 },
       wison: { bo:+wsBO_.toFixed(1),  adm:wsAdm_, atp:wsAdm_>0?+((wsBO_*10000/wsAdm_).toFixed(1)):0, ms:gtBO>0?+(wsBO_/gtBO*100).toFixed(1):0 },
     };
     storeMonthArchive(ym, archive);
