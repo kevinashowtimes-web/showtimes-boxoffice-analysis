@@ -697,9 +697,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 // ════════════════════════════════════
 const DATA = {
   date: '2026-07-05', weekday: '日',
-  lastUpdate: '2026-07-05 全日票房（秀泰：822.9萬 全15館完整 / 全台：2509.1萬；全台ADM：87,930人 / ATP：285.4元；威秀：611.1萬；資料來源：taipeitheater.org.tw ⚠當日僅68/104家入帳（14家威秀等未回報，全台/威秀/市占數字將隨補報上修）；賣品消費結構(stFB)為依前次比例估算 ⚠待確認；熱映影片明細維持07-01資料）',
+  lastUpdate: '2026-07-05 全日票房（秀泰：822.9萬 全15館完整 / 全台：3,871.0萬；全台ADM：135,596人 / ATP：285.5元；威秀：1,815.0萬；市占：21.3%；資料來源：taipeitheater.org.tw 完整數據已補齊）',
 
-  mkt: { bo: 2509.1, visitors: 87930, atp: 285.4, lastWeekBO: 4334.8 },
+  mkt: { bo: 3871.0, visitors: 135596, atp: 285.5, lastWeekBO: 4334.8 },
 
   st: {
     bo: 822.9, fb: 239.3, visitors: 26791,
@@ -708,7 +708,7 @@ const DATA = {
     ytdBO: 88101.9, ytdLastYearBO: 57795.2,
   },
 
-  wison: { bo: 611.1, visitors: 19537, atp: 312.8, mtdBO: 5709.0, mtdVisitors: 190409, mtdAtp: 299.8 },
+  wison: { bo: 1815.0, visitors: 0, atp: 0, mtdBO: 0, mtdVisitors: 0, mtdAtp: 0 },
 
   // 院線競爭對手當日票房（來源：台北票房觀測站 / 手動填入）
 
@@ -756,7 +756,7 @@ const DATA = {
   ],
   mtdMktTotal: 12606.2, mtdMktAdm: 439543, mtdMktAtp: 286.8,
 
-  competitors: { '秀泰':822.9, '威秀':611.1, '國賓':255.8, '美麗華':72.9, 'in89':35.6, '新光':186.4, '美麗新台茂':42.8, '喜樂':129.8, '其他':351.8 },
+  competitors: { '秀泰':822.9, '威秀':1815.0, '國賓':255.8, '美麗華':72.9, 'in89':79.2, '新光':186.4, '美麗新台茂':42.8, '喜樂':129.8, '其他':466.2 },
 
   cinemas: [
     { name:'秀泰巨蛋', bo:129.8, fb:27.7, visitors:2718, shows:73, avgPrice:477.7, seats:120, halls:14, totalSeats:1683, ystBO:160.9, ytdBO:12667.4, ytdVisitors:268499, mtdBO:509.5, mtdVisitors:10334 },
@@ -857,6 +857,29 @@ const DATA = {
 
   // 每日歷史快照（key = 'YYYY-MM-DD'，匯出 HTML 後永久保存）
   history: {
+  '2026-07-05': {
+    date:'2026-07-05', mktBO:3871.0, stBO:822.9, stFB:239.3, stVisitors:26791,
+    ystBO:896.7, mtdBO:2891.3, ytdBO:88101.9, wisonBO:1815.0, mktShare:21.3,
+    mktNote:'全台全日票房完整數據（資料來源：taipeitheater.org.tw）',
+    competitors:{'秀泰':822.9,'威秀':1815.0,'國賓':255.8,'美麗華':72.9,'in89':79.2,'新光':186.4,'美麗新台茂':42.8,'喜樂':129.8,'其他':466.2},
+    cinemas:[
+      {"name":"秀泰巨蛋","bo":129.8,"fb":27.7,"visitors":2718,"shows":73,"avgPrice":477.7},
+      {"name":"秀泰欣欣","bo":52.8,"fb":14.6,"visitors":1842,"shows":88,"avgPrice":286.9},
+      {"name":"秀泰土城","bo":36.9,"fb":12.3,"visitors":1316,"shows":61,"avgPrice":280.6},
+      {"name":"秀泰樹林","bo":58.9,"fb":30.9,"visitors":2049,"shows":67,"avgPrice":287.3},
+      {"name":"秀泰基隆","bo":29.8,"fb":6.2,"visitors":1132,"shows":47,"avgPrice":263.4},
+      {"name":"秀泰文心","bo":117.2,"fb":30.7,"visitors":3803,"shows":91,"avgPrice":308.1},
+      {"name":"秀泰站前","bo":98.3,"fb":27.5,"visitors":3349,"shows":107,"avgPrice":293.5},
+      {"name":"秀泰麗寶","bo":37.4,"fb":11.8,"visitors":1249,"shows":52,"avgPrice":299.4},
+      {"name":"秀泰北港","bo":9.5,"fb":1.1,"visitors":360,"shows":17,"avgPrice":262.7},
+      {"name":"秀泰嘉義","bo":43.5,"fb":13.6,"visitors":1587,"shows":64,"avgPrice":274.3},
+      {"name":"秀泰仁德","bo":9.9,"fb":7.4,"visitors":375,"shows":25,"avgPrice":264.7},
+      {"name":"秀泰夢時代","bo":101.1,"fb":24.5,"visitors":3457,"shows":84,"avgPrice":292.4},
+      {"name":"秀泰岡山","bo":63.5,"fb":19.0,"visitors":2228,"shows":80,"avgPrice":285.0},
+      {"name":"秀泰台東","bo":15.9,"fb":4.9,"visitors":604,"shows":39,"avgPrice":263.9},
+      {"name":"秀泰花蓮","bo":18.3,"fb":7.1,"visitors":722,"shows":48,"avgPrice":253.3}
+    ],
+  },
   '2026-07-04': {
     date:'2026-07-04', mktBO:4373.8, stBO:896.7, stFB:260.6, stVisitors:29141,
     ystBO:418.7, mtdBO:2068.3, ytdBO:87278.9, wisonBO:2103.9, mktShare:20.5,
