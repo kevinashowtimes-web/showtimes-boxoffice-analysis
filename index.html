@@ -2314,166 +2314,300 @@ function viewHistoryDay(date) {
   const d = new Date(date);
   const dow = ['日','一','二','三','四','五','六'][d.getDay()];
   const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+  const weekendBadge = isWeekend
+    ? '<span style="background:#E65100;color:#fff;padding:2px 10px;border-radius:4px;font-size:11px;font-weight:700;margin-left:10px;">📌 週末</span>'
+    : '';
 
-  // Seats lookup from live DATA
+  // 座位數來自當前 DATA
   const seatsMap = {};
-  DATA.cinemas.forEach(c => { seatsMap[c.name] = c.seats || 0; });
+  DATA.cinemas.forEach(function(c){ seatsMap[c.name] = c.seats || 0; });
 
-  // Cinemas sorted by bo desc
-  const cinemas = [...(h.cinemas || [])].sort((a, b) => b.bo - a.bo);
-  const stAvg = cinemas.reduce((s, c) => s + (c.bo||0), 0) / (cinemas.length || 1);
+  // 影城排行（by 票房）
+  const cinemas = (h.cinemas||[]).slice().sort(function(a,b){return b.bo-a.bo;});
+  const totalVisH = cinemas.reduce(function(s,c){return s+(c.visitors||0);},0) || h.stVisitors || 0;
+  const totalBOH  = cinemas.reduce(function(s,c){return s+(c.bo||0);},0);
+  const totalFBH  = cinemas.reduce(function(s,c){return s+(c.fb||0);},0);
+  const stATP  = totalVisH>0 ? +(totalBOH*10000/totalVisH).toFixed(1) : 0;
+  const stMS   = h.mktBO>0 ? +(h.stBO/h.mktBO*100).toFixed(1) : 0;
+  const wiMS   = (h.mktBO>0&&h.wisonBO>0) ? +(h.wisonBO/h.mktBO*100).toFixed(1) : 0;
+  const stAvg  = cinemas.length ? totalBOH/cinemas.length : 1;
+  const ystChg = h.ystBO>0 ? (h.stBO-h.ystBO)/h.ystBO*100 : null;
 
-  // Prev day for anomaly comparison
+  // 前一天（異常對比）
   const allKeys = Object.keys(DATA.history).sort();
   const idx = allKeys.indexOf(date);
-  const prevKey = idx > 0 ? allKeys[idx - 1] : null;
+  const prevKey = idx>0 ? allKeys[idx-1] : null;
   const prev = prevKey ? DATA.history[prevKey] : null;
 
-  // KPI values
-  const mktShare = h.mktBO > 0 ? (h.stBO / h.mktBO * 100) : 0;
-  const wiShare  = h.mktBO > 0 && h.wisonBO > 0 ? (h.wisonBO / h.mktBO * 100) : 0;
-  const totalVis = cinemas.reduce((s, c) => s + (c.visitors||0), 0) || h.stVisitors || 0;
-  const totalBO  = cinemas.reduce((s, c) => s + (c.bo||0), 0);
-  const totalFB  = cinemas.reduce((s, c) => s + (c.fb||0), 0);
-  const avgPrice = totalVis > 0 ? +(totalBO * 10000 / totalVis).toFixed(1) : 0;
-  const ystChg   = h.ystBO > 0 ? (h.stBO - h.ystBO) / h.ystBO * 100 : null;
+  // 月累計（從 history[] 動態加總）
+  const ym = date.substring(0,7);
+  const mtdKeys = allKeys.filter(function(k){return k.startsWith(ym)&&k<=date;});
+  const mtdStBO  = mtdKeys.reduce(function(s,k){return s+(DATA.history[k].stBO||0);},0);
+  const mtdStVis = mtdKeys.reduce(function(s,k){return s+(DATA.history[k].stVisitors||0);},0);
+  const mtdMktBO = mtdKeys.reduce(function(s,k){return s+(DATA.history[k].mktBO||0);},0);
+  const mtdWsBO  = mtdKeys.reduce(function(s,k){return s+(DATA.history[k].wisonBO||0);},0);
+  const mtdStATP = mtdStVis>0 ? +(mtdStBO*10000/mtdStVis).toFixed(1) : 0;
+  const mtdStMS  = mtdMktBO>0 ? +(mtdStBO/mtdMktBO*100).toFixed(1) : 0;
+  const mtdWsMS  = mtdMktBO>0 ? +(mtdWsBO/mtdMktBO*100).toFixed(1) : 0;
 
-  // KPIs
-  const kpiHtml = '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px;">'
-    + '<div class="kpi blue"><div class="kpi-lbl">全台票房</div><div class="kpi-val">' + fmtW(h.mktBO) + '<span class="unit">萬</span></div><div class="kpi-sub">全國市場</div></div>'
-    + '<div class="kpi accent"><div class="kpi-lbl">秀泰票房</div><div class="kpi-val">' + fmtW(h.stBO) + '<span class="unit">萬</span></div><div class="kpi-sub">' + (ystChg!==null?deltaHtml(ystChg)+' vs 昨日':'— vs 昨日') + '</div></div>'
-    + '<div class="kpi green"><div class="kpi-lbl">市占率</div><div class="kpi-val">' + (mktShare>0?mktShare.toFixed(1):'—') + '<span class="unit">%</span></div><div class="kpi-sub">vs 威秀 ' + (wiShare>0?wiShare.toFixed(1)+'%':'—') + '</div></div>'
-    + '<div class="kpi"><div class="kpi-lbl">來客數</div><div class="kpi-val" style="font-size:18px;">' + (totalVis>0?totalVis.toLocaleString():'—') + '<span class="unit">人</span></div><div class="kpi-sub">全館合計</div></div>'
-    + '<div class="kpi"><div class="kpi-lbl">平均票價</div><div class="kpi-val">' + (avgPrice>0?fmtATP(avgPrice):'—') + '<span class="unit">元</span></div><div class="kpi-sub">' + (totalFB>0?'餐飲 '+fmtW(totalFB)+'萬':'票房÷來客') + '</div></div>'
+  // ──────────────────── ① 三品牌 KPI ────────────────────
+  const brandHtml =
+    '<div class="brand-grid">'
+
+    // 全台市場
+    + '<div class="brand-card mkt">'
+    + '<div class="brand-card-hdr"><span class="brand-name">🇹🇼 全台市場</span><span class="brand-ms-badge">市佔率 100%</span></div>'
+    + '<div class="brand-metrics">'
+    + '<div class="brand-metric"><div class="bm-lbl">票房 BO</div>'
+    + '<div class="bm-val">' + (h.mktBO>0?fmtAuto(h.mktBO)+'<span class="unit">萬</span>':'—') + '</div>'
+    + '<div class="bm-mtd">' + (mtdMktBO>0?'月累 '+fmtAuto(mtdMktBO)+'（'+mtdKeys.length+'日）':'—') + '</div></div>'
+    + '<div class="brand-metric"><div class="bm-lbl">來客數 ADM</div>'
+    + '<div class="bm-val">—<span class="unit">人</span></div>'
+    + '<div class="bm-mtd">月數據待整合</div></div>'
+    + '<div class="brand-metric"><div class="bm-lbl">平均票價 ATP</div>'
+    + '<div class="bm-val">—<span class="unit">元</span></div>'
+    + '<div class="bm-mtd">—</div></div>'
+    + '<div class="brand-metric"><div class="bm-lbl">市佔率</div>'
+    + '<div class="bm-val ms-hi">100<span class="unit">%</span></div>'
+    + '<div class="bm-sub">全台基準</div></div>'
+    + '</div></div>'
+
+    // 秀泰影城
+    + '<div class="brand-card st">'
+    + '<div class="brand-card-hdr"><span class="brand-name">🎬 秀泰影城</span>'
+    + '<span class="brand-ms-badge">市佔率 ' + (stMS>0?stMS+'%':'—') + '</span></div>'
+    + '<div class="brand-metrics">'
+    + '<div class="brand-metric"><div class="bm-lbl">票房 BO</div>'
+    + '<div class="bm-val">' + fmtW(h.stBO) + '<span class="unit">萬</span></div>'
+    + '<div class="bm-sub">' + (ystChg!==null?deltaHtml(ystChg)+' vs 昨日':'— vs 昨日') + '</div>'
+    + '<div class="bm-mtd">' + (mtdStBO>0?'月累 '+fmtW(mtdStBO)+'萬':'—') + '</div></div>'
+    + '<div class="brand-metric"><div class="bm-lbl">來客數 ADM</div>'
+    + '<div class="bm-val">' + (totalVisH>0?fmt(totalVisH):'—') + '<span class="unit">人</span></div>'
+    + '<div class="bm-sub">15館合計</div>'
+    + '<div class="bm-mtd">' + (mtdStVis>0?'月累 '+fmt(mtdStVis)+'人':'—') + '</div></div>'
+    + '<div class="brand-metric"><div class="bm-lbl">平均票價 ATP</div>'
+    + '<div class="bm-val">' + (stATP>0?fmtATP(stATP):'—') + '<span class="unit">元</span></div>'
+    + '<div class="bm-sub">BO÷ADM</div>'
+    + '<div class="bm-mtd">' + (mtdStATP>0?'月均 '+fmtATP(mtdStATP)+'元':'—') + '</div></div>'
+    + '<div class="brand-metric"><div class="bm-lbl">市佔率</div>'
+    + '<div class="bm-val ms-st">' + (stMS>0?stMS:'—') + '<span class="unit">%</span></div>'
+    + '<div class="bm-sub">秀泰÷全台</div>'
+    + '<div class="bm-mtd">' + (mtdStMS>0?'月均 '+mtdStMS+'%':'—') + '</div></div>'
+    + '</div></div>'
+
+    // 威秀影城
+    + '<div class="brand-card ws">'
+    + '<div class="brand-card-hdr"><span class="brand-name">🏟️ 威秀影城</span>'
+    + '<span class="brand-ms-badge">市佔率 ' + (wiMS>0?wiMS+'%':'—') + '</span></div>'
+    + '<div class="brand-metrics">'
+    + '<div class="brand-metric"><div class="bm-lbl">票房 BO</div>'
+    + '<div class="bm-val">' + (h.wisonBO>0?fmtW(h.wisonBO)+'<span class="unit">萬</span>':'—') + '</div>'
+    + '<div class="bm-mtd">' + (mtdWsBO>0?'月累 '+fmtW(mtdWsBO)+'萬':'—') + '</div></div>'
+    + '<div class="brand-metric"><div class="bm-lbl">來客數 ADM</div>'
+    + '<div class="bm-val">—<span class="unit">人</span></div>'
+    + '<div class="bm-sub">⚠ 待確認</div>'
+    + '<div class="bm-mtd">月數據待整合</div></div>'
+    + '<div class="brand-metric"><div class="bm-lbl">平均票價 ATP</div>'
+    + '<div class="bm-val">—<span class="unit">元</span></div>'
+    + '<div class="bm-sub">⚠ 待確認</div>'
+    + '<div class="bm-mtd">月數據待整合</div></div>'
+    + '<div class="brand-metric"><div class="bm-lbl">市佔率</div>'
+    + '<div class="bm-val ms-ws">' + (wiMS>0?wiMS:'—') + '<span class="unit">%</span></div>'
+    + '<div class="bm-sub">威秀÷全台</div>'
+    + '<div class="bm-mtd">' + (mtdWsMS>0?'月均 '+mtdWsMS+'%':'—') + '</div></div>'
+    + '</div></div>'
     + '</div>';
 
-  // 院線市占 / 秀泰 vs 威秀
+  // ──────────────────── ② 各館排行榜 ────────────────────
+  const rankRowsHtml = cinemas.map(function(c,i){
+    const n=i+1;
+    const seats=c.seats||seatsMap[c.name]||0;
+    const occ=c.shows>0&&seats>0?(c.visitors/(c.shows*seats)*100):0;
+    const vsAvg=stAvg>0?(c.bo-stAvg)/stAvg*100:null;
+    const spp=c.visitors>0&&c.fb>0 ? +(c.fb*10000/c.visitors).toFixed(1) : 0;
+    const cls=n===1?'r1':n===2?'r2':n===3?'r3':'';
+    return '<tr>'
+      +'<td class="c"><span class="rank-num '+cls+'">'+n+'</span></td>'
+      +'<td><strong style="font-size:12px;">'+c.name+'</strong>'
+      +(vsAvg!==null&&vsAvg>15?'<span style="font-size:9px;background:#E8F5E9;color:var(--up);padding:1px 4px;border-radius:3px;margin-left:3px;">↑均</span>':'')
+      +(vsAvg!==null&&vsAvg<-15?'<span style="font-size:9px;background:#FFEBEE;color:var(--dn);padding:1px 4px;border-radius:3px;margin-left:3px;">↓均</span>':'')
+      +'</td>'
+      +'<td class="r" style="font-weight:700;color:var(--st);">'+fmtW(c.bo)+'</td>'
+      +'<td class="r" style="color:var(--green);">'+(c.fb>0?fmtW(c.fb):'—')+'</td>'
+      +'<td class="r">'+fmt(c.visitors||0)+'</td>'
+      +'<td class="r">'+(c.shows>0?c.shows:'—')+'</td>'
+      +'<td class="r">'+(c.avgPrice>0?'$'+fmtATP(c.avgPrice):'—')+'</td>'
+      +'<td class="r">'+(spp>0?fmtATP(spp):'—')+'</td>'
+      +'<td class="r">'+(occ>0?occ.toFixed(1)+'%':'—')+'</td>'
+      +'</tr>';
+  }).join('');
+
+  const rankHtml = cinemas.length>0
+    ? '<div class="ranking-grid" style="display:grid;grid-template-columns:1fr;gap:14px;">'
+      +'<div class="card" style="padding:0;overflow:hidden;">'
+      +'<div class="rank-hdr rank-hdr-st">🏬 秀泰影城　當日排行</div>'
+      +'<div style="overflow-x:auto;"><table class="tbl">'
+      +'<thead><tr><th class="c" style="width:32px;">#</th><th>影城</th>'
+      +'<th class="r">票房(萬)</th><th class="r">餐飲(萬)</th><th class="r">來客數</th>'
+      +'<th class="r">場次</th><th class="r">均票價</th><th class="r">賣品/人</th><th class="r">滿座%</th></tr></thead>'
+      +'<tbody>'+rankRowsHtml+'</tbody></table></div></div></div>'
+    : '<div class="card" style="padding:20px;text-align:center;color:var(--sub);">各館明細未儲存</div>';
+
+  // ──────────────────── ③ 院線競爭 ────────────────────
   const comp = h.competitors;
-  let compHtml = '';
+  let compBodyHtml = '';
   if (comp && Object.values(comp).some(function(v){return v>0;})) {
-    const colors = {'秀泰':'#572d88','威秀':'#1A237E','國賓':'#00695C','美麗華':'#4A148C','in89':'#E65100','新光':'#E65100','美麗新台茂':'#AD1457','美麗新':'#AD1457','喜樂':'#2E7D32','絕色':'#5D4037','其他':'#607D8B'};
+    const colors = {'秀泰':'#572d88','威秀':'#1A237E','國賓':'#00695C','美麗華':'#4A148C','in89':'#E65100','新光':'#BF360C','美麗新台茂':'#AD1457','美麗新':'#AD1457','喜樂':'#2E7D32','其他':'#607D8B'};
     const labels = Object.keys(comp).filter(function(k){return comp[k]>0;});
     const vals   = labels.map(function(k){return comp[k];});
     const total  = vals.reduce(function(a,b){return a+b;},0);
-    compHtml = '<canvas id="histDonut_' + date + '" style="max-height:150px;width:100%;"></canvas><div style="margin-top:8px;">'
-      + labels.map(function(k,i){
-          const p=(vals[i]/total*100).toFixed(1);
-          return '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);font-size:11px;">'
-            + '<span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + (colors[k]||'#607D8B') + ';margin-right:5px;"></span><b style="' + (k==='秀泰'?'color:var(--st)':'') + '">' + k + '</b></span>'
-            + '<span><b style="' + (k==='秀泰'?'color:var(--st)':'') + '">' + p + '%</b> <span style="color:var(--sub);font-size:10px;">' + vals[i].toFixed(1) + '萬</span></span>'
-            + '</div>';
-        }).join('') + '</div>';
-  } else if (h.stBO>0 && h.wisonBO>0) {
-    const tot=h.stBO+h.wisonBO, stP=Math.round(h.stBO/tot*100);
-    compHtml = '<div style="font-size:11px;font-weight:700;margin-bottom:6px;color:var(--sub);">秀泰 vs 威秀</div>'
-      + '<div class="vs-metric">'
-      + '<div class="vs-names"><span class="st-name">秀泰 ' + fmtW(h.stBO) + '萬</span><span class="wi-name">威秀 ' + fmtW(h.wisonBO) + '萬</span></div>'
-      + '<div class="vs-bar-track">'
-      + '<div class="vs-bar-st" style="width:' + stP + '%"><span class="vs-bar-val">' + stP + '%</span></div>'
-      + '<div class="vs-bar-wi" style="width:' + (100-stP) + '%"><span class="vs-bar-val">' + (100-stP) + '%</span></div>'
-      + '</div></div>';
+    compBodyHtml =
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start;">'
+      +'<canvas id="hdonut_'+date+'" style="max-height:160px;width:100%;"></canvas>'
+      +'<div>'+labels.map(function(k,i){
+        const p=(vals[i]/total*100).toFixed(1);
+        return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px;">'
+          +'<span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+(colors[k]||'#607D8B')+';margin-right:5px;"></span>'
+          +'<b style="'+(k==='秀泰'?'color:var(--st)':'')+'">'+k+'</b></span>'
+          +'<span><b style="'+(k==='秀泰'?'color:var(--st)':'')+'">'+p+'%</b> <span style="color:var(--sub);font-size:10px;">'+vals[i].toFixed(1)+'萬</span></span>'
+          +'</div>';
+      }).join('')+'</div>'
+      +'</div>';
   } else {
-    compHtml = '<div class="empty-state" style="padding:16px;"><div class="big" style="font-size:28px;">📊</div>院線數據未儲存</div>';
+    compBodyHtml = '<div style="padding:16px;text-align:center;color:var(--sub);">院線數據未儲存</div>';
+  }
+  const compHtml = '<div class="card" style="padding:14px;"><div class="sec-label" style="margin:0 0 10px;">③ 院線市占競爭</div>'+compBodyHtml+'</div>';
+
+  // ──────────────────── ④ 地區別分析 ────────────────────
+  var regHtml = '';
+  if (cinemas.length > 0 && typeof REGION !== 'undefined') {
+    const regions = ['北部','中部','南部','東部'];
+    const regData = regions.map(function(reg){
+      const names = REGION[reg] || [];
+      const rc = cinemas.filter(function(c){return names.indexOf(c.name)>=0;});
+      const rBO  = rc.reduce(function(s,c){return s+(c.bo||0);},0);
+      const rVis = rc.reduce(function(s,c){return s+(c.visitors||0);},0);
+      const rATP = rVis>0 ? +(rBO*10000/rVis).toFixed(1) : 0;
+      const rShare = totalBOH>0&&rBO>0 ? +(rBO/totalBOH*100).toFixed(1) : 0;
+      return {reg, rc, rBO, rVis, rATP, rShare};
+    }).filter(function(r){return r.rBO>0;});
+
+    const regCardsHtml = regData.map(function(r){
+      const cinemaRows = r.rc.map(function(c){
+        return '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border-lt);font-size:11px;">'
+          +'<span style="font-weight:600;">'+c.name+'</span>'
+          +'<span style="color:var(--st);font-weight:700;">'+fmtW(c.bo)+'萬</span>'
+          +'</div>';
+      }).join('');
+      return '<div class="card" style="padding:12px;">'
+        +'<div style="font-size:12px;font-weight:800;color:var(--st);margin-bottom:8px;">'+r.reg+'</div>'
+        +'<div style="display:flex;gap:12px;margin-bottom:8px;">'
+        +'<div><div style="font-size:10px;color:var(--sub);">票房</div><div style="font-size:16px;font-weight:800;">'+fmtW(r.rBO)+'<span style="font-size:10px;">萬</span></div></div>'
+        +'<div><div style="font-size:10px;color:var(--sub);">比重</div><div style="font-size:16px;font-weight:800;">'+r.rShare+'<span style="font-size:10px;">%</span></div></div>'
+        +'<div><div style="font-size:10px;color:var(--sub);">均票</div><div style="font-size:16px;font-weight:800;">'+(r.rATP>0?fmtATP(r.rATP):'—')+'<span style="font-size:10px;">元</span></div></div>'
+        +'</div>'
+        +cinemaRows
+        +'</div>';
+    }).join('');
+
+    regHtml = '<div class="card" style="padding:14px;">'
+      +'<div class="sec-label" style="margin:0 0 10px;">⑤ 地區別分析</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;">'+regCardsHtml+'</div>'
+      +'</div>';
   }
 
-  // 收入結構
-  const maxRev = Math.max.apply(null, cinemas.map(function(c){return (c.bo||0)+(c.fb||0);})) || 1;
-  const revMixHtml = cinemas.filter(function(c){return c.bo>0||c.fb>0;}).map(function(c){
-    const tot=(c.bo||0)+(c.fb||0), boPct=tot>0?c.bo/tot*100:0, barW=tot/maxRev*100;
+  // ──────────────────── ⑤ 收入結構 ────────────────────
+  const hasFB = totalFBH > 0;
+  const revHtml = cinemas.filter(function(c){return c.bo>0;}).map(function(c){
+    const maxRev = Math.max.apply(null,cinemas.map(function(x){return (x.bo||0)+(x.fb||0);})) || 1;
+    const tot=(c.bo||0)+(c.fb||0), boPct=tot>0?c.bo/tot*100:100, barW=tot/maxRev*100;
     return '<div class="mix-row">'
-      + '<div class="mix-label">'
-      + '<span style="font-weight:700;font-size:11px;">' + c.name + '</span>'
-      + '<span style="font-size:10px;color:var(--sub);">' + fmtW(c.bo) + '萬' + (c.fb>0?' + '+fmtW(c.fb)+'萬':'') + '</span>'
-      + '</div>'
-      + '<div class="mix-track" style="width:' + Math.max(barW,3) + '%;"><div class="mix-bo" style="width:' + boPct + '%;"></div><div class="mix-fb" style="width:' + (100-boPct) + '%;"></div></div>'
-      + '</div>';
+      +'<div class="mix-label"><span style="font-weight:700;font-size:11px;">'+c.name+'</span>'
+      +'<span style="font-size:10px;color:var(--sub);">'+fmtW(c.bo)+'萬'+(c.fb>0?' + '+fmtW(c.fb)+'萬':'')+'</span></div>'
+      +'<div class="mix-track" style="width:'+Math.max(barW,3)+'%;"><div class="mix-bo" style="width:'+boPct+'%;"></div><div class="mix-fb" style="width:'+(100-boPct)+'%;"></div></div>'
+      +'</div>';
   }).join('');
-
-  // 影城業績排行
-  const rankHtml = cinemas.map(function(c,i){
-    const n=i+1, seats=c.seats||seatsMap[c.name]||0;
-    const occ=c.shows>0&&seats>0?(c.visitors/(c.shows*seats)*100):0;
-    const vsAvg=stAvg>0?(c.bo-stAvg)/stAvg*100:null;
-    const cls=n===1?'r1':n===2?'r2':n===3?'r3':'';
-    return '<tr>'
-      + '<td class="c"><span class="rank-num ' + cls + '">' + n + '</span></td>'
-      + '<td><strong style="font-size:12px;">' + c.name + '</strong>'
-      + (vsAvg!==null&&vsAvg>15?'<span style="font-size:9px;background:#E8F5E9;color:var(--up);padding:1px 4px;border-radius:3px;margin-left:4px;">↑均</span>':'')
-      + (vsAvg!==null&&vsAvg<-15?'<span style="font-size:9px;background:#FFEBEE;color:var(--dn);padding:1px 4px;border-radius:3px;margin-left:4px;">↓均</span>':'')
-      + '</td>'
-      + '<td class="r" style="font-weight:700;color:var(--st);">' + fmtW(c.bo) + '</td>'
-      + '<td class="r" style="color:var(--green);">' + (c.fb>0?fmtW(c.fb):'—') + '</td>'
-      + '<td class="r">' + fmt(c.visitors||0) + '</td>'
-      + '<td class="r">' + (c.shows>0?c.shows:'—') + '</td>'
-      + '<td class="r">' + (c.avgPrice>0?'$'+fmtATP(c.avgPrice):'—') + '</td>'
-      + '<td class="r">' + (occ>0?occ.toFixed(1)+'%':'—') + '</td>'
-      + '</tr>';
-  }).join('');
-
-  // 異常波動
-  let alertHtml = '';
-  if (prev && prev.cinemas) {
-    cinemas.forEach(function(c) {
-      if (c.bo <= 0) return;
-      const prevC = prev.cinemas.find(function(pc){return pc.name===c.name;});
-      if (!prevC || prevC.bo <= 0) return;
-      const chg = (c.bo - prevC.bo) / prevC.bo * 100;
-      if (Math.abs(chg) < 15) return;
-      alertHtml += '<div style="padding:8px 12px;border-radius:8px;margin-bottom:5px;background:' + (chg>0?'var(--up-lt)':'var(--dn-lt)') + ';border-left:4px solid ' + (chg>0?'var(--up)':'var(--dn)') + ';">'
-        + '<span style="font-weight:700;font-size:12px;">' + c.name + '</span>'
-        + '<span style="margin-left:8px;">' + deltaHtml(chg) + '</span>'
-        + '<span style="font-size:10px;color:var(--sub);margin-left:6px;">vs ' + prevKey + '（前日）</span>'
-        + '<span style="float:right;font-size:11px;color:var(--sub);">' + fmtW(prevC.bo) + '萬 → ' + fmtW(c.bo) + '萬</span>'
-        + '</div>';
-    });
-  }
-
-  const weekendBadge = isWeekend
-    ? '<span style="background:#E65100;color:#fff;padding:2px 10px;border-radius:4px;font-size:11px;font-weight:700;margin-left:10px;">📌 週末重點觀察</span>'
+  const revStructHtml = (cinemas.length>0&&(hasFB||totalBOH>0))
+    ? '<div class="card" style="padding:14px;">'
+      +'<div class="sec-label" style="margin:0 0 10px;">'+(hasFB?'⑥ 收入結構（票房 + 餐飲）':'⑥ 票房分布')+'</div>'
+      +revHtml
+      +(hasFB?'':'<div style="font-size:11px;color:var(--sub);margin-top:6px;text-align:center;">賣品數據未儲存</div>')
+      +'</div>'
     : '';
 
+  // ──────────────────── 異常波動 ────────────────────
+  var alertHtml = '';
+  if (prev && prev.cinemas && prev.cinemas.length > 0) {
+    cinemas.forEach(function(c){
+      if (c.bo<=0) return;
+      const prevC = prev.cinemas.find(function(pc){return pc.name===c.name;});
+      if (!prevC||prevC.bo<=0) return;
+      const chg=(c.bo-prevC.bo)/prevC.bo*100;
+      if (Math.abs(chg)<15) return;
+      alertHtml += '<div style="padding:8px 12px;border-radius:8px;margin-bottom:5px;background:'+(chg>0?'var(--up-lt)':'var(--dn-lt)')+';border-left:4px solid '+(chg>0?'var(--up)':'var(--dn)')+';display:flex;align-items:center;flex-wrap:wrap;gap:6px;">'
+        +'<strong style="font-size:12px;">'+c.name+'</strong>'
+        +'<span>'+deltaHtml(chg)+'</span>'
+        +'<span style="font-size:10px;color:var(--sub);">vs '+prevKey+'（前日）</span>'
+        +'<span style="margin-left:auto;font-size:11px;color:var(--sub);">'+fmtW(prevC.bo)+'萬 → '+fmtW(c.bo)+'萬</span>'
+        +'</div>';
+    });
+  }
+  const alertSection = alertHtml
+    ? '<div class="card" style="padding:14px;"><div class="sec-label" style="margin:0 0 10px;">⚠ 異常波動（>±15%）</div>'+alertHtml+'</div>'
+    : '';
+
+  // ──────────────────── 整體組裝 ────────────────────
   const overlay = document.createElement('div');
   overlay.className = 'overlay open';
   overlay.style.cssText = 'z-index:2000;align-items:flex-start;overflow-y:auto;padding:16px;';
   overlay.innerHTML =
-    '<div style="background:var(--bg-1);border-radius:14px;max-width:960px;width:100%;padding:20px;margin:0 auto;">'
-    + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--border);">'
-    + '<div><span style="font-size:20px;font-weight:800;">📅 ' + date + '（週' + dow + '）</span>' + weekendBadge
-    + '<div style="font-size:11px;color:var(--sub);margin-top:2px;">歷史儀表板 · 秀泰影城每日營運</div></div>'
-    + '<button onclick="this.closest(\'.overlay\').remove()" style="border:none;background:var(--bg-2);border-radius:8px;width:32px;height:32px;font-size:18px;cursor:pointer;color:var(--sub);">✕</button>'
-    + '</div>'
-    + kpiHtml
-    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">'
-    + '<div class="card" style="margin:0;padding:14px;"><div style="font-size:10px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">② 院線市占</div>' + compHtml + '</div>'
-    + '<div class="card" style="margin:0;padding:14px;"><div style="font-size:10px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">③ 收入結構（票房 + 餐飲）</div>' + (revMixHtml || '<div class="empty-state" style="padding:12px;"><div class="big" style="font-size:28px;">📊</div>無餐飲數據</div>') + '</div>'
-    + '</div>'
-    + '<div class="card" style="margin:0 0 12px;padding:14px;">'
-    + '<div style="font-size:10px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">④ 影城業績排行</div>'
-    + '<div style="overflow-x:auto;"><table class="tbl"><thead><tr><th class="c">#</th><th>影城</th><th class="r">票房(萬)</th><th class="r">餐飲(萬)</th><th class="r">來客數</th><th class="r">場次</th><th class="r">均票</th><th class="r">滿座%</th></tr></thead><tbody>' + rankHtml + '</tbody></table></div>'
-    + '</div>'
-    + (alertHtml ? '<div class="card" style="margin:0 0 12px;padding:14px;"><div style="font-size:10px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">⑤ 異常波動</div>' + alertHtml + '</div>' : '')
-    + '</div>';
+    '<div style="background:var(--bg);max-width:1000px;width:100%;margin:0 auto;padding-bottom:24px;">'
+    // Header
+    +'<div class="card" style="padding:16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;">'
+    +'<div>'
+    +'<div style="display:flex;align-items:center;gap:8px;">'
+    +'<span style="font-size:20px;font-weight:800;">📅 '+date+'（週'+dow+'）</span>'+weekendBadge+'</div>'
+    +'<div style="font-size:11px;color:var(--sub);margin-top:3px;">歷史儀表板 · 秀泰影城每日營運</div>'
+    +'</div>'
+    +'<button onclick="this.closest(\'.overlay\').remove()" style="border:none;background:var(--bg-2);border-radius:8px;width:36px;height:36px;font-size:18px;cursor:pointer;color:var(--sub);">✕</button>'
+    +'</div>'
+    // ① KPI
+    +'<div class="sec-label" style="margin-bottom:8px;">① 關鍵指標 KPI</div>'
+    +brandHtml
+    // ② 各館排行
+    +'<div class="sec-label" style="margin:14px 0 8px;">② 秀泰各館影城排行榜</div>'
+    +rankHtml
+    // ③ 院線市占
+    +'<div style="margin-top:14px;">'+compHtml+'</div>'
+    // ④ 地區別
+    +(regHtml?'<div style="margin-top:14px;">'+regHtml+'</div>':'')
+    // ⑤⑥ 收入結構
+    +(revStructHtml?'<div style="margin-top:14px;">'+revStructHtml+'</div>':'')
+    // 異常
+    +(alertSection?'<div style="margin-top:14px;">'+alertSection+'</div>':'')
+    +'</div>';
 
   document.body.appendChild(overlay);
-  overlay.addEventListener('click', function(e){ if (e.target === overlay) overlay.remove(); });
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
 
+  // 繪製甜甜圈圖
   setTimeout(function(){
-    const ctx = document.getElementById('histDonut_' + date);
-    if (ctx && comp && typeof Chart !== 'undefined') {
-      const colors2 = {'秀泰':'#572d88','威秀':'#1A237E','國賓':'#00695C','美麗華':'#4A148C','in89':'#E65100','新光':'#E65100','美麗新台茂':'#AD1457','美麗新':'#AD1457','喜樂':'#2E7D32','絕色':'#5D4037','其他':'#607D8B'};
-      const labels2 = Object.keys(comp).filter(function(k){ return comp[k]>0; });
-      const vals2   = labels2.map(function(k){ return comp[k]; });
-      if (labels2.length > 0) {
-        new Chart(ctx, {
-          type: 'doughnut',
-          data: { labels: labels2, datasets: [{ data: vals2, backgroundColor: labels2.map(function(k){ return colors2[k]||'#607D8B'; }), borderWidth: 2, borderColor: '#fff' }] },
-          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c){ return ' ' + c.label + ': ' + c.parsed.toFixed(1) + '萬'; } } } } }
+    const ctx = document.getElementById('hdonut_'+date);
+    if (ctx && h.competitors && typeof Chart!=='undefined') {
+      const colors2 = {'秀泰':'#572d88','威秀':'#1A237E','國賓':'#00695C','美麗華':'#4A148C','in89':'#E65100','新光':'#BF360C','美麗新台茂':'#AD1457','美麗新':'#AD1457','喜樂':'#2E7D32','其他':'#607D8B'};
+      const comp2 = h.competitors;
+      const labels2 = Object.keys(comp2).filter(function(k){return comp2[k]>0;});
+      const vals2   = labels2.map(function(k){return comp2[k];});
+      if (labels2.length>0) {
+        new Chart(ctx,{
+          type:'doughnut',
+          data:{labels:labels2,datasets:[{data:vals2,backgroundColor:labels2.map(function(k){return colors2[k]||'#607D8B';}),borderWidth:2,borderColor:'#fff'}]},
+          options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.label+': '+c.parsed.toFixed(1)+'萬';}}}}}
         });
       }
     }
-  }, 50);
+  }, 80);
 }
-
 function scrollToHistory() {
   document.getElementById('historyCard').scrollIntoView({behavior:'smooth', block:'start'});
 }
