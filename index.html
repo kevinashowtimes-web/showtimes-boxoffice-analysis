@@ -2123,9 +2123,12 @@ function renderRegional() {
 function saveSnapshot() {
   const key = DATA.date;
   if (!key) return;
-  DATA.history[key] = {
+  const existing = DATA.history[key] || {};
+  DATA.history[key] = Object.assign({}, existing, {
     date: DATA.date,
     mktBO: DATA.mkt.bo,
+    mktVisitors: DATA.mkt.visitors || existing.mktVisitors || 0,
+    mktATP: DATA.mkt.atp || existing.mktATP || 0,
     stBO: DATA.st.bo,
     stFB: DATA.st.fb,
     stVisitors: DATA.st.visitors,
@@ -2133,12 +2136,14 @@ function saveSnapshot() {
     mtdBO: DATA.st.mtdBO,
     ytdBO: DATA.st.ytdBO,
     wisonBO: DATA.wison.bo,
+    wisonVisitors: DATA.wison.visitors || existing.wisonVisitors || 0,
+    wisonATP: DATA.wison.atp || existing.wisonATP || 0,
     mktShare: DATA.mkt.bo > 0 ? +(DATA.st.bo / DATA.mkt.bo * 100).toFixed(1) : 0,
     competitors: Object.assign({}, DATA.competitors),
     cinemas: DATA.cinemas.map(c => ({
       name: c.name, bo: c.bo, fb: c.fb, visitors: c.visitors, shows: c.shows, avgPrice: c.avgPrice, seats: c.seats
     })),
-  };
+  });
 }
 
 // ════════════════════════════════════
