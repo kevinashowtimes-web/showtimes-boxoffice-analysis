@@ -2486,8 +2486,8 @@ function viewHistoryDay(date) {
     const vals   = labels.map(function(k){return comp[k];});
     const total  = vals.reduce(function(a,b){return a+b;},0);
     compBodyHtml =
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start;">'
-      +'<canvas id="hdonut_'+date+'" style="max-height:160px;width:100%;"></canvas>'
+      '<div style="display:grid;grid-template-columns:180px 1fr;gap:12px;align-items:start;">'
+      +'<div style="position:relative;height:160px;"><canvas id="hdonut_'+date+'"></canvas></div>'
       +'<div>'+labels.map(function(k,i){
         const p=(vals[i]/total*100).toFixed(1);
         return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px;">'
@@ -2505,9 +2505,15 @@ function viewHistoryDay(date) {
   // ──────────────────── ④ 地區別分析 ────────────────────
   var regHtml = '';
   if (cinemas.length > 0 && typeof REGION !== 'undefined') {
+    const regionGroups = {
+      '北部': (REGION['台北']||[]).concat(REGION['新北']||[]).concat(REGION['桃園']||[]),
+      '中部': (REGION['台中']||[]),
+      '南部': (REGION['台南']||[]).concat(REGION['高雄']||[]),
+      '東部': (REGION['東部']||[]),
+    };
     const regions = ['北部','中部','南部','東部'];
     const regData = regions.map(function(reg){
-      const names = REGION[reg] || [];
+      const names = regionGroups[reg] || [];
       const rc = cinemas.filter(function(c){return names.indexOf(c.name)>=0;});
       const rBO  = rc.reduce(function(s,c){return s+(c.bo||0);},0);
       const rVis = rc.reduce(function(s,c){return s+(c.visitors||0);},0);
