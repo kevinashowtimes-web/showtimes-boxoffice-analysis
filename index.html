@@ -596,8 +596,17 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   </div>
 </div>
 
-<!-- ④ 全台影城排行榜 -->
-<div class="sec-label">④ 全台影城排行榜</div>
+<!-- ④ 院線市佔競爭 -->
+<div class="sec-label">④ 院線市佔競爭</div>
+<div class="card" id="mktShareCard">
+  <div class="ms-layout-grid" style="display:grid;grid-template-columns:200px 1fr;gap:16px;align-items:start;">
+    <div style="position:relative;height:180px;"><canvas id="mainDonut"></canvas></div>
+    <div id="mktShareList"></div>
+  </div>
+</div>
+
+<!-- ⑤ 全台影城排行榜 -->
+<div class="sec-label">⑤ 全台影城排行榜</div>
 <div class="ranking-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
   <div class="card" style="padding:0;overflow:hidden;">
     <div class="rank-hdr rank-hdr-mkt">🎬 全台　當日排行 TOP20</div>
@@ -632,11 +641,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 </div>
 
 <!-- ⑤ 分區域分析 -->
-<div class="sec-label">⑤ 分區域分析</div>
+<div class="sec-label">⑥ 分區域分析</div>
 <div id="regionalSection"></div>
 
 <!-- ⑥ 歷史紀錄 -->
-<div class="sec-label">⑥ 歷史紀錄</div>
+<div class="sec-label">⑦ 歷史紀錄</div>
 <div class="card" id="historyCard">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
     <h3 style="margin:0;font-size:16px;">🗂 歷史紀錄查詢</h3>
@@ -1244,12 +1253,48 @@ function toast(msg) {
 // ════════════════════════════════════
 //  RENDER
 // ════════════════════════════════════
+
+function renderMktShare() {
+  const comp = DATA.competitors;
+  if (!comp || !Object.values(comp).some(function(v){return v>0;})) return;
+  const colors = {'秀泰':'#572d88','威秀':'#1A237E','國賓':'#00695C','美麗華':'#4A148C','in89':'#E65100','新光':'#BF360C','美麗新台茂':'#AD1457','美麗新':'#AD1457','喜樂':'#2E7D32','其他':'#607D8B'};
+  const labels = Object.keys(comp).filter(function(k){return comp[k]>0;});
+  const vals   = labels.map(function(k){return comp[k];});
+  const total  = vals.reduce(function(a,b){return a+b;},0);
+  const listEl = document.getElementById('mktShareList');
+  if (listEl) {
+    listEl.innerHTML = labels.map(function(k,i){
+      const p = (vals[i]/total*100).toFixed(1);
+      const isST = k==='秀泰';
+      return '<div style="display:grid;grid-template-columns:14px 1fr 44px 56px;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid var(--border-lt);font-size:12px;">'
+        +'<span style="width:9px;height:9px;border-radius:50%;background:'+(colors[k]||'#607D8B')+';display:inline-block;"></span>'
+        +'<span style="'+(isST?'font-weight:700;color:var(--st)':'')+'">'+k+'</span>'
+        +'<span style="text-align:right;font-weight:700;'+(isST?'color:var(--st)':'')+'">'+(isST?'<b>':'')+p+'%'+(isST?'</b>':'')+'</span>'
+        +'<span style="text-align:right;color:var(--sub);font-size:11px;">'+vals[i].toFixed(1)+'萬</span>'
+        +'</div>';
+    }).join('');
+  }
+  setTimeout(function(){
+    const existing = typeof Chart!=='undefined' && Chart.getChart && Chart.getChart('mainDonut');
+    if (existing) existing.destroy();
+    const ctx = document.getElementById('mainDonut');
+    if (ctx && typeof Chart!=='undefined') {
+      new Chart(ctx,{
+        type:'doughnut',
+        data:{labels:labels,datasets:[{data:vals,backgroundColor:labels.map(function(k){return colors[k]||'#607D8B';}),borderWidth:2,borderColor:'#fff'}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.label+': '+c.parsed.toFixed(1)+'萬';}}}}}
+      });
+    }
+  }, 80);
+}
+
 function renderAll() {
   saveSnapshot();
   renderHeader();
   renderKPIs();
   renderST();
   renderFilms();
+  renderMktShare();
   renderFullRankings();
   renderRegional();
   renderHistory();
