@@ -37,7 +37,7 @@
 
 /* ── LOGIN ── */
 /* ── BASE ── */
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:var(--fs-md);line-height:1.6;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:var(--fs-md);line-height:1.6;overflow-x:hidden;}
 
 /* ── HEADER ── */
 .hdr{background:linear-gradient(135deg,#2d1450 0%,#4a2275 50%,#6b3ea5 100%);color:#fff;padding:0 var(--sp-6);height:56px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 4px 20px rgba(50,15,90,.30);}
@@ -307,7 +307,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   .hdr { flex-direction:column;align-items:stretch;gap:var(--sp-2);padding:var(--sp-2) var(--sp-4);height:auto; }
   .hdr-left { display:flex;align-items:center;gap:var(--sp-2);min-width:0;overflow:hidden; }
   .hdr-logo { font-size:15px;white-space:nowrap;flex-shrink:0; }
-  .hdr-btns { display:flex;gap:6px; }
+  .hdr-btns { display:flex;gap:6px;flex-wrap:wrap; }
   .btn-hdr { font-size:var(--fs-xs);padding:5px 8px;flex:1;text-align:center;white-space:nowrap;min-width:0;border-radius:var(--r-sm); }
   .kpi-strip { grid-template-columns:repeat(2,1fr) !important;gap:var(--sp-2); }
   .kpi { padding:var(--sp-3) var(--sp-3); }
@@ -569,7 +569,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 
 <!-- ② 秀泰各家排行 -->
 <div class="sec-label">② 秀泰各家影城排行榜</div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+<div class="grid2" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
   <!-- 當日排行 -->
   <div class="card" style="padding:0;overflow:hidden;">
     <div class="rank-hdr rank-hdr-st2"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjAwIj4KICA8cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgcng9IjEyIiBmaWxsPSIjNkIyQThBIi8+CiAgPCEtLSBBYnN0cmFjdCBnZW9tZXRyaWMgbWFyayAo5q2l6ZqO5pa55aGKKSAtLT4KICA8cmVjdCB4PSI2OCIgeT0iNDIiIHdpZHRoPSI3MiIgaGVpZ2h0PSI0NCIgZmlsbD0id2hpdGUiLz4KICA8cmVjdCB4PSI0NCIgeT0iOTAiIHdpZHRoPSI1MiIgaGVpZ2h0PSI0MiIgZmlsbD0id2hpdGUiLz4KICA8cmVjdCB4PSIxMTIiIHk9IjEwNiIgd2lkdGg9IjMwIiBoZWlnaHQ9IjI4IiBmaWxsPSJ3aGl0ZSIvPgogIDwhLS0gU0hPV1RJTUUgdGV4dCAtLT4KICA8dGV4dCB4PSIxMDAiIHk9IjE1OCIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCxIZWx2ZXRpY2Esc2Fucy1zZXJpZiIKICAgICAgICBmb250LXNpemU9IjE4IiBmb250LXdlaWdodD0iOTAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBsZXR0ZXItc3BhY2luZz0iMiI+U0hPV1RJTUU8L3RleHQ+CiAgPCEtLSBDSU5FTUFTIHRleHQgLS0+CiAgPHRleHQgeD0iMTAwIiB5PSIxNzgiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC44NSkiIGZvbnQtZmFtaWx5PSJBcmlhbCxIZWx2ZXRpY2Esc2Fucy1zZXJpZiIKICAgICAgICBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNDAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBsZXR0ZXItc3BhY2luZz0iNSI+Q0lORU1BUzwvdGV4dD4KPC9zdmc+" style="height:22px;width:auto;border-radius:3px;vertical-align:middle;" alt="ST"/>&ensp;秀泰影城&emsp;當日排行</div>
@@ -641,7 +641,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 
 <!-- ④ 全台影城排行榜 -->
 <div class="sec-label">④ 全台影城排行榜</div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+<div class="grid2" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
   <div class="card" style="padding:0;overflow:hidden;">
     <div class="rank-hdr rank-hdr-mkt2">🎬 全台影城&emsp;當日排行 TOP20</div>
     <div style="overflow-x:auto;">
