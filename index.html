@@ -338,6 +338,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   .cinema-hdr,.cinema-row-inp { grid-template-columns:68px repeat(5,1fr) !important;gap:4px; }
   .accum-row { flex-wrap:wrap;gap:4px; }
   #mktShareSummary { gap:12px !important; }
+  .reg-main-grid { grid-template-columns:1fr !important; }
+  .reg-ov-grid { grid-template-columns:repeat(4,1fr) !important;gap:5px !important; }
 }
 /* ── Narrow mobile ≤480px ── */
 @media (max-width:480px) {
@@ -750,7 +752,7 @@ const DATA = {
   date: '2026-07-12', weekday: '日',
   lastUpdate: '2026-07-12 更新（秀泰：852.1萬/28,112人；全台市場：2403.1萬/84885人/ATP283.1元；⚠ 威秀數據待確認）',
 
-  mkt: { bo: 2403.1, visitors: 84885, atp: 283.1, lastWeekBO: 1656.3, cinemaCount: 100 },
+  mkt: { bo: 2403.1, visitors: 84885, atp: 283.1, lastWeekBO: 1656.3, cinemaCount: 99 },
 
   st: {
     bo: 852.1, fb: 196.0, visitors: 28112,
@@ -2420,7 +2422,7 @@ function renderRegional() {
     // Chain summary cards
     const summaryCards = chainOrder.filter(k=>chains[k]).map(k=>{
       const d=chains[k]; const pct=(d.bo/total*100).toFixed(1);
-      return `<div style="display:flex;flex-direction:column;align-items:center;padding:6px 8px;border-radius:8px;background:${CHAIN_CLR[k]}18;border:1.5px solid ${CHAIN_CLR[k]}44;flex:1;min-width:0;">
+      return `<div style="display:flex;flex-direction:column;align-items:center;padding:6px 8px;border-radius:8px;background:${CHAIN_CLR[k]}18;border:1.5px solid ${CHAIN_CLR[k]}44;flex:1;min-width:72px;">
         <div style="font-size:10px;font-weight:800;color:${CHAIN_CLR[k]};margin-bottom:1px;">${getLbl(k)}</div>
         <div style="font-size:14px;font-weight:800;color:${CHAIN_CLR[k]};">${fmtW(d.bo)}<span style="font-size:9px;">萬</span></div>
         <div style="font-size:10px;color:var(--sub);">${pct}%｜${d.cnt}家</div>
@@ -2449,7 +2451,7 @@ function renderRegional() {
 
     return `
     <!-- donut + insight -->
-    <div style="display:grid;grid-template-columns:180px 1fr;gap:14px;align-items:start;margin-bottom:14px;">
+    <div class="reg-main-grid" style="display:grid;grid-template-columns:180px 1fr;gap:14px;align-items:start;margin-bottom:14px;">
       <div>
         <div style="position:relative;height:170px;">
           <canvas id="regDonut" data-labels='${JSON.stringify(chartLabels)}' data-values='${JSON.stringify(chartData)}' data-colors='${JSON.stringify(chartColors)}'></canvas>
@@ -2466,7 +2468,7 @@ function renderRegional() {
     </div>
     <!-- cinema rows -->
     <div style="font-size:11px;font-weight:700;color:var(--sub);margin-bottom:6px;">本月累計票房排行 | 共 ${list.length} 家</div>
-    <div>${rows}</div>`;
+    <div style="overflow-x:auto;">${rows}</div>`;
   };
 
   // ── Tabs bar ──────────────────────────────────────────────────────────────
@@ -2482,7 +2484,7 @@ function renderRegional() {
       <!-- Overview grid -->
       <div style="margin-bottom:14px;">
         <div style="font-size:11px;font-weight:700;color:var(--sub);margin-bottom:8px;">地區競爭概覽 — 點擊地區查看詳情</div>
-        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;">${overviewHtml}</div>
+        <div class="reg-ov-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;">${overviewHtml}</div>
       </div>
       <!-- Tabs -->
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;border-top:1px solid var(--border);padding-top:12px;">${renderTabs(reg)}</div>
@@ -2891,7 +2893,7 @@ function viewHistoryDay(date) {
     const vals   = labels.map(function(k){return comp[k];});
     const total  = vals.reduce(function(a,b){return a+b;},0);
     compBodyHtml =
-      '<div style="display:grid;grid-template-columns:180px 1fr;gap:12px;align-items:start;">'
+      '<div class="reg-main-grid" style="display:grid;grid-template-columns:180px 1fr;gap:12px;align-items:start;">'
       +'<div style="position:relative;height:160px;"><canvas id="hdonut_'+date+'"></canvas></div>'
       +'<div>'+labels.map(function(k,i){
         const p=(vals[i]/total*100).toFixed(1);
