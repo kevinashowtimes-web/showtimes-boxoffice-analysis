@@ -748,9 +748,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 // ════════════════════════════════════
 const DATA = {
   date: '2026-07-12', weekday: '日',
-  lastUpdate: '2026-07-12 更新（秀泰內部系統：852.1萬/28,112人/FB196.0萬；⚠ 全台市場/威秀數據待補入）',
+  lastUpdate: '2026-07-12 更新（秀泰：852.1萬/28,112人；全台市場：2403.1萬/84885人/ATP283.1元；⚠ 威秀數據待確認）',
 
-  mkt: { bo: 0, visitors: 0, atp: 0, lastWeekBO: 1656.3, cinemaCount: 100 }, // ⚠ 7/12 全台數據待補入
+  mkt: { bo: 2403.1, visitors: 84885, atp: 283.1, lastWeekBO: 1656.3, cinemaCount: 100 },
 
   st: {
     bo: 852.1, fb: 196.0, visitors: 28112,
@@ -923,10 +923,10 @@ const DATA = {
   // 每日歷史快照（key = 'YYYY-MM-DD'，匯出 HTML 後永久保存）
   history: {
   '2026-07-09': {
-    date:'2026-07-09', mktBO:0, mktVisitors:0, mktATP:0, stBO:299.6, stFB:61.1, stVisitors:9610,
-    ystBO:341.0, mtdBO:4102.9, ytdBO:89313.5, wisonBO:755.4, mktShare:0,
+    date:'2026-07-09', mktBO:1488.9, mktVisitors:52315, mktATP:284.6, stBO:299.6, stFB:61.1, stVisitors:9610,
+    ystBO:341.0, mtdBO:4102.9, ytdBO:89313.5, wisonBO:755.4, mktShare:20.1,
     wisonVisitors:25627, wisonATP:295,
-    mktNote:'⚠ 全台市場數據待補入；秀泰+威秀數據來源：內部系統+taipeitheater.org.tw',
+    mktNote:'全台市場來源：taipeitheater.org.tw dayboquery_all；⚠ 威秀數據來源：taipeitheater.org.tw（待確認）',
     cinemas:[
       {"name":"秀泰巨蛋","bo":59.7,"fb":6.9,"visitors":1115,"shows":74,"avgPrice":535.5},
       {"name":"秀泰欣欣","bo":20.0,"fb":3.4,"visitors":726,"shows":91,"avgPrice":275.4},
@@ -946,10 +946,10 @@ const DATA = {
     ],
   },
   '2026-07-10': {
-    date:'2026-07-10', mktBO:0, mktVisitors:0, mktATP:0, stBO:312.9, stFB:82.4, stVisitors:10349,
-    ystBO:299.6, mtdBO:4415.8, ytdBO:89626.4, wisonBO:351.7, mktShare:0,
+    date:'2026-07-10', mktBO:1166.4, mktVisitors:42151, mktATP:276.7, stBO:312.9, stFB:82.4, stVisitors:10349,
+    ystBO:299.6, mtdBO:4415.8, ytdBO:89626.4, wisonBO:351.7, mktShare:26.8,
     wisonVisitors:11916, wisonATP:295,
-    mktNote:'⚠ 全台市場數據待補入；秀泰+威秀數據來源：內部系統+taipeitheater.org.tw；⚠ 秀泰花蓮當日票房=0元（系統異常待確認）',
+    mktNote:'全台市場來源：taipeitheater.org.tw dayboquery_all；⚠ 秀泰花蓮當日票房=0元（系統異常待確認）；⚠ 威秀數據待確認',
     cinemas:[
       {"name":"秀泰巨蛋","bo":43.6,"fb":12.7,"visitors":933,"shows":76,"avgPrice":467.8},
       {"name":"秀泰欣欣","bo":31.4,"fb":7.2,"visitors":1047,"shows":91,"avgPrice":299.6},
@@ -969,10 +969,10 @@ const DATA = {
     ],
   },
   '2026-07-11': {
-    date:'2026-07-11', mktBO:0, mktVisitors:0, mktATP:0, stBO:23.3, stFB:20.9, stVisitors:882,
-    ystBO:312.9, mtdBO:4439.1, ytdBO:89649.7, wisonBO:312.6, mktShare:0,
+    date:'2026-07-11', mktBO:574.8, mktVisitors:21150, mktATP:271.8, stBO:23.3, stFB:20.9, stVisitors:882,
+    ystBO:312.9, mtdBO:4439.1, ytdBO:89649.7, wisonBO:312.6, mktShare:4.1,
     wisonVisitors:10103, wisonATP:309,
-    mktNote:'⚠ 全台市場數據待補入；⚠ 秀泰內部系統數據大部分為0（系統異常/資料尚未入帳），僅部分影城有數據；威秀數據來源：taipeitheater.org.tw（⚠ 可能未完整）',
+    mktNote:'全台市場來源：taipeitheater.org.tw（⚠ 7/11為週六但場次數據偏低1379場，可能仍有缺漏）；⚠ 秀泰內部系統數據大部分為0（系統異常/資料尚未入帳）；⚠ 威秀數據待確認',
     cinemas:[
       {"name":"秀泰巨蛋","bo":2.9,"fb":0.6,"visitors":95,"shows":77,"avgPrice":310.0},
       {"name":"秀泰欣欣","bo":0,"fb":0.2,"visitors":0,"shows":91,"avgPrice":0},
@@ -992,10 +992,10 @@ const DATA = {
     ],
   },
   '2026-07-12': {
-    date:'2026-07-12', mktBO:0, mktVisitors:0, mktATP:0, stBO:852.1, stFB:196.0, stVisitors:28112,
-    ystBO:23.3, mtdBO:5291.2, ytdBO:90501.8, wisonBO:241.2, mktShare:0,
+    date:'2026-07-12', mktBO:2403.1, mktVisitors:84885, mktATP:283.1, stBO:852.1, stFB:196.0, stVisitors:28112,
+    ystBO:23.3, mtdBO:5291.2, ytdBO:90501.8, wisonBO:241.2, mktShare:35.5,
     wisonVisitors:7601, wisonATP:317,
-    mktNote:'⚠ 全台市場數據待補入；秀泰數據來源：內部系統（完整）；⚠ 威秀ADM/BO數據來自taipeitheater.org.tw（可能未完整入帳，週日數據偏低待確認）',
+    mktNote:'全台市場來源：taipeitheater.org.tw dayboquery_all（7/12全台2403.1萬/84885人）；秀泰數據來源：內部系統（完整）；⚠ 威秀週日數據偏低待確認',
     cinemas:[
       {"name":"秀泰巨蛋","bo":114.8,"fb":18.7,"visitors":2265,"shows":74,"avgPrice":506.9},
       {"name":"秀泰欣欣","bo":49.9,"fb":9.4,"visitors":1711,"shows":91,"avgPrice":291.7},
