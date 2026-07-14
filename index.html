@@ -307,8 +307,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   .hdr { flex-direction:column;align-items:stretch;gap:var(--sp-2);padding:var(--sp-2) var(--sp-4);height:auto; }
   .hdr-left { display:flex;align-items:center;gap:var(--sp-2);min-width:0;overflow:hidden; }
   .hdr-logo { font-size:15px;white-space:nowrap;flex-shrink:0; }
-  .hdr-btns { display:flex;gap:6px;flex-wrap:wrap; }
-  .btn-hdr { font-size:var(--fs-xs);padding:5px 8px;flex:1;text-align:center;white-space:nowrap;min-width:0;border-radius:var(--r-sm); }
+  .hdr-btns { display:flex;gap:5px;flex-wrap:wrap; }
+  .btn-hdr { font-size:var(--fs-xs);padding:5px 7px;flex:1;text-align:center;white-space:nowrap;min-width:60px;border-radius:var(--r-sm); }
   .kpi-strip { grid-template-columns:repeat(2,1fr) !important;gap:var(--sp-2); }
   .kpi { padding:var(--sp-3) var(--sp-3); }
   .kpi-val { font-size:20px; }
@@ -327,7 +327,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   .brand-grid { grid-template-columns:1fr !important;gap:var(--sp-3); }
   .brand-card-hdr { padding:var(--sp-2) var(--sp-4); }
   .brand-metric { padding:var(--sp-2) var(--sp-3); }
-  .bm-val { font-size:var(--fs-lg); }
+  .bm-val { font-size:18px; }
+  .bm-sub,.bm-mtd { font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%; }
   /* 市佔率 */
   .ms-layout-grid { grid-template-columns:1fr !important;gap:var(--sp-3) !important; }
   .ms-layout-grid > *:first-child { max-width:240px;margin:0 auto; }
@@ -340,11 +341,15 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   #mktShareSummary { gap:12px !important; }
   .reg-main-grid { grid-template-columns:1fr !important; }
   .reg-ov-grid { grid-template-columns:repeat(4,1fr) !important;gap:5px !important; }
+  /* film strip */
+  .film-summary-strip { grid-template-columns:1fr 1fr !important; }
+  /* history date row */
+  #histDateRow { flex-direction:column;align-items:stretch !important; }
 }
 /* ── Narrow mobile ≤480px ── */
 @media (max-width:480px) {
   .brand-grid { grid-template-columns:1fr !important; }
-  .bm-val { font-size:var(--fs-md) !important; }
+  .bm-val { font-size:16px !important; }
   .brand-card-hdr .brand-name { font-size:var(--fs-sm); }
   .ms-row  { grid-template-columns:18px 1fr 54px 42px !important;gap:4px; }
   .ms-hdr  { grid-template-columns:18px 1fr 54px 42px !important;gap:4px; }
@@ -352,6 +357,21 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   .kpi-val { font-size:var(--fs-lg); }
   .cinema-hdr,.cinema-row-inp { grid-template-columns:58px 1fr 1fr 1fr !important;gap:3px; }
   .cinema-hdr > *:nth-child(n+5),.cinema-row-inp > *:nth-child(n+5) { display:none; }
+  .brand-metrics { grid-template-columns:1fr 1fr !important; }
+  .brand-metric { padding:10px 12px; }
+}
+/* ── iPhone SE / very narrow ≤390px ── */
+@media (max-width:390px) {
+  .wrap { padding:8px 10px; }
+  .bm-val { font-size:17px !important; }
+  .bm-lbl { font-size:9px; }
+  .btn-hdr { font-size:9px;padding:4px 5px;min-width:50px; }
+  .hdr-date { font-size:9px;max-width:55vw; }
+  .kpi-val { font-size:17px !important; }
+  .accum-val { font-size:13px !important; }
+  .ms-row { grid-template-columns:16px 1fr 48px 38px !important;font-size:10px; }
+  .ms-hdr { grid-template-columns:16px 1fr 48px 38px !important;font-size:9px; }
+  .tbl th,.tbl td { padding:5px 6px;font-size:10px; }
 }
 /* ── Landscape phone ── */
 @media (max-width:900px) and (orientation:landscape) {
@@ -462,7 +482,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <div class="wrap">
 
 <!-- ① KPIs -->
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+<div id="sec1Row" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
   <div class="sec-label" style="margin-bottom:0;">① 今日關鍵指標</div>
   <div id="kpiDateRow" style="display:flex;align-items:center;gap:8px;">
     <span id="kpiDateTxt" style="font-size:13px;font-weight:700;color:var(--text);">—</span>
@@ -750,9 +770,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 // ════════════════════════════════════
 const DATA = {
   date: '2026-07-13', weekday: '一',
-  lastUpdate: '2026-07-13 更新（秀泰：239.4萬/7,735人/ATP309.4；⚠ 全台市場數據尚不完整（47家）；⚠ 威秀數據待確認）',
+  lastUpdate: '2026-07-13 更新（秀泰：239.4萬/7,735人/ATP309.4；全台59家571.6萬；威秀4家101.6萬含信義第1；市占41.9%）',
 
-  mkt: { bo: 370.6, visitors: 13849, atp: 267.6, lastWeekBO: 1389.8, cinemaCount: 47 }, // ⚠ 7/13全台僅47家上報，數據不完整
+  mkt: { bo: 571.6, visitors: 19869, atp: 287.7, lastWeekBO: 1389.8, cinemaCount: 59 }, // 7/13全台59家上報（含全部15家秀泰）；威秀4家已報（信義/西門/桃知道/花蓮）
 
   st: {
     bo: 239.4, fb: 53.0, visitors: 7735,
@@ -761,7 +781,7 @@ const DATA = {
     ytdBO: 90741.2, ytdLastYearBO: 60278.2,
   },
 
-  wison: { bo: 0, visitors: 0, atp: 0, mtdBO: 11093.8, mtdVisitors: 368359, mtdAtp: 301.2 }, // ⚠ 威秀7/13數據待確認
+  wison: { bo: 101.6, visitors: 3133, atp: 324.2, mtdBO: 11163.4, mtdVisitors: 370364, mtdAtp: 301.4 }, // 威秀7/13共4家（信義69.5萬/西門25.0萬/桃知道4.5萬/花蓮2.5萬）；59/99家上報
 
   // 院線競爭對手當日票房（來源：台北票房觀測站 / 手動填入）
 
@@ -994,29 +1014,30 @@ const DATA = {
     ],
   },
   '2026-07-13': {
-    date:'2026-07-13', mktBO:370.6, mktVisitors:13849, mktATP:267.6, stBO:239.4, stFB:53.0, stVisitors:7735,
-    ystBO:852.1, mtdBO:5530.6, ytdBO:90741.2, wisonBO:0, mktShare:0,
-    wisonVisitors:0, wisonATP:0,
-    mktNote:'⚠ 7/13全台市場數據尚不完整（tbopercentage2.php僅47家上報，全台370.6萬/13849人，最終數據待更新）；秀泰15家來源：內部系統（完整）；⚠ 威秀數據待確認',
+    date:'2026-07-13', mktBO:571.6, mktVisitors:19869, mktATP:287.7, stBO:239.4, stFB:53.0, stVisitors:7735,
+    ystBO:852.1, mtdBO:5530.6, ytdBO:90741.2, wisonBO:101.6, mktShare:41.9,
+    wisonVisitors:3133, wisonATP:324.2,
+    mktNote:'全台市場來源：taipeitheater.org.tw tbopercentage2（7/13共59家上報；含全部15家秀泰）；全台571.6萬/19,869人；威秀4家已報（信義69.5萬/西門25.0萬/桃知道4.5萬/花蓮2.5萬=101.6萬）；高雄威秀等尚未上報',
     cinemas:[
-      {"name":"秀泰巨蛋","bo":48.0,"fb":7.39,"visitors":936,"shows":74,"avgPrice":512.4},
+      {"name":"秀泰巨蛋","bo":48.0,"fb":7.39,"visitors":934,"shows":77,"avgPrice":513.5},
       {"name":"秀泰欣欣","bo":15.6,"fb":3.03,"visitors":534,"shows":91,"avgPrice":292.6},
-      {"name":"秀泰土城","bo":7.6,"fb":1.80,"visitors":287,"shows":61,"avgPrice":264.8},
+      {"name":"秀泰土城","bo":7.6,"fb":1.80,"visitors":285,"shows":61,"avgPrice":266.7},
       {"name":"秀泰樹林","bo":13.2,"fb":3.77,"visitors":470,"shows":70,"avgPrice":279.9},
       {"name":"秀泰基隆","bo":7.0,"fb":0.98,"visitors":262,"shows":47,"avgPrice":265.5},
       {"name":"秀泰文心","bo":36.2,"fb":7.56,"visitors":1193,"shows":93,"avgPrice":303.4},
-      {"name":"秀泰站前","bo":20.3,"fb":4.95,"visitors":723,"shows":103,"avgPrice":280.9},
-      {"name":"秀泰麗寶","bo":6.3,"fb":1.79,"visitors":221,"shows":49,"avgPrice":284.2},
+      {"name":"秀泰站前","bo":20.3,"fb":4.95,"visitors":715,"shows":103,"avgPrice":284.1},
+      {"name":"秀泰麗寶","bo":6.3,"fb":1.79,"visitors":220,"shows":49,"avgPrice":285.5},
       {"name":"秀泰北港","bo":2.6,"fb":0.55,"visitors":101,"shows":17,"avgPrice":259.9},
-      {"name":"秀泰嘉義","bo":12.1,"fb":3.25,"visitors":458,"shows":66,"avgPrice":264.7},
+      {"name":"秀泰嘉義","bo":12.1,"fb":3.25,"visitors":455,"shows":64,"avgPrice":266.4},
       {"name":"秀泰仁德","bo":1.1,"fb":0.50,"visitors":42,"shows":26,"avgPrice":264.0},
-      {"name":"秀泰夢時代","bo":37.4,"fb":8.20,"visitors":1285,"shows":85,"avgPrice":291.1},
+      {"name":"秀泰夢時代","bo":37.4,"fb":8.20,"visitors":1283,"shows":85,"avgPrice":291.5},
       {"name":"秀泰岡山","bo":20.6,"fb":5.75,"visitors":779,"shows":78,"avgPrice":264.6},
-      {"name":"秀泰台東","bo":5.0,"fb":2.09,"visitors":191,"shows":39,"avgPrice":260.5},
+      {"name":"秀泰台東","bo":5.0,"fb":2.09,"visitors":188,"shows":40,"avgPrice":264.7},
       {"name":"秀泰花蓮","bo":6.4,"fb":1.35,"visitors":253,"shows":49,"avgPrice":254.0},
     ],
   },
-  '2026-07-12': {, mktVisitors:135804, mktATP:284.7, stBO:852.1, stFB:196.0, stVisitors:28112,
+  '2026-07-12': {
+    date:'2026-07-12', mktBO:3867.0, mktVisitors:135804, mktATP:284.7, stBO:852.1, stFB:196.0, stVisitors:28112,
     ystBO:23.3, mtdBO:5291.2, ytdBO:90501.8, wisonBO:241.2, mktShare:22.0,
     wisonVisitors:7601, wisonATP:317,
     mktNote:'全台市場來源：taipeitheater.org.tw tbopercentage2（戲院市佔率，100家完整）；7/12全台3867.0萬/135804人/ATP284.7；秀泰數據來源：內部系統（完整）；⚠ 威秀週日數據偏低待確認',
