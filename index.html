@@ -1772,7 +1772,7 @@ function renderKPIs() {
   const chainLbl = document.querySelector('#b-mkt-chain-count')?.closest('.brand-metric')?.querySelector('.bm-lbl');
   if (chainLbl) chainLbl.textContent = cinemaCount > 0 ? '統計影城' : '統計院線';
 
-  // 待確認提示（俞'��相容）
+  // 待確認提示（保留相容）
 
 
   // ── 月累計（動態從 history[] 加總；ADM/ATP 由 monthlyArchive 補齊）────────
@@ -1805,7 +1805,7 @@ function renderKPIs() {
   setEl('b-ws-atp-mtd', wsMtdAtp > 0 ? `月均 ${fmtATP(wsMtdAtp)} 元` : '月數據待整合');
   setEl('b-ws-ms-mtd',  wsMtdMS  > 0 ? `月均 ${wsMtdMS.toFixed(1)}%` : '—');
 
-  // ── 院線競爭格局圖（俞'��原有 donut chart + vsBar 邏輯） ──────
+  // ── 院線競爭格局圖（保留原有 donut chart + vsBar 邏輯） ──────
   const wiShare = wsMS;
   const others  = 100 - stMS - wiShare;
   if (typeof Chart !== 'undefined') {
