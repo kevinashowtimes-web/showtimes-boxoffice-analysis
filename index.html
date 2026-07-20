@@ -859,22 +859,23 @@ const DATA = {
   ],
 
   movies: [
-    // 資料來源：taipeitheater.org.tw + 內部系統 2026-07-08；cumBO=全台累積（元）；stBO/wisonBO=各院線當日（元）
+    // 資料來源：taipeitheater.org.tw + 內部系統 2026-07-13；cumBO=全台累積（元）；stBO/wisonBO=各院線當日（元）
     // sessions=全台當日估算；totalBO=全台當日（⚠ST+WS佔比估算）
-    {title:'名偵探柯南 高速公路的墮天使', dist:'普威爾', theaters:88, sessions:537, days:15, cumBO:132331151, totalBO:4148000, stBO:905466, mktMtdBO:132331151, stMtdBO:26717691, wisonBO:1931765, wisonMtdBO:71513714, avgPrice:330},
-    {title:'海洋奇緣 (真人版)', dist:'迪士尼', theaters:89, sessions:668, days:1, cumBO:3019002, totalBO:3019002, stBO:744667, mktMtdBO:3019002, stMtdBO:744667, wisonBO:1389033, wisonMtdBO:1389033, avgPrice:316},
-    {title:'玩具總動員5', dist:'迪士尼', theaters:90, sessions:389, days:23, cumBO:218732419, totalBO:2650000, stBO:541059, mktMtdBO:218732419, stMtdBO:44444661, wisonBO:1272873, wisonMtdBO:105632490, avgPrice:285},
-    {title:'小小兵&大怪獸', dist:'UIP', theaters:91, sessions:430, days:10, cumBO:51643659, totalBO:2169000, stBO:451574, mktMtdBO:51643659, stMtdBO:10553048, wisonBO:1032305, wisonMtdBO:25194080, avgPrice:289},
-    {title:'電影哆啦A夢：新．大雄的海底鬼岩城', dist:'車庫娛樂', theaters:83, sessions:222, days:1, cumBO:1482997, totalBO:1482997, stBO:237732, mktMtdBO:1482997, stMtdBO:237732, wisonBO:616625, wisonMtdBO:616625, avgPrice:276},
-    {title:'屍變焚場', dist:'索尼', theaters:79, sessions:126, days:4, cumBO:982466, totalBO:861000, stBO:157581, mktMtdBO:982466, stMtdBO:157581, wisonBO:431505, wisonMtdBO:431505, avgPrice:271},
-    {title:'屍速禁區', dist:'車庫娛樂', theaters:84, sessions:78, days:48, cumBO:228386471, totalBO:293467, stBO:113742, mktMtdBO:228386471, stMtdBO:51356869, wisonBO:179725, wisonMtdBO:107754535, avgPrice:287},
-    {title:'攻殼機動隊 2026', dist:'車庫娛樂', theaters:61, sessions:60, days:3, cumBO:0, totalBO:223534, stBO:51984, mktMtdBO:0, stMtdBO:51984, wisonBO:171550, wisonMtdBO:171550, avgPrice:248},
-    {title:'魯冰花（數位修復版）', dist:'牽猴子', theaters:54, sessions:0, days:3, cumBO:628274, totalBO:160994, stBO:53524, mktMtdBO:628274, stMtdBO:53524, wisonBO:107470, wisonMtdBO:107470, avgPrice:265},
-    {title:'催眠麥克風', dist:'甲上', theaters:12, sessions:19, days:72, cumBO:0, totalBO:151420, stBO:0, mktMtdBO:0, stMtdBO:0, wisonBO:151420, wisonMtdBO:30101980, avgPrice:473},
-    {title:'後室', dist:'采昌', theaters:88, sessions:0, days:45, cumBO:80145319, totalBO:147462, stBO:28792, mktMtdBO:80145319, stMtdBO:13927173, wisonBO:118670, wisonMtdBO:43631826, avgPrice:290},
-    {title:'揭密日', dist:'UIP', theaters:90, sessions:0, days:30, cumBO:54670080, totalBO:113635, stBO:32120, mktMtdBO:54670080, stMtdBO:9091219, wisonBO:81515, wisonMtdBO:26116049, avgPrice:282},
-    {title:'超少女', dist:'華納', theaters:88, sessions:0, days:22, cumBO:0, totalBO:53380, stBO:21535, mktMtdBO:0, stMtdBO:0, wisonBO:31845, wisonMtdBO:8353922, avgPrice:273},
-    {title:'鬼囚', dist:'暗光鳥', theaters:52, sessions:0, days:11, cumBO:0, totalBO:56153, stBO:16228, mktMtdBO:0, stMtdBO:274267, wisonBO:39925, wisonMtdBO:474568, avgPrice:271},
+    // releaseDate = 首映日，days 由 JS 動態計算（不需手動更新）
+    {title:'名偵探柯南 高速公路的墮天使', dist:'普威爾', releaseDate:'2026-06-29', theaters:88, sessions:537, cumBO:132331151, totalBO:4148000, stBO:905466, mktMtdBO:132331151, stMtdBO:26717691, wisonBO:1931765, wisonMtdBO:71513714, avgPrice:330},
+    {title:'海洋奇緣 (真人版)', dist:'迪士尼', releaseDate:'2026-07-13', theaters:89, sessions:668, cumBO:3019002, totalBO:3019002, stBO:744667, mktMtdBO:3019002, stMtdBO:744667, wisonBO:1389033, wisonMtdBO:1389033, avgPrice:316},
+    {title:'玩具總動員5', dist:'迪士尼', releaseDate:'2026-06-21', theaters:90, sessions:389, cumBO:218732419, totalBO:2650000, stBO:541059, mktMtdBO:218732419, stMtdBO:44444661, wisonBO:1272873, wisonMtdBO:105632490, avgPrice:285},
+    {title:'小小兵&大怪獸', dist:'UIP', releaseDate:'2026-07-04', theaters:91, sessions:430, cumBO:51643659, totalBO:2169000, stBO:451574, mktMtdBO:51643659, stMtdBO:10553048, wisonBO:1032305, wisonMtdBO:25194080, avgPrice:289},
+    {title:'電影哆啦A夢：新．大雄的海底鬼岩城', dist:'車庫娛樂', releaseDate:'2026-07-13', theaters:83, sessions:222, cumBO:1482997, totalBO:1482997, stBO:237732, mktMtdBO:1482997, stMtdBO:237732, wisonBO:616625, wisonMtdBO:616625, avgPrice:276},
+    {title:'屍變焚場', dist:'索尼', releaseDate:'2026-07-10', theaters:79, sessions:126, cumBO:982466, totalBO:861000, stBO:157581, mktMtdBO:982466, stMtdBO:157581, wisonBO:431505, wisonMtdBO:431505, avgPrice:271},
+    {title:'屍速禁區', dist:'車庫娛樂', releaseDate:'2026-05-27', theaters:84, sessions:78, cumBO:228386471, totalBO:293467, stBO:113742, mktMtdBO:228386471, stMtdBO:51356869, wisonBO:179725, wisonMtdBO:107754535, avgPrice:287},
+    {title:'攻殼機動隊 2026', dist:'車庫娛樂', releaseDate:'2026-07-11', theaters:61, sessions:60, cumBO:0, totalBO:223534, stBO:51984, mktMtdBO:0, stMtdBO:51984, wisonBO:171550, wisonMtdBO:171550, avgPrice:248},
+    {title:'魯冰花（數位修復版）', dist:'牽猴子', releaseDate:'2026-07-11', theaters:54, sessions:0, cumBO:628274, totalBO:160994, stBO:53524, mktMtdBO:628274, stMtdBO:53524, wisonBO:107470, wisonMtdBO:107470, avgPrice:265},
+    {title:'催眠麥克風', dist:'甲上', releaseDate:'2026-05-03', theaters:12, sessions:19, cumBO:0, totalBO:151420, stBO:0, mktMtdBO:0, stMtdBO:0, wisonBO:151420, wisonMtdBO:30101980, avgPrice:473},
+    {title:'後室', dist:'采昌', releaseDate:'2026-05-30', theaters:88, sessions:0, cumBO:80145319, totalBO:147462, stBO:28792, mktMtdBO:80145319, stMtdBO:13927173, wisonBO:118670, wisonMtdBO:43631826, avgPrice:290},
+    {title:'揭密日', dist:'UIP', releaseDate:'2026-06-14', theaters:90, sessions:0, cumBO:54670080, totalBO:113635, stBO:32120, mktMtdBO:54670080, stMtdBO:9091219, wisonBO:81515, wisonMtdBO:26116049, avgPrice:282},
+    {title:'超少女', dist:'華納', releaseDate:'2026-06-22', theaters:88, sessions:0, cumBO:0, totalBO:53380, stBO:21535, mktMtdBO:0, stMtdBO:0, wisonBO:31845, wisonMtdBO:8353922, avgPrice:273},
+    {title:'鬼囚', dist:'暗光鳥', releaseDate:'2026-07-03', theaters:52, sessions:0, cumBO:0, totalBO:56153, stBO:16228, mktMtdBO:0, stMtdBO:274267, wisonBO:39925, wisonMtdBO:474568, avgPrice:271},
   ],
 
   // 威秀各家 MTD 2026-07-01～07-15（資料來源：taipeitheater.org.tw）
@@ -1771,7 +1772,7 @@ function renderKPIs() {
   const chainLbl = document.querySelector('#b-mkt-chain-count')?.closest('.brand-metric')?.querySelector('.bm-lbl');
   if (chainLbl) chainLbl.textContent = cinemaCount > 0 ? '統計影城' : '統計院線';
 
-  // 待確認提示（保留相容）
+  // 待確認提示（俞'��相容）
 
 
   // ── 月累計（動態從 history[] 加總；ADM/ATP 由 monthlyArchive 補齊）────────
@@ -1804,7 +1805,7 @@ function renderKPIs() {
   setEl('b-ws-atp-mtd', wsMtdAtp > 0 ? `月均 ${fmtATP(wsMtdAtp)} 元` : '月數據待整合');
   setEl('b-ws-ms-mtd',  wsMtdMS  > 0 ? `月均 ${wsMtdMS.toFixed(1)}%` : '—');
 
-  // ── 院線競爭格局圖（保留原有 donut chart + vsBar 邏輯） ──────
+  // ── 院線競爭格局圖（俞'��原有 donut chart + vsBar 邏輯） ──────
   const wiShare = wsMS;
   const others  = 100 - stMS - wiShare;
   if (typeof Chart !== 'undefined') {
@@ -1968,10 +1969,19 @@ function renderFilms() {
     return;
   }
 
+  // ── 上映天數動態計算（releaseDate → days）────────────────────────────
+  const _refDate = new Date(DATA.date);
+  const moviesWithDays = movies.map(m => {
+    const d = m.releaseDate
+      ? Math.floor((_refDate - new Date(m.releaseDate)) / 86400000) + 1
+      : (m.days || 0);
+    return Object.assign({}, m, { _days: Math.max(d, 1) });
+  });
+
   // ── 排序：新片優先，次按全台當日 ──────────────────────────────────────
-  const sorted = [...movies].sort((a,b) => {
-    const aNew = (a.days||99) <= 3 ? 1 : 0;
-    const bNew = (b.days||99) <= 3 ? 1 : 0;
+  const sorted = [...moviesWithDays].sort((a,b) => {
+    const aNew = (a._days||99) <= 3 ? 1 : 0;
+    const bNew = (b._days||99) <= 3 ? 1 : 0;
     if(bNew !== aNew) return bNew - aNew;
     return (b.totalBO||0) - (a.totalBO||0);
   });
@@ -1990,7 +2000,7 @@ function renderFilms() {
     const stMtdShare = mMtd>0 && sMtd>0 ? (sMtd/mMtd*100).toFixed(1) : null;
     const wShare    = tBO>0  && wBO>0   ? (wBO/tBO*100).toFixed(1)    : null;
     const wMtdShare  = mMtd>0 && wMtd>0  ? (wMtd/mMtd*100).toFixed(1) : null;
-    const isNew  = (m.days||99) <= 3;
+    const isNew  = (m._days||99) <= 3;
     const bg = i%2===1 ? 'background:var(--gray-lt);' : '';
     return `<tr style="${bg}">
       <td class="c" style="padding:7px 6px;"><span class="film-rank ${cls}">${rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':rank}</span></td>
@@ -1998,7 +2008,7 @@ function renderFilms() {
       <td style="padding:7px 8px;font-size:11px;color:var(--sub);white-space:nowrap;">${m.dist||'—'}</td>
       <td class="r" style="padding:7px 8px;color:var(--sub);white-space:nowrap;">${m.theaters>0?m.theaters+'廳':'—'}</td>
       <td class="r" style="padding:7px 8px;color:var(--sub);">${m.sessions>0?m.sessions.toLocaleString():'—'}</td>
-      <td class="c" style="padding:7px 8px;color:var(--sub);white-space:nowrap;">${m.days>0?m.days+'天':'—'}</td>
+      <td class="c" style="padding:7px 8px;color:var(--sub);white-space:nowrap;">${m._days>0?m._days+'天':'—'}</td>
       <td class="r td-mkt td-mkt-first" style="padding:7px 8px;font-weight:700;color:#3F51B5;">${tBO>0?fmtAuto(tBO):'—'}</td>
       <td class="r td-mkt" style="padding:7px 8px;font-weight:700;color:#3F51B5;">${cumBO>0?fmtAuto(cumBO):'—'}</td>
       <td class="r td-mkt" style="padding:7px 8px;color:var(--sub);">${m.avgPrice>0?fmtATP(m.avgPrice):'—'}</td>
