@@ -2377,43 +2377,66 @@ function renderTaiwanMap() {
       ' onmouseenter="showMapTip(event,this)" onmouseleave="hideMapTip()"'+
       ' onmousemove="moveMapTip(event)"/>';
 
-    // Labels — only if tile is big enough
-    if (w>34 && h>22) {
-      // rank (top-left)
-      var fs_rank = Math.max(7, Math.min(10, w*0.1, h*0.18));
-      out += '<text x="'+(x+4)+'" y="'+(y+fs_rank+1)+'" font-size="'+fs_rank.toFixed(1)+'" fill="rgba(255,255,255,.5)" font-weight="700" pointer-events="none">#'+r.rank+'</text>';
+    // ── 統一垂直堆疊文字佈局 ──────────────────────────────────
+    var _name = r.name||'';
+    var _boStr = parseFloat(r.bo).toFixed(1);
+    var _pfx = _name.match(/^(台北|高雄|台中|台南|新竹|新店|板橋|南港|林口|中和|桃園|秀泰)/);
+
+    // 決定各層顯示條件
+    var _showRank = w>22 && h>16;
+    var _showCity = _pfx && w>50 && h>62;
+    var _showName = w>38 && h>28;
+    var _showBO   = w>44 && h>50;
+    var _showPct  = w>48 && h>70;
+
+    // 字型大小（依格子比例，限制上下界）
+    var _fsCity = Math.min(9,  Math.max(7,  w*0.09, h*0.10));
+    var _fsName = Math.min(12, Math.max(8,  w*0.11, h*0.13));
+    var _fsBO   = Math.min(11, Math.max(8,  w*0.09, h*0.11));
+    var _fsPct  = Math.min(9,  Math.max(7,  w*0.08, h*0.09));
+
+    // 計算總文字塊高度
+    var _lineGap = 3;
+    var _blockH = (_showCity ? _fsCity+_lineGap : 0)
+                + (_showName ? _fsName+_lineGap : 0)
+                + (_showBO   ? _fsBO  +_lineGap : 0)
+                + (_showPct  ? _fsPct          : 0);
+
+    // 起始 Y（讓文字塊垂直置中，留 rank 的空間）
+    var _rankH = _showRank ? 12 : 0;
+    var _avail = h - _rankH - 6;
+    var _startY = y + _rankH + 5 + (_avail - _blockH) / 2;
+    var _cy = _startY;
+
+    // Rank（左上角，不佔堆疊空間）
+    if (_showRank) {
+      out += '<text x="'+(x+4)+'" y="'+(y+10)+'" font-size="8" fill="rgba(255,255,255,.4)" font-weight="700" pointer-events="none">#'+r.rank+'</text>';
     }
-    if (w>45 && h>35) {
-      // cinema name (center)
-      var name = r.name||'';
-      var fs_name = Math.max(8, Math.min(13, w*0.12, h*0.22));
-      // 依格寬動態截字，保留城市前綴避免同名混淆
-      var maxCh = Math.max(3, Math.floor((w-10)/fs_name));
-      // 嘗試拆成兩行（城市 + 品牌）
-      var pfxMatch = name.match(/^(台北|高雄|台中|台南|新竹|新店|板橋|南港|林口|中和|桃園|秀泰)/);
-      var twoLine = pfxMatch && h > 52 && w > 48;
-      if (twoLine) {
-        var line1 = pfxMatch[1];
-        var line2 = name.slice(pfxMatch[1].length);
-        if (line2.length > maxCh) line2 = line2.slice(0, maxCh);
-        var ly1 = y+h/2 - fs_name*0.6;
-        var ly2 = y+h/2 + fs_name*0.8;
-        out += '<text x="'+(x+w/2)+'" y="'+ly1+'" text-anchor="middle" font-size="'+(fs_name*0.82).toFixed(1)+'" fill="rgba(255,255,255,.65)" font-weight="600" font-family="\'PingFang TC\',\'Noto Sans TC\',sans-serif" pointer-events="none">'+line1+'</text>';
-        out += '<text x="'+(x+w/2)+'" y="'+ly2+'" text-anchor="middle" font-size="'+fs_name.toFixed(1)+'" fill="rgba(255,255,255,.92)" font-weight="800" font-family="\'PingFang TC\',\'Noto Sans TC\',sans-serif" pointer-events="none">'+line2+'</text>';
-      } else {
-        var displayName = name.length > maxCh ? name.slice(0, maxCh) : name;
-        var cy_name = h>55 ? y+h/2-5 : y+h/2+fs_name*0.4;
-        out += '<text x="'+(x+w/2)+'" y="'+cy_name+'" text-anchor="middle" font-size="'+fs_name.toFixed(1)+'" fill="rgba(255,255,255,.92)" font-weight="800" font-family="\'PingFang TC\',\'Noto Sans TC\',sans-serif" pointer-events="none">'+displayName+'</text>';
-      }
+    // City prefix
+    if (_showCity) {
+      _cy += _fsCity;
+      out += '<text x="'+(x+w/2).toFixed(1)+'" y="'+_cy.toFixed(1)+'" text-anchor="middle" font-size="'+_fsCity.toFixed(1)+'" fill="rgba(255,255,255,.55)" font-weight="600" font-family="\'PingFang TC\',\'Noto Sans TC\',sans-serif" pointer-events="none">'+_pfx[1]+'</text>';
+      _cy += _lineGap;
     }
-    if (w>50 && h>52) {
-      // BO value
-      var fs_bo = Math.max(9, Math.min(13, w*0.1, h*0.18));
-      out += '<text x="'+(x+w/2)+'" y="'+(y+h/2+fs_bo+3)+'" text-anchor="middle" font-size="'+fs_bo.toFixed(1)+'" fill="rgba(255,255,255,.75)" font-weight="700" pointer-events="none">'+boStr+'萬</text>';
+    // Name（去除已顯示的城市前綴，否則顯示全名截字）
+    if (_showName) {
+      var _rawName = _showCity ? _name.slice(_pfx[1].length) : _name;
+      var _maxCh = Math.max(3, Math.floor((w-8)/_fsName));
+      var _dispName = _rawName.length>_maxCh ? _rawName.slice(0,_maxCh) : _rawName;
+      _cy += _fsName;
+      out += '<text x="'+(x+w/2).toFixed(1)+'" y="'+_cy.toFixed(1)+'" text-anchor="middle" font-size="'+_fsName.toFixed(1)+'" fill="rgba(255,255,255,.92)" font-weight="800" font-family="\'PingFang TC\',\'Noto Sans TC\',sans-serif" pointer-events="none">'+_dispName+'</text>';
+      _cy += _lineGap;
     }
-    if (w>55 && h>70) {
-      // mktPct
-      out += '<text x="'+(x+w/2)+'" y="'+(y+h/2+fs_bo+17)+'" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.45)" pointer-events="none">市占 '+(r.mktPct||0).toFixed(1)+'%</text>';
+    // BO
+    if (_showBO) {
+      _cy += _fsBO;
+      out += '<text x="'+(x+w/2).toFixed(1)+'" y="'+_cy.toFixed(1)+'" text-anchor="middle" font-size="'+_fsBO.toFixed(1)+'" fill="rgba(255,255,255,.78)" font-weight="700" pointer-events="none">'+_boStr+'萬</text>';
+      _cy += _lineGap;
+    }
+    // mktPct
+    if (_showPct) {
+      _cy += _fsPct;
+      out += '<text x="'+(x+w/2).toFixed(1)+'" y="'+_cy.toFixed(1)+'" text-anchor="middle" font-size="'+_fsPct.toFixed(1)+'" fill="rgba(255,255,255,.45)" pointer-events="none">市占 '+(r.mktPct||0).toFixed(1)+'%</text>';
     }
   });
 
