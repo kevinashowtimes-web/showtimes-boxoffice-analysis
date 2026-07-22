@@ -672,13 +672,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
       <span id="hmSubLabel" style="font-size:10px;color:var(--sub);margin-left:8px;">面積＝票房規模　色溫＝市占高低</span>
     </div>
     <div style="display:flex;gap:4px;flex-wrap:wrap;">
-      <button id="mapBtn0" onclick="setMapMode('daily')"
-        style="font-size:11px;font-weight:700;padding:3px 11px;border-radius:20px;border:none;background:#dc2626;color:white;cursor:pointer;">當日</button>
-      <button id="mapBtn1" onclick="setMapMode('mtd')"
-        style="font-size:11px;font-weight:700;padding:3px 11px;border-radius:20px;border:1px solid #e2e8f0;background:transparent;color:#94a3b8;cursor:pointer;">月累計</button>
-      <button id="mapBtn2" onclick="setMapMode('hyf')"
+      <button id="mapBtn0" onclick="setMapMode('mtd')"
+        style="font-size:11px;font-weight:700;padding:3px 11px;border-radius:20px;border:none;background:#dc2626;color:white;cursor:pointer;">當月</button>
+      <button id="mapBtn1" onclick="setMapMode('hyf')"
         style="font-size:11px;font-weight:700;padding:3px 11px;border-radius:20px;border:1px solid #e2e8f0;background:transparent;color:#94a3b8;cursor:pointer;">上半年</button>
-      <button id="mapBtn3" onclick="setMapMode('ann')"
+      <button id="mapBtn2" onclick="setMapMode('ann')"
         style="font-size:11px;font-weight:700;padding:3px 11px;border-radius:20px;border:1px solid #e2e8f0;background:transparent;color:#94a3b8;cursor:pointer;">年度</button>
     </div>
   </div>
@@ -2312,9 +2310,9 @@ function renderFullRankings() {
 }
 
 // ════ 🔥 票房熱力圖 ════
-var _mapMode = 'daily';
+var _mapMode = 'mtd';
 
-var _MAP_MODES = ['daily','mtd','hyf','ann'];
+var _MAP_MODES = ['mtd','hyf','ann'];
 function setMapMode(mode) {
   _mapMode = mode;
   var on  = 'font-size:11px;font-weight:700;padding:3px 11px;border-radius:20px;border:none;background:#dc2626;color:white;cursor:pointer;';
@@ -2383,9 +2381,8 @@ function renderTaiwanMap() {
   if (!svg) return;
 
   var ranking;
-  var _periodLabel = {daily:'當日 '+DATA.date, mtd:'月累計 2026/7/1~'+DATA.date.slice(5), hyf:'上半年 2026/1/1~6/30', ann:'年度 2026/1/1~'+DATA.date.slice(5)};
-  if (_mapMode==='daily') ranking = DATA.ytdRanking&&DATA.ytdRanking.length ? DATA.ytdRanking : DATA.mtdRanking;
-  else if (_mapMode==='mtd') ranking = DATA.mtdRanking;
+  var _periodLabel = {mtd:'月累計 2026/7/1~'+DATA.date.slice(5), hyf:'上半年 2026/1/1~6/30', ann:'年度 2026/1/1~'+DATA.date.slice(5)};
+  if (_mapMode==='mtd') ranking = DATA.mtdRanking;
   else if (_mapMode==='hyf') ranking = DATA.hyfRanking&&DATA.hyfRanking.length ? DATA.hyfRanking : [];
   else ranking = DATA.annRanking&&DATA.annRanking.length ? DATA.annRanking : [];
   var _subEl = document.getElementById('hmSubLabel');
@@ -2437,7 +2434,7 @@ function renderTaiwanMap() {
     // interactive overlay (invisible, for hover events)
     var boStr = (r._origBO!==undefined ? r._origBO : r.bo).toFixed(1);
     var visStr = r.visitors ? (+r.visitors).toLocaleString() : '—';
-    var unit = _mapMode==='daily'?'當日':'月累計';
+    var unit = '月累計';
     out += '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" fill="transparent" rx="'+rx.toFixed(1)+'"'+
       ' data-name="'+(r.name||'').replace(/"/g,'&quot;')+'" data-bo="'+boStr+'"'+
       ' data-rank="'+r.rank+'" data-st="'+r.st+'" data-vis="'+visStr+'" data-pct="'+(r.mktPct||0).toFixed(1)+'"'+
@@ -2526,7 +2523,7 @@ function showMapTip(e, el) {
   if(!tip) return;
   var isST = el.dataset.st==='true';
   var nc = isST ? '#c4b5fd' : '#f1f5f9';
-  var unit = _mapMode==='daily'?'當日':'月累計';
+  var unit = '月累計';
   tip.innerHTML =
     '<div style="font-weight:800;color:'+nc+';margin-bottom:2px;">#'+el.dataset.rank+'&ensp;'+el.dataset.name+'</div>'+
     '<div style="color:#94a3b8;">'+unit+'票房&ensp;<span style="color:#fbbf24;font-weight:800;font-size:13px;">'+el.dataset.bo+'</span>&thinsp;萬元</div>'+
