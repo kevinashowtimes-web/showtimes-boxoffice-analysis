@@ -2387,12 +2387,24 @@ function renderTaiwanMap() {
       // cinema name (center)
       var name = r.name||'';
       var fs_name = Math.max(8, Math.min(13, w*0.12, h*0.22));
-      // strip leading '秀泰'/'台北'/'高雄' etc for short display
-      var shortName = name.replace(/^(秀泰|台北|高雄|台中|台南|新竹|新店|板橋|南港|林口|中和|桃園)/,'');
-      if(shortName.length===0) shortName=name;
-      var displayName = shortName.length>6 ? shortName.slice(0,6) : shortName;
-      var cy_name = h>55 ? y+h/2-5 : y+h/2+fs_name*0.4;
-      out += '<text x="'+(x+w/2)+'" y="'+cy_name+'" text-anchor="middle" font-size="'+fs_name.toFixed(1)+'" fill="rgba(255,255,255,.92)" font-weight="800" font-family="\'PingFang TC\',\'Noto Sans TC\',sans-serif" pointer-events="none">'+displayName+'</text>';
+      // 依格寬動態截字，保留城市前綴避免同名混淆
+      var maxCh = Math.max(3, Math.floor((w-10)/fs_name));
+      // 嘗試拆成兩行（城市 + 品牌）
+      var pfxMatch = name.match(/^(台北|高雄|台中|台南|新竹|新店|板橋|南港|林口|中和|桃園|秀泰)/);
+      var twoLine = pfxMatch && h > 52 && w > 48;
+      if (twoLine) {
+        var line1 = pfxMatch[1];
+        var line2 = name.slice(pfxMatch[1].length);
+        if (line2.length > maxCh) line2 = line2.slice(0, maxCh);
+        var ly1 = y+h/2 - fs_name*0.6;
+        var ly2 = y+h/2 + fs_name*0.8;
+        out += '<text x="'+(x+w/2)+'" y="'+ly1+'" text-anchor="middle" font-size="'+(fs_name*0.82).toFixed(1)+'" fill="rgba(255,255,255,.65)" font-weight="600" font-family="\'PingFang TC\',\'Noto Sans TC\',sans-serif" pointer-events="none">'+line1+'</text>';
+        out += '<text x="'+(x+w/2)+'" y="'+ly2+'" text-anchor="middle" font-size="'+fs_name.toFixed(1)+'" fill="rgba(255,255,255,.92)" font-weight="800" font-family="\'PingFang TC\',\'Noto Sans TC\',sans-serif" pointer-events="none">'+line2+'</text>';
+      } else {
+        var displayName = name.length > maxCh ? name.slice(0, maxCh) : name;
+        var cy_name = h>55 ? y+h/2-5 : y+h/2+fs_name*0.4;
+        out += '<text x="'+(x+w/2)+'" y="'+cy_name+'" text-anchor="middle" font-size="'+fs_name.toFixed(1)+'" fill="rgba(255,255,255,.92)" font-weight="800" font-family="\'PingFang TC\',\'Noto Sans TC\',sans-serif" pointer-events="none">'+displayName+'</text>';
+      }
     }
     if (w>50 && h>52) {
       // BO value
