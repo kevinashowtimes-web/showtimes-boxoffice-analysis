@@ -698,32 +698,25 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   </div>
 </div>
 
-<!-- 🗺 台灣票房地圖 -->
-<div id="taiwanMapCard" style="border-radius:12px;overflow:hidden;margin-top:14px;margin-bottom:14px;background:linear-gradient(160deg,#050d1c 0%,#091524 60%,#060f1e 100%);box-shadow:0 8px 32px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.05);">
-  <!-- Header -->
-  <div style="padding:12px 18px;border-bottom:1px solid rgba(45,212,191,.12);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <span style="font-size:15px;">🗺</span>
-      <div>
-        <div style="font-size:12px;font-weight:800;color:#7dd3fc;letter-spacing:.8px;text-transform:uppercase;">全台票房分佈地圖</div>
-        <div style="font-size:10px;color:#4a7a9a;letter-spacing:.3px;">TOP 20 影城 ｜ 泡泡大小 = 票房規模</div>
-      </div>
+<!-- 🔥 票房熱力圖 -->
+<div id="taiwanMapCard" style="border-radius:12px;overflow:hidden;margin-top:14px;margin-bottom:14px;background:#0a0f1a;box-shadow:0 8px 32px rgba(0,0,0,.5);">
+  <div style="padding:11px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid rgba(255,255,255,.05);">
+    <div>
+      <span style="font-size:12px;font-weight:800;color:#f1f5f9;letter-spacing:.5px;">🔥 票房熱力圖</span>
+      <span style="font-size:10px;color:#475569;margin-left:8px;">面積＝票房規模　色溫＝市占高低</span>
     </div>
-    <div style="display:flex;gap:6px;">
+    <div style="display:flex;gap:5px;">
       <button id="mapBtnDaily" onclick="setMapMode('daily')"
-        style="font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;border:none;background:linear-gradient(135deg,#0284c7,#0ea5e9);color:white;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(14,165,233,.4);">當日</button>
+        style="font-size:11px;font-weight:700;padding:3px 13px;border-radius:20px;border:none;background:#dc2626;color:white;cursor:pointer;">當日</button>
       <button id="mapBtnMTD" onclick="setMapMode('mtd')"
-        style="font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;border:1px solid rgba(45,212,191,.25);background:transparent;color:#5eead4;cursor:pointer;transition:all .2s;">月累計</button>
+        style="font-size:11px;font-weight:700;padding:3px 13px;border-radius:20px;border:1px solid #334155;background:transparent;color:#64748b;cursor:pointer;">月累計</button>
     </div>
   </div>
-  <!-- Body -->
-  <div style="padding:16px 18px;display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;justify-content:center;">
-    <div style="position:relative;flex:0 0 auto;">
-      <svg id="taiwanMapSvg" viewBox="0 0 220 460" style="width:min(185px,38vw);height:auto;display:block;border-radius:8px;"></svg>
-      <div id="mapTooltip" style="position:fixed;background:rgba(5,13,28,.97);color:#e2e8f0;padding:9px 13px;border-radius:10px;font-size:11.5px;line-height:1.7;pointer-events:none;display:none;white-space:nowrap;z-index:9999;box-shadow:0 6px 24px rgba(0,0,0,.7);border:1px solid rgba(45,212,191,.2);backdrop-filter:blur(8px);"></div>
-    </div>
-    <div id="mapLegendList" style="flex:1;min-width:190px;max-width:380px;"></div>
+  <div style="padding:8px;">
+    <svg id="taiwanMapSvg" viewBox="0 0 620 300" style="width:100%;height:auto;display:block;max-height:330px;"></svg>
   </div>
+  <div id="heatmapLegend" style="padding:6px 12px 10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.04);"></div>
+  <div id="mapTooltip" style="position:fixed;background:rgba(2,6,14,.97);color:#e2e8f0;padding:9px 13px;border-radius:10px;font-size:11.5px;line-height:1.7;pointer-events:none;display:none;white-space:nowrap;z-index:9999;box-shadow:0 6px 24px rgba(0,0,0,.8);border:1px solid rgba(255,255,255,.08);"></div>
 </div>
 
 
@@ -2259,214 +2252,194 @@ function renderFullRankings() {
   renderTbl('fullMTDBody',   DATA.mtdRanking);
 }
 
-// ════ 🗺 台灣票房地圖 v2 ════
+// ════ 🔥 票房熱力圖 ════
 var _mapMode = 'daily';
 
 function setMapMode(mode) {
   _mapMode = mode;
   var btnD = document.getElementById('mapBtnDaily');
   var btnM = document.getElementById('mapBtnMTD');
-  var activeStyle = 'font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;border:none;background:linear-gradient(135deg,#0284c7,#0ea5e9);color:white;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(14,165,233,.4);';
-  var inactiveStyle = 'font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;border:1px solid rgba(45,212,191,.25);background:transparent;color:#5eead4;cursor:pointer;transition:all .2s;';
-  if (btnD) { btnD.style.cssText = mode==='daily' ? activeStyle : inactiveStyle; }
-  if (btnM) { btnM.style.cssText = mode==='mtd'   ? activeStyle : inactiveStyle; }
+  var on  = 'font-size:11px;font-weight:700;padding:3px 13px;border-radius:20px;border:none;background:#dc2626;color:white;cursor:pointer;';
+  var off = 'font-size:11px;font-weight:700;padding:3px 13px;border-radius:20px;border:1px solid #334155;background:transparent;color:#64748b;cursor:pointer;';
+  if(btnD) { btnD.style.cssText = mode==='daily'?on:off; }
+  if(btnM) { btnM.style.cssText = mode==='mtd'  ?on:off; }
   renderTaiwanMap();
 }
 
-// 影城精確座標 [緯度, 經度]
-var CINEMA_COORDS = {
-  '台北美麗華':              [25.072, 121.540],
-  '高雄威秀':                [22.632, 120.284],
-  '板橋大遠百威秀':          [25.011, 121.461],
-  '台中大遠百威秀':          [24.182, 120.648],
-  '台北信義威秀':            [25.036, 121.567],
-  '新竹巨城威秀':            [24.793, 120.977],
-  '台南南紡威秀':            [23.003, 120.222],
-  '新店裕隆城威秀':          [24.960, 121.540],
-  '台北京站威秀':            [25.048, 121.521],
-  'MuvieCinemas':            [25.062, 121.508],
-  '台中站前秀泰':            [24.140, 120.681],
-  '台北大巨蛋秀泰':          [25.042, 121.549],
-  '台中文心秀泰':            [24.118, 120.638],
-  '高雄夢時代秀泰':          [22.590, 120.318],
-  '林口威秀':                [25.078, 121.374],
-  '南港LaLaport威秀':        [25.052, 121.613],
-  '台中老虎城威秀':          [24.179, 120.643],
-  '台中iFG遠雄廣場威秀':     [24.201, 120.681],
-  '桃園統領威秀':            [24.989, 121.308],
-  '中和環球威秀':            [25.001, 121.490]
-};
+// 20-step hot→cold palette (rank 1=hottest red, rank 20=coldest blue)
+var _HM_PALETTE = [
+  '#7f1d1d','#9b1c1c','#b91c1c','#dc2626','#ef4444',   // 1-5  red
+  '#c2410c','#ea580c','#f97316','#fb923c','#fed7aa',   // 6-10 orange (fade)
+  '#a16207','#ca8a04','#eab308','#fde047','#fef08a',   // 11-15 yellow (fade)
+  '#15803d','#16a34a','#22c55e','#4ade80','#86efac'    // 16-20 green (fade)
+];
+// Remap by rank descending: rank1 gets palette[0], rank20 gets palette[19]
+// But we want hot=large BO, so rank1(best)=red, rank20(lowest)=green-faded
 
-function _ll2svg(lat, lon) {
-  // viewBox "0 0 220 460" | lon 119.8~122.2 scale 88 | lat 25.45~21.8 scale 120
-  return [(lon - 119.8) * 88 + 10, (25.45 - lat) * 120 + 10];
+function _hmColor(rank) {
+  var idx = Math.min(rank-1, _HM_PALETTE.length-1);
+  return _HM_PALETTE[idx];
+}
+
+// ── Squarified treemap layout ──────────────────────────────────
+function _squarify(items, x, y, w, h) {
+  var result = [];
+  if (!items.length) return result;
+  var remaining = items.slice().sort(function(a,b){return b.bo-a.bo;});
+  var remX=x, remY=y, remW=w, remH=h;
+  var totalVal = remaining.reduce(function(s,i){return s+i.bo;},0);
+
+  while (remaining.length) {
+    var isH = remW >= remH;
+    var stripItems=[], stripTotal=0, stripW=0, prevWorst=Infinity;
+    for (var i=0; i<remaining.length; i++) {
+      var ti = stripItems.concat([remaining[i]]);
+      var tt = stripTotal + remaining[i].bo;
+      var tw = (tt/totalVal) * (isH?remW:remH);
+      var worst=0;
+      ti.forEach(function(it){
+        var tl = (it.bo/tt)*(isH?remH:remW);
+        var asp = Math.max(tw/tl,tl/tw);
+        if(asp>worst) worst=asp;
+      });
+      if (stripItems.length>0 && worst>prevWorst+0.01) break;
+      prevWorst=worst; stripItems=ti; stripTotal=tt; stripW=tw;
+    }
+    var pos = isH?remY:remX;
+    stripItems.forEach(function(item){
+      var tl=(item.bo/stripTotal)*(isH?remH:remW);
+      if(isH) result.push({item:item,x:remX,y:pos,w:stripW,h:tl});
+      else    result.push({item:item,x:pos, y:remY,w:tl,  h:stripW});
+      pos+=tl;
+    });
+    totalVal-=stripTotal;
+    remaining=remaining.slice(stripItems.length);
+    if(isH){remX+=stripW;remW-=stripW;}
+    else   {remY+=stripW;remH-=stripW;}
+  }
+  return result;
 }
 
 function renderTaiwanMap() {
   var svg = document.getElementById('taiwanMapSvg');
-  var legendEl = document.getElementById('mapLegendList');
-  if (!svg || !legendEl) return;
+  var lgEl = document.getElementById('heatmapLegend');
+  if (!svg) return;
 
-  var ranking = _mapMode === 'daily'
-    ? (DATA.ytdRanking && DATA.ytdRanking.length ? DATA.ytdRanking : DATA.mtdRanking)
-    : (DATA.mtdRanking);
-  if (!ranking || !ranking.length) {
-    svg.innerHTML = '<rect width="220" height="460" fill="#050d1c" rx="8"/><text x="110" y="230" text-anchor="middle" fill="#2a5a7a" font-size="12" font-family="sans-serif">無排行資料</text>';
+  var ranking = _mapMode==='daily'
+    ? (DATA.ytdRanking&&DATA.ytdRanking.length ? DATA.ytdRanking : DATA.mtdRanking)
+    : DATA.mtdRanking;
+  if (!ranking||!ranking.length) {
+    svg.innerHTML='<rect width="620" height="300" fill="#0a0f1a"/><text x="310" y="155" text-anchor="middle" fill="#334155" font-size="14">無排行資料</text>';
     return;
   }
-  var maxBO = Math.max.apply(null, ranking.map(function(r){ return r.bo; }));
 
-  // Taiwan outline — 26-point path (clockwise from N tip)
-  var TW = 'M161,18 L181,38 L189,42 L203,54 L181,80 L192,102 L186,138 L170,174 L164,234 L149,282 L126,328 L107,378 L103,426 L89,418 L50,352 L40,294 L37,234 L39,156 L46,126 L62,105 L102,78 L120,54 L138,56 L144,44 L149,34 Z';
+  var W=620, H=300, GAP=2;
+  var tiles = _squarify(ranking, 0, 0, W, H);
 
-  // ── defs ──────────────────────────────────────────────────
-  var defs =
-    '<defs>' +
-      '<radialGradient id="mgOcean" cx="45%" cy="38%" r="70%">' +
-        '<stop offset="0%" stop-color="#0e1f38"/>' +
-        '<stop offset="100%" stop-color="#040c18"/>' +
-      '</radialGradient>' +
-      '<linearGradient id="mgIsland" x1="0" y1="0" x2=".7" y2="1">' +
-        '<stop offset="0%" stop-color="#152e3e"/>' +
-        '<stop offset="45%" stop-color="#1c4358"/>' +
-        '<stop offset="100%" stop-color="#112432"/>' +
-      '</linearGradient>' +
-      '<radialGradient id="mgST" cx="35%" cy="30%" r="68%">' +
-        '<stop offset="0%" stop-color="#e9d5ff"/>' +
-        '<stop offset="50%" stop-color="#a855f7"/>' +
-        '<stop offset="100%" stop-color="#5b21b6"/>' +
-      '</radialGradient>' +
-      '<radialGradient id="mgMKT" cx="35%" cy="30%" r="68%">' +
-        '<stop offset="0%" stop-color="#bae6fd"/>' +
-        '<stop offset="50%" stop-color="#0ea5e9"/>' +
-        '<stop offset="100%" stop-color="#0c4a6e"/>' +
-      '</radialGradient>' +
-      '<filter id="mgCoast" x="-10%" y="-10%" width="120%" height="120%">' +
-        '<feGaussianBlur stdDeviation="2" result="b"/>' +
-        '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>' +
-      '</filter>' +
-      '<filter id="mgGlowST" x="-80%" y="-80%" width="260%" height="260%">' +
-        '<feGaussianBlur stdDeviation="5" result="b"/>' +
-        '<feFlood flood-color="#a855f7" flood-opacity=".6" result="c"/>' +
-        '<feComposite in="c" in2="b" operator="in" result="s"/>' +
-        '<feMerge><feMergeNode in="s"/><feMergeNode in="SourceGraphic"/></feMerge>' +
-      '</filter>' +
-      '<filter id="mgGlowMKT" x="-80%" y="-80%" width="260%" height="260%">' +
-        '<feGaussianBlur stdDeviation="4" result="b"/>' +
-        '<feFlood flood-color="#0ea5e9" flood-opacity=".5" result="c"/>' +
-        '<feComposite in="c" in2="b" operator="in" result="s"/>' +
-        '<feMerge><feMergeNode in="s"/><feMergeNode in="SourceGraphic"/></feMerge>' +
-      '</filter>' +
-    '</defs>';
+  var out = '<defs>' +
+    '<filter id="hmGlow" x="-50%" y="-50%" width="200%" height="200%">' +
+      '<feGaussianBlur stdDeviation="3" result="b"/>' +
+      '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>' +
+    '</filter>' +
+    // subtle top-highlight gradient
+    '<linearGradient id="hmShine" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0%" stop-color="rgba(255,255,255,.13)"/>' +
+      '<stop offset="40%" stop-color="rgba(255,255,255,.03)"/>' +
+      '<stop offset="100%" stop-color="rgba(0,0,0,.15)"/>' +
+    '</linearGradient>' +
+  '</defs>';
+  out += '<rect width="620" height="300" fill="#0a0f1a"/>';
 
-  // ── ocean + island ─────────────────────────────────────────
-  var base =
-    '<rect width="220" height="460" fill="url(#mgOcean)" rx="8"/>' +
-    // latitude grid
-    [25,24,23,22].map(function(lat){
-      var y = (25.45-lat)*120+10;
-      return '<line x1="10" y1="'+y+'" x2="210" y2="'+y+'" stroke="#0e2a42" stroke-width=".7" stroke-dasharray="2,7"/>' +
-             '<text x="13" y="'+(y-2)+'" font-size="6.5" fill="#1a4060" font-family="monospace">'+lat+'°</text>';
-    }).join('') +
-    // island shadow
-    '<path d="'+TW+'" fill="#04080f" opacity=".6" transform="translate(2,4)"/>' +
-    // island fill
-    '<path d="'+TW+'" fill="url(#mgIsland)"/>' +
-    // coastline glow
-    '<path d="'+TW+'" fill="none" stroke="#2dd4bf" stroke-width=".8" opacity=".5" filter="url(#mgCoast)"/>' +
-    // coastline crisp
-    '<path d="'+TW+'" fill="none" stroke="#2dd4bf" stroke-width=".9" opacity=".55"/>';
+  tiles.forEach(function(t) {
+    var r=t.item, col=_hmColor(r.rank);
+    var x=t.x+GAP/2, y=t.y+GAP/2, w=t.w-GAP, h=t.h-GAP;
+    if(w<2||h<2) return;
+    var rx=Math.min(4, w*0.08, h*0.08);
 
-  // ── city labels ────────────────────────────────────────────
-  var cities = [
-    [25.06, 121.53, '台北'],
-    [24.80, 120.97, '新竹'],
-    [24.15, 120.68, '台中'],
-    [23.00, 120.21, '台南'],
-    [22.62, 120.31, '高雄']
-  ].map(function(c){
-    var p = _ll2svg(c[0], c[1]);
-    return '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="1.5" fill="#1a4060"/>' +
-           '<text x="'+(p[0]+4)+'" y="'+(p[1]+3)+'" font-size="7" fill="#2a6070" font-family="sans-serif" font-weight="600">'+c[2]+'</text>';
-  }).join('');
+    // base rect
+    out += '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" fill="'+col+'" rx="'+rx.toFixed(1)+'"/>';
+    // shine overlay
+    out += '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" fill="url(#hmShine)" rx="'+rx.toFixed(1)+'"/>';
 
-  // ── cinema bubbles (small→large so large renders on top) ──
-  var sorted = ranking.slice().sort(function(a,b){ return a.bo - b.bo; });
-  var bubbles = sorted.map(function(item){
-    var coord = CINEMA_COORDS[item.name];
-    if (!coord) return '';
-    var p = _ll2svg(coord[0], coord[1]);
-    var cx = p[0].toFixed(1), cy = p[1].toFixed(1);
-    var r  = (4.5 + Math.sqrt(item.bo / maxBO) * 13.5).toFixed(1);
-    var isST   = item.st;
-    var grad   = isST ? 'url(#mgST)'  : 'url(#mgMKT)';
-    var glowF  = isST ? 'url(#mgGlowST)' : 'url(#mgGlowMKT)';
-    var ringC  = isST ? '#c084fc' : '#38bdf8';
-    var top5   = item.rank <= 5;
-    var pulse  = top5 ?
-      '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+ringC+'" stroke-width="1.2" opacity="0">' +
-        '<animate attributeName="r" from="'+r+'" to="'+(parseFloat(r)+11)+'" dur="2s" repeatCount="indefinite"/>' +
-        '<animate attributeName="opacity" from=".65" to="0" dur="2s" repeatCount="indefinite"/>' +
-      '</circle>' : '';
-    var fs = Math.max(6, Math.min(8.5, parseFloat(r)*0.62)).toFixed(1);
-    var boStr = parseFloat(item.bo).toFixed(1);
-    var visStr = item.visitors ? (+item.visitors).toLocaleString() : '—';
-    return pulse +
-      '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+grad+'" filter="'+glowF+'"' +
-        ' data-name="'+item.name.replace(/"/g,'&quot;')+'"' +
-        ' data-bo="'+boStr+'" data-rank="'+item.rank+'"' +
-        ' data-st="'+isST+'" data-vis="'+visStr+'"' +
-        ' style="cursor:pointer;"' +
-        ' onmouseenter="showMapTip(event,this)" onmouseleave="hideMapTip()"/>' +
-      '<text x="'+cx+'" y="'+(parseFloat(cy)+parseFloat(fs)*0.38)+'"' +
-        ' font-size="'+fs+'" fill="rgba(255,255,255,.95)" text-anchor="middle"' +
-        ' pointer-events="none" font-weight="900" font-family="\'Helvetica Neue\',sans-serif">'+item.rank+'</text>';
-  }).join('');
+    // ST marker strip (left edge, purple)
+    if (r.st && w>8) {
+      out += '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="3" height="'+h.toFixed(1)+'" fill="rgba(192,132,252,.8)" rx="'+rx.toFixed(1)+'"/>';
+    }
 
-  svg.innerHTML = defs + base + cities + bubbles;
+    // interactive overlay (invisible, for hover events)
+    var boStr = parseFloat(r.bo).toFixed(1);
+    var visStr = r.visitors ? (+r.visitors).toLocaleString() : '—';
+    var unit = _mapMode==='daily'?'當日':'月累計';
+    out += '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" fill="transparent" rx="'+rx.toFixed(1)+'"'+
+      ' data-name="'+(r.name||'').replace(/"/g,'&quot;')+'" data-bo="'+boStr+'"'+
+      ' data-rank="'+r.rank+'" data-st="'+r.st+'" data-vis="'+visStr+'" data-pct="'+(r.mktPct||0).toFixed(1)+'"'+
+      ' style="cursor:pointer;"'+
+      ' onmouseenter="showMapTip(event,this)" onmouseleave="hideMapTip()"'+
+      ' onmousemove="moveMapTip(event)"/>';
 
-  // ── legend list ────────────────────────────────────────────
-  var lg = '<div style="display:flex;gap:14px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(45,212,191,.1);">' +
-    '<span style="display:flex;align-items:center;gap:5px;font-size:10.5px;color:#c4b5fd;">' +
-      '<svg width="10" height="10" style="flex-shrink:0"><circle cx="5" cy="5" r="4.5" fill="url(#mgST)"/></svg>秀泰影城</span>' +
-    '<span style="display:flex;align-items:center;gap:5px;font-size:10.5px;color:#7dd3fc;">' +
-      '<svg width="10" height="10" style="flex-shrink:0"><circle cx="5" cy="5" r="4.5" fill="url(#mgMKT)"/></svg>其他院線</span>' +
-    '</div>';
-  ranking.forEach(function(item){
-    var isST = item.st;
-    var nameColor = isST ? '#d8b4fe' : '#e2e8f0';
-    var boColor   = isST ? '#c084fc' : '#38bdf8';
-    var boStr = _mapMode==='daily' ? item.bo.toFixed(1) : (+item.bo).toLocaleString();
-    var topMedal = item.rank===1 ? '🥇 ' : item.rank===2 ? '🥈 ' : item.rank===3 ? '🥉 ' : '';
-    lg +=
-      '<div style="display:flex;align-items:center;gap:5px;margin-bottom:3.5px;font-size:11px;">' +
-        '<span style="min-width:17px;text-align:right;font-size:9.5px;color:#3a6a8a;font-family:monospace;">' + (item.rank<10?'0':'')+item.rank+'</span>' +
-        '<span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:'+nameColor+';">' + topMedal + item.name + '</span>' +
-        '<span style="font-weight:800;color:'+boColor+';min-width:52px;text-align:right;font-variant-numeric:tabular-nums;">' + boStr + '萬</span>' +
-        '<span style="color:#2a5a7a;min-width:40px;text-align:right;font-size:10px;">' + (item.mktPct||0).toFixed(1) + '%</span>' +
-      '</div>';
+    // Labels — only if tile is big enough
+    if (w>34 && h>22) {
+      // rank (top-left)
+      var fs_rank = Math.max(7, Math.min(10, w*0.1, h*0.18));
+      out += '<text x="'+(x+4)+'" y="'+(y+fs_rank+1)+'" font-size="'+fs_rank.toFixed(1)+'" fill="rgba(255,255,255,.5)" font-weight="700" pointer-events="none">#'+r.rank+'</text>';
+    }
+    if (w>45 && h>35) {
+      // cinema name (center)
+      var name = r.name||'';
+      var fs_name = Math.max(8, Math.min(13, w*0.12, h*0.22));
+      // strip leading '秀泰'/'台北'/'高雄' etc for short display
+      var shortName = name.replace(/^(秀泰|台北|高雄|台中|台南|新竹|新店|板橋|南港|林口|中和|桃園)/,'');
+      if(shortName.length===0) shortName=name;
+      var displayName = shortName.length>6 ? shortName.slice(0,6) : shortName;
+      var cy_name = h>55 ? y+h/2-5 : y+h/2+fs_name*0.4;
+      out += '<text x="'+(x+w/2)+'" y="'+cy_name+'" text-anchor="middle" font-size="'+fs_name.toFixed(1)+'" fill="rgba(255,255,255,.92)" font-weight="800" font-family="\'PingFang TC\',\'Noto Sans TC\',sans-serif" pointer-events="none">'+displayName+'</text>';
+    }
+    if (w>50 && h>52) {
+      // BO value
+      var fs_bo = Math.max(9, Math.min(13, w*0.1, h*0.18));
+      out += '<text x="'+(x+w/2)+'" y="'+(y+h/2+fs_bo+3)+'" text-anchor="middle" font-size="'+fs_bo.toFixed(1)+'" fill="rgba(255,255,255,.75)" font-weight="700" pointer-events="none">'+boStr+'萬</text>';
+    }
+    if (w>55 && h>70) {
+      // mktPct
+      out += '<text x="'+(x+w/2)+'" y="'+(y+h/2+fs_bo+17)+'" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.45)" pointer-events="none">市占 '+(r.mktPct||0).toFixed(1)+'%</text>';
+    }
   });
-  legendEl.innerHTML = lg;
+
+  svg.innerHTML = out;
+
+  // Legend
+  var lg = '<span style="font-size:9.5px;color:#475569;margin-right:4px;">市占高</span>';
+  ['#ef4444','#f97316','#eab308','#22c55e'].forEach(function(c){
+    lg += '<span style="display:inline-block;width:16px;height:10px;background:'+c+';border-radius:2px;"></span>';
+  });
+  lg += '<span style="font-size:9.5px;color:#475569;margin-left:4px;margin-right:16px;">低</span>';
+  lg += '<span style="display:inline-block;width:3px;height:10px;background:rgba(192,132,252,.8);border-radius:1px;margin-right:3px;"></span>';
+  lg += '<span style="font-size:9.5px;color:#a78bfa;">秀泰影城</span>';
+  if(lgEl) lgEl.innerHTML = lg;
 }
 
 function showMapTip(e, el) {
   var tip = document.getElementById('mapTooltip');
-  if (!tip) return;
-  var isST = el.dataset.st === 'true';
-  var nc = isST ? '#d8b4fe' : '#7dd3fc';
-  var vc = isST ? '#c084fc' : '#38bdf8';
-  var unit = _mapMode === 'daily' ? '當日' : '月累計';
+  if(!tip) return;
+  var isST = el.dataset.st==='true';
+  var nc = isST ? '#c4b5fd' : '#f1f5f9';
+  var unit = _mapMode==='daily'?'當日':'月累計';
   tip.innerHTML =
-    '<div style="font-weight:800;color:'+nc+';margin-bottom:3px;">◉ #'+el.dataset.rank+' &nbsp;'+el.dataset.name+'</div>' +
-    '<div style="color:#94a3b8;">'+unit+'票房 <span style="color:'+vc+';font-weight:700;font-size:13px;">'+el.dataset.bo+'</span> <span style="font-size:10px;">萬元</span></div>' +
-    '<div style="color:#94a3b8;">來客數 <span style="color:#e2e8f0;font-weight:600;">'+el.dataset.vis+'</span> 人</div>';
-  tip.style.display = 'block';
-  tip.style.left = (e.clientX + 16) + 'px';
-  tip.style.top  = (e.clientY - 14) + 'px';
+    '<div style="font-weight:800;color:'+nc+';margin-bottom:2px;">#'+el.dataset.rank+'&ensp;'+el.dataset.name+'</div>'+
+    '<div style="color:#94a3b8;">'+unit+'票房&ensp;<span style="color:#fbbf24;font-weight:800;font-size:13px;">'+el.dataset.bo+'</span>&thinsp;萬元</div>'+
+    '<div style="color:#94a3b8;">市占率&ensp;<span style="color:#f1f5f9;font-weight:700;">'+el.dataset.pct+'%</span></div>'+
+    '<div style="color:#94a3b8;">來客數&ensp;<span style="color:#f1f5f9;">'+el.dataset.vis+'</span>&thinsp;人</div>';
+  tip.style.display='block';
+  tip.style.left=(e.clientX+16)+'px';
+  tip.style.top=(e.clientY-14)+'px';
+}
+function moveMapTip(e) {
+  var tip=document.getElementById('mapTooltip');
+  if(tip&&tip.style.display!=='none'){tip.style.left=(e.clientX+16)+'px';tip.style.top=(e.clientY-14)+'px';}
 }
 function hideMapTip() {
-  var t = document.getElementById('mapTooltip');
-  if (t) t.style.display = 'none';
+  var t=document.getElementById('mapTooltip');
+  if(t) t.style.display='none';
 }
 
 // ════════════════════════════════════
