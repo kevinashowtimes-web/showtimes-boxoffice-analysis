@@ -699,23 +699,23 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 </div>
 
 <!-- 🔥 票房熱力圖 -->
-<div id="taiwanMapCard" style="border-radius:12px;overflow:hidden;margin-top:14px;margin-bottom:14px;background:#0a0f1a;box-shadow:0 8px 32px rgba(0,0,0,.5);">
-  <div style="padding:11px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid rgba(255,255,255,.05);">
+<div id="taiwanMapCard" style="border-radius:12px;overflow:hidden;margin-top:14px;margin-bottom:14px;background:var(--card);border:1px solid var(--border-lt);box-shadow:var(--sh-card);">
+  <div style="padding:11px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--border-lt);">
     <div>
-      <span style="font-size:12px;font-weight:800;color:#f1f5f9;letter-spacing:.5px;">🔥 票房熱力圖</span>
-      <span style="font-size:10px;color:#475569;margin-left:8px;">面積＝票房規模　色溫＝市占高低</span>
+      <span style="font-size:12px;font-weight:800;color:var(--text);letter-spacing:.5px;">🔥 票房熱力圖</span>
+      <span style="font-size:10px;color:var(--sub);margin-left:8px;">面積＝票房規模　色溫＝市占高低</span>
     </div>
     <div style="display:flex;gap:5px;">
       <button id="mapBtnDaily" onclick="setMapMode('daily')"
         style="font-size:11px;font-weight:700;padding:3px 13px;border-radius:20px;border:none;background:#dc2626;color:white;cursor:pointer;">當日</button>
       <button id="mapBtnMTD" onclick="setMapMode('mtd')"
-        style="font-size:11px;font-weight:700;padding:3px 13px;border-radius:20px;border:1px solid #334155;background:transparent;color:#64748b;cursor:pointer;">月累計</button>
+        style="font-size:11px;font-weight:700;padding:3px 13px;border-radius:20px;border:1px solid #e2e8f0;background:transparent;color:#94a3b8;cursor:pointer;">月累計</button>
     </div>
   </div>
   <div style="padding:8px;">
     <svg id="taiwanMapSvg" viewBox="0 0 620 300" style="width:100%;height:auto;display:block;max-height:330px;"></svg>
   </div>
-  <div id="heatmapLegend" style="padding:6px 12px 10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.04);"></div>
+  <div id="heatmapLegend" style="padding:6px 12px 10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;border-top:1px solid var(--border-lt);"></div>
   <div id="mapTooltip" style="position:fixed;background:rgba(2,6,14,.97);color:#e2e8f0;padding:9px 13px;border-radius:10px;font-size:11.5px;line-height:1.7;pointer-events:none;display:none;white-space:nowrap;z-index:9999;box-shadow:0 6px 24px rgba(0,0,0,.8);border:1px solid rgba(255,255,255,.08);"></div>
 </div>
 
@@ -2260,7 +2260,7 @@ function setMapMode(mode) {
   var btnD = document.getElementById('mapBtnDaily');
   var btnM = document.getElementById('mapBtnMTD');
   var on  = 'font-size:11px;font-weight:700;padding:3px 13px;border-radius:20px;border:none;background:#dc2626;color:white;cursor:pointer;';
-  var off = 'font-size:11px;font-weight:700;padding:3px 13px;border-radius:20px;border:1px solid #334155;background:transparent;color:#64748b;cursor:pointer;';
+  var off = 'font-size:11px;font-weight:700;padding:3px 13px;border-radius:20px;border:1px solid #e2e8f0;background:transparent;color:#94a3b8;cursor:pointer;';
   if(btnD) { btnD.style.cssText = mode==='daily'?on:off; }
   if(btnM) { btnM.style.cssText = mode==='mtd'  ?on:off; }
   renderTaiwanMap();
@@ -2329,7 +2329,7 @@ function renderTaiwanMap() {
     ? (DATA.ytdRanking&&DATA.ytdRanking.length ? DATA.ytdRanking : DATA.mtdRanking)
     : DATA.mtdRanking;
   if (!ranking||!ranking.length) {
-    svg.innerHTML='<rect width="620" height="300" fill="#0a0f1a"/><text x="310" y="155" text-anchor="middle" fill="#334155" font-size="14">無排行資料</text>';
+    svg.innerHTML='<rect width="620" height="300" fill="#f8f9fc"/><text x="310" y="155" text-anchor="middle" fill="#94a3b8" font-size="14">無排行資料</text>';
     return;
   }
 
@@ -2348,7 +2348,7 @@ function renderTaiwanMap() {
       '<stop offset="100%" stop-color="rgba(0,0,0,.15)"/>' +
     '</linearGradient>' +
   '</defs>';
-  out += '<rect width="620" height="300" fill="#0a0f1a"/>';
+  out += '<rect width="620" height="300" fill="#f8f9fc"/>';
 
   tiles.forEach(function(t) {
     var r=t.item, col=_hmColor(r.rank);
@@ -2408,11 +2408,11 @@ function renderTaiwanMap() {
   svg.innerHTML = out;
 
   // Legend
-  var lg = '<span style="font-size:9.5px;color:#475569;margin-right:4px;">市占高</span>';
+  var lg = '<span style="font-size:9.5px;color:var(--sub);margin-right:4px;">市占高</span>';
   ['#ef4444','#f97316','#eab308','#22c55e'].forEach(function(c){
     lg += '<span style="display:inline-block;width:16px;height:10px;background:'+c+';border-radius:2px;"></span>';
   });
-  lg += '<span style="font-size:9.5px;color:#475569;margin-left:4px;margin-right:16px;">低</span>';
+  lg += '<span style="font-size:9.5px;color:var(--sub);margin-left:4px;margin-right:16px;">低</span>';
   lg += '<span style="display:inline-block;width:3px;height:10px;background:rgba(192,132,252,.8);border-radius:1px;margin-right:3px;"></span>';
   lg += '<span style="font-size:9.5px;color:#a78bfa;">秀泰影城</span>';
   if(lgEl) lgEl.innerHTML = lg;
