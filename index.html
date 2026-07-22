@@ -2393,7 +2393,13 @@ function renderTaiwanMap() {
   }
 
   var W=620, H=300, GAP=2;
-  var tiles = _squarify(ranking, 0, 0, W, H);
+  // 放大區塊大小差異：power scaling（保留 _origBO 供顯示）
+  var _EXP = 1.8;
+  var _maxBO = Math.max.apply(null, ranking.map(function(r){return r.bo;}));
+  var layoutRanking = ranking.map(function(r){
+    return Object.assign({}, r, {_origBO: r.bo, bo: Math.pow(r.bo/_maxBO, _EXP)*_maxBO});
+  });
+  var tiles = _squarify(layoutRanking, 0, 0, W, H);
 
   var out = '<defs>' +
     '<filter id="hmGlow" x="-50%" y="-50%" width="200%" height="200%">' +
@@ -2426,7 +2432,7 @@ function renderTaiwanMap() {
     }
 
     // interactive overlay (invisible, for hover events)
-    var boStr = parseFloat(r.bo).toFixed(1);
+    var boStr = (r._origBO!==undefined ? r._origBO : r.bo).toFixed(1);
     var visStr = r.visitors ? (+r.visitors).toLocaleString() : '—';
     var unit = _mapMode==='daily'?'當日':'月累計';
     out += '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" fill="transparent" rx="'+rx.toFixed(1)+'"'+
@@ -2438,7 +2444,7 @@ function renderTaiwanMap() {
 
     // ── 統一垂直堆疊文字佈局 ──────────────────────────────────
     var _name = r.name||'';
-    var _boStr = parseFloat(r.bo).toFixed(1);
+    var _boStr = (r._origBO!==undefined ? r._origBO : r.bo).toFixed(1);
     var _pfx = _name.match(/^(台北|高雄|台中|台南|新竹|新店|板橋|南港|林口|中和|桃園|秀泰)/);
 
     // 決定各層顯示條件
