@@ -669,13 +669,17 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   <div style="padding:11px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--border-lt);">
     <div>
       <span style="font-size:12px;font-weight:800;color:var(--text);letter-spacing:.5px;">🔥 票房熱力圖</span>
-      <span style="font-size:10px;color:var(--sub);margin-left:8px;">面積＝票房規模　色溫＝市占高低</span>
+      <span id="hmSubLabel" style="font-size:10px;color:var(--sub);margin-left:8px;">面積＝票房規模　色溫＝市占高低</span>
     </div>
-    <div style="display:flex;gap:5px;">
-      <button id="mapBtnDaily" onclick="setMapMode('daily')"
-        style="font-size:11px;font-weight:700;padding:3px 13px;border-radius:20px;border:none;background:#dc2626;color:white;cursor:pointer;">當日</button>
-      <button id="mapBtnMTD" onclick="setMapMode('mtd')"
-        style="font-size:11px;font-weight:700;padding:3px 13px;border-radius:20px;border:1px solid #e2e8f0;background:transparent;color:#94a3b8;cursor:pointer;">月累計</button>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+      <button id="mapBtn0" onclick="setMapMode('daily')"
+        style="font-size:11px;font-weight:700;padding:3px 11px;border-radius:20px;border:none;background:#dc2626;color:white;cursor:pointer;">當日</button>
+      <button id="mapBtn1" onclick="setMapMode('mtd')"
+        style="font-size:11px;font-weight:700;padding:3px 11px;border-radius:20px;border:1px solid #e2e8f0;background:transparent;color:#94a3b8;cursor:pointer;">月累計</button>
+      <button id="mapBtn2" onclick="setMapMode('hyf')"
+        style="font-size:11px;font-weight:700;padding:3px 11px;border-radius:20px;border:1px solid #e2e8f0;background:transparent;color:#94a3b8;cursor:pointer;">上半年</button>
+      <button id="mapBtn3" onclick="setMapMode('ann')"
+        style="font-size:11px;font-weight:700;padding:3px 11px;border-radius:20px;border:1px solid #e2e8f0;background:transparent;color:#94a3b8;cursor:pointer;">年度</button>
     </div>
   </div>
   <div style="padding:8px;">
@@ -860,6 +864,57 @@ const DATA = {
     { rank:20,  name:'台中老虎城威秀', region:'C', st:false, bo:717.7,  visitors:22732, mktPct:1.65 },
   ],
   mtdMktTotal: 43393.5, mtdMktAdm: 1487065, mtdMktAtp: 291.8,
+
+  // 上半年累計排行 2026-01-01 ~ 2026-06-30（資料來源：taipeitheater.org.tw）
+  // 上半年累計排行 2026-01-01 ~ 2026-06-30（資料來源：taipeitheater.org.tw）
+  hyfRanking: [
+    {rank:1,  name:'台北信義威秀',        bo:20267.9, visitors:603046, mktPct:4.78, st:false, region:'N'},
+    {rank:2,  name:'高雄威秀',            bo:18814.3, visitors:609986, mktPct:4.44, st:false, region:'S'},
+    {rank:3,  name:'台南南紡威秀',        bo:16591.3, visitors:575111, mktPct:3.91, st:false, region:'S'},
+    {rank:4,  name:'台北京站威秀',        bo:15220.3, visitors:496264, mktPct:3.59, st:false, region:'N'},
+    {rank:5,  name:'板橋大遠百威秀',      bo:14293.7, visitors:452218, mktPct:3.37, st:false, region:'N'},
+    {rank:6,  name:'台中文心秀泰',        bo:13649.0, visitors:450342, mktPct:3.22, st:true,  region:'C'},
+    {rank:7,  name:'新竹巨城威秀',        bo:13245.2, visitors:441186, mktPct:3.12, st:false, region:'N'},
+    {rank:8,  name:'台中大遠百威秀',      bo:13117.4, visitors:445628, mktPct:3.09, st:false, region:'C'},
+    {rank:9,  name:'台北大巨蛋秀泰',      bo:12157.9, visitors:260163, mktPct:2.87, st:true,  region:'N'},
+    {rank:10, name:'台中站前秀泰',        bo:10740.2, visitors:357166, mktPct:2.53, st:true,  region:'C'},
+    {rank:11, name:'新店裕隆城威秀',      bo:10615.4, visitors:343428, mktPct:2.50, st:false, region:'N'},
+    {rank:12, name:'高雄夢時代秀泰',      bo:10365.7, visitors:358408, mktPct:2.44, st:true,  region:'S'},
+    {rank:13, name:'台北美麗華',          bo:10278.7, visitors:302342, mktPct:2.42, st:false, region:'N'},
+    {rank:14, name:'台中iFG遠雄廣場威秀', bo:9820.8,  visitors:342766, mktPct:2.32, st:false, region:'C'},
+    {rank:15, name:'MuvieCinemas',        bo:9236.1,  visitors:252318, mktPct:2.18, st:false, region:'N'},
+    {rank:16, name:'南港LaLaport威秀',    bo:8862.8,  visitors:292857, mktPct:2.09, st:false, region:'N'},
+    {rank:17, name:'台中老虎城威秀',      bo:8253.6,  visitors:264031, mktPct:1.95, st:false, region:'C'},
+    {rank:18, name:'林口威秀',            bo:7836.1,  visitors:257577, mktPct:1.85, st:false, region:'N'},
+    {rank:19, name:'桃園統領威秀',        bo:7589.5,  visitors:267445, mktPct:1.79, st:false, region:'N'},
+    {rank:20, name:'台北西門威秀',        bo:7283.8,  visitors:251286, mktPct:1.72, st:false, region:'N'},
+  ],
+  hyfMktTotal: 238240,  // 上半年全台累計（萬元，2026-01-01~06-30）
+
+  // 年度累計排行 2026-01-01 ~ 2026-07-20（資料來源：taipeitheater.org.tw）
+  annRanking: [
+    {rank:1,  name:'台北信義威秀',        bo:22579.5, visitors:671189, mktPct:4.83, st:false, region:'N'},
+    {rank:2,  name:'高雄威秀',            bo:20816.8, visitors:673526, mktPct:4.45, st:false, region:'S'},
+    {rank:3,  name:'台南南紡威秀',        bo:18386.5, visitors:637399, mktPct:3.93, st:false, region:'S'},
+    {rank:4,  name:'台北京站威秀',        bo:16763.4, visitors:547068, mktPct:3.59, st:false, region:'N'},
+    {rank:5,  name:'板橋大遠百威秀',      bo:15745.5, visitors:486476, mktPct:3.37, st:false, region:'N'},
+    {rank:6,  name:'台中文心秀泰',        bo:14896.9, visitors:479686, mktPct:3.19, st:true,  region:'C'},
+    {rank:7,  name:'新竹巨城威秀',        bo:14849.1, visitors:481180, mktPct:3.18, st:false, region:'N'},
+    {rank:8,  name:'台中大遠百威秀',      bo:14367.6, visitors:478691, mktPct:3.07, st:false, region:'C'},
+    {rank:9,  name:'台北大巨蛋秀泰',      bo:13653.3, visitors:288264, mktPct:2.92, st:true,  region:'N'},
+    {rank:10, name:'新店裕隆城威秀',      bo:11772.6, visitors:374436, mktPct:2.52, st:false, region:'N'},
+    {rank:11, name:'台中站前秀泰',        bo:11732.5, visitors:384173, mktPct:2.51, st:true,  region:'C'},
+    {rank:12, name:'高雄夢時代秀泰',      bo:11539.9, visitors:384617, mktPct:2.47, st:true,  region:'S'},
+    {rank:13, name:'台北美麗華',          bo:11509.0, visitors:329045, mktPct:2.46, st:false, region:'N'},
+    {rank:14, name:'台中iFG遠雄廣場威秀', bo:10740.0, visitors:367306, mktPct:2.30, st:false, region:'C'},
+    {rank:15, name:'MuvieCinemas',        bo:10105.8, visitors:270882, mktPct:2.16, st:false, region:'N'},
+    {rank:16, name:'南港LaLaport威秀',    bo:9795.4,  visitors:316323, mktPct:2.10, st:false, region:'N'},
+    {rank:17, name:'台中老虎城威秀',      bo:8971.3,  visitors:284105, mktPct:1.92, st:false, region:'C'},
+    {rank:18, name:'林口威秀',            bo:8840.5,  visitors:280570, mktPct:1.89, st:false, region:'N'},
+    {rank:19, name:'桃園統領威秀',        bo:8310.3,  visitors:288447, mktPct:1.78, st:false, region:'N'},
+    {rank:20, name:'中和環球威秀',        bo:7982.5,  visitors:281019, mktPct:1.71, st:false, region:'N'},
+  ],
+  annMktTotal: 263358,  // 年度全台累計（萬元，2026-01-01~07-20）
 
   competitors: { '秀泰':293.1, '威秀':929.4, '國賓':80.1, '美麗華':106.4, 'in89':33.6, '新光':93.6, '美麗新台茂':25.8, '喜樂':23.7, '其他':143.9 },
 
@@ -2256,14 +2311,12 @@ function renderFullRankings() {
 // ════ 🔥 票房熱力圖 ════
 var _mapMode = 'daily';
 
+var _MAP_MODES = ['daily','mtd','hyf','ann'];
 function setMapMode(mode) {
   _mapMode = mode;
-  var btnD = document.getElementById('mapBtnDaily');
-  var btnM = document.getElementById('mapBtnMTD');
-  var on  = 'font-size:11px;font-weight:700;padding:3px 13px;border-radius:20px;border:none;background:#dc2626;color:white;cursor:pointer;';
-  var off = 'font-size:11px;font-weight:700;padding:3px 13px;border-radius:20px;border:1px solid #e2e8f0;background:transparent;color:#94a3b8;cursor:pointer;';
-  if(btnD) { btnD.style.cssText = mode==='daily'?on:off; }
-  if(btnM) { btnM.style.cssText = mode==='mtd'  ?on:off; }
+  var on  = 'font-size:11px;font-weight:700;padding:3px 11px;border-radius:20px;border:none;background:#dc2626;color:white;cursor:pointer;';
+  var off = 'font-size:11px;font-weight:700;padding:3px 11px;border-radius:20px;border:1px solid #e2e8f0;background:transparent;color:#94a3b8;cursor:pointer;';
+  _MAP_MODES.forEach(function(m,i){ var b=document.getElementById('mapBtn'+i); if(b) b.style.cssText=m===mode?on:off; });
   renderTaiwanMap();
 }
 
@@ -2326,9 +2379,14 @@ function renderTaiwanMap() {
   var lgEl = document.getElementById('heatmapLegend');
   if (!svg) return;
 
-  var ranking = _mapMode==='daily'
-    ? (DATA.ytdRanking&&DATA.ytdRanking.length ? DATA.ytdRanking : DATA.mtdRanking)
-    : DATA.mtdRanking;
+  var ranking;
+  var _periodLabel = {daily:'當日 '+DATA.date, mtd:'月累計 2026/7/1~'+DATA.date.slice(5), hyf:'上半年 2026/1/1~6/30', ann:'年度 2026/1/1~'+DATA.date.slice(5)};
+  if (_mapMode==='daily') ranking = DATA.ytdRanking&&DATA.ytdRanking.length ? DATA.ytdRanking : DATA.mtdRanking;
+  else if (_mapMode==='mtd') ranking = DATA.mtdRanking;
+  else if (_mapMode==='hyf') ranking = DATA.hyfRanking&&DATA.hyfRanking.length ? DATA.hyfRanking : [];
+  else ranking = DATA.annRanking&&DATA.annRanking.length ? DATA.annRanking : [];
+  var _subEl = document.getElementById('hmSubLabel');
+  if(_subEl) _subEl.textContent = (_periodLabel[_mapMode]||'') + '　面積＝票房規模　色溫＝市占高低';
   if (!ranking||!ranking.length) {
     svg.innerHTML='<rect width="620" height="300" fill="#f8f9fc"/><text x="310" y="155" text-anchor="middle" fill="#94a3b8" font-size="14">無排行資料</text>';
     return;
