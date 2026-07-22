@@ -724,11 +724,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 </div>
 
 
-<div class="sec-label">⑤ 地區競爭態勢分析</div>
-<div class="card" style="padding:12px 16px;margin-bottom:14px;">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-    <span style="font-size:var(--fs-xs);font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;">全台院線市占（當日）</span>
-    <span id="mktTotalLabel" style="font-size:11px;color:var(--sub);"></span>
+<div class="sec-label">⑤ 院線競爭版圖</div>
+<div class="card" style="padding:0;overflow:hidden;margin-bottom:14px;background:linear-gradient(145deg,#0d1117 0%,#131c2e 55%,#0d1117 100%);border:1px solid rgba(255,255,255,0.07);">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 16px 9px;border-bottom:1px solid rgba(255,255,255,0.06);">
+    <span style="font-size:12px;font-weight:800;color:rgba(255,255,255,0.75);letter-spacing:.6px;">🗺 全台院線版圖</span>
+    <span id="mktTotalLabel" style="font-size:10.5px;color:rgba(255,255,255,0.3);"></span>
   </div>
   <div id="mktShareCompact"></div>
 </div>
@@ -1841,38 +1841,160 @@ function toast(msg) {
 // ════════════════════════════════════
 
 function renderMktShare() {
-  const comp = DATA.competitors;
+  var comp = DATA.competitors;
   if (!comp || !Object.values(comp).some(function(v){return v>0;})) return;
-  const colors = {'秀泰':'#5B3A8E','威秀':'#A63248','國賓':'#2B5F90','美麗華':'#7B4A8E','喜樂':'#3A7D5E','in89':'#C07E35','新光':'#A04535','美麗新台茂':'#9B4070','美麗新':'#9B4070','其他':'#8A9BAB'};
 
-  // 院線顯示順序（秀泰置頂，其他依大小排）
-  const ORDER = ['秀泰','威秀','國賓','喜樂','新光','美麗華','in89','美麗新台茂','其他'];
-  const labels = ORDER.filter(function(k){return comp[k]>0;});
-  const vals   = labels.map(function(k){return comp[k];});
-  const total  = vals.reduce(function(a,b){return a+b;},0);
-  const maxVal = Math.max.apply(null, vals);
+  var CHAIN_CFG = [
+    {key:'秀泰',      color:'#A78BFA', code:'ST'},
+    {key:'威秀',      color:'#F87171', code:'VS'},
+    {key:'國賓',      color:'#60A5FA', code:'GBA'},
+    {key:'新光',      color:'#FB923C', code:'SK'},
+    {key:'美麗華',    color:'#E879F9', code:'MR'},
+    {key:'in89',     color:'#FBBF24', code:'IN89'},
+    {key:'喜樂',      color:'#34D399', code:'JY'},
+    {key:'美麗新台茂', color:'#F472B6', code:'MRN'},
+    {key:'其他',      color:'#94A3B8', code:'OTH'},
+  ].filter(function(c){return comp[c.key]>0;});
 
-  const totalEl = document.getElementById('mktTotalLabel');
+  var vals = CHAIN_CFG.map(function(c){return comp[c.key];});
+  var total = vals.reduce(function(a,b){return a+b;},0);
+  var totalEl = document.getElementById('mktTotalLabel');
   if (totalEl) totalEl.textContent = '全台票房合計 ' + fmtAuto(total);
 
-  const rows = labels.map(function(k,i){
-    const pct    = (vals[i]/total*100).toFixed(1);
-    const barW   = Math.round(vals[i]/maxVal*100);
-    const isST   = k==='秀泰';
-    const clr    = colors[k]||'#8A9BAB';
-    const rowBg  = isST ? 'background:'+clr+'12;border-left:3px solid '+clr+';' : 'border-left:3px solid '+clr+'60;';
-    return '<div style="display:grid;grid-template-columns:72px 1fr 44px 64px;align-items:center;gap:10px;padding:6px 10px 6px 12px;border-radius:6px;margin-bottom:3px;'+rowBg+'">'
-      +'<span style="font-size:12px;font-weight:'+(isST?800:600)+';color:'+(isST?clr:'var(--text)')+';">'+k+'</span>'
-      +'<div style="height:7px;background:var(--gray-lt);border-radius:4px;overflow:hidden;">'
-        +'<div style="height:100%;width:'+barW+'%;background:'+clr+';border-radius:4px;transition:.4s;"></div>'
-      +'</div>'
-      +'<span style="text-align:right;font-size:13px;font-weight:800;color:'+clr+';">'+pct+'%</span>'
-      +'<span style="text-align:right;font-size:11px;color:var(--sub);">'+vals[i].toFixed(1)+'萬</span>'
+  // ── City coords in viewBox "0 0 140 270" ──────────────────────
+  var CITY_XY = {
+    '基隆':[84,30],'台北':[70,43],'新北':[60,55],'桃園':[50,71],'新竹':[44,89],
+    '苗栗':[41,107],'台中':[41,131],'彰化':[40,147],'雲林':[41,164],'嘉義':[48,181],
+    '台南':[51,199],'高雄':[60,215],'屏東':[71,231],'花蓮':[108,134],'台東':[104,207],
+    '宜蘭':[96,57],
+  };
+
+  function _city(name) {
+    var MAP = {
+      '巨蛋':'台北','欣欣':'台北','信義':'台北','長春':'台北','西門':'台北','大國賓':'台北',
+      '南港':'台北','喜樂時代南港':'台北','喜樂時代今日':'台北',
+      '土城':'新北','樹林':'新北','新莊':'新北','淡水':'新北','林口':'新北',
+      '永和':'新北','中和':'新北','板橋':'新北','新店':'新北','美麗新':'新北',
+      '喜樂時代永和':'新北',
+      '基隆':'基隆','宜蘭':'宜蘭',
+      '八德':'桃園','桃園':'桃園','桃知道':'桃園','統領威秀':'桃園',
+      '巨城':'新竹','新竹':'新竹',
+      '頭份':'苗栗',
+      '文心':'台中','站前':'台中','麗寶':'台中','台中':'台中','iFG':'台中','老虎城':'台中','豐原':'台中',
+      '北港':'雲林',
+      '嘉義':'嘉義','in89嘉義':'嘉義',
+      '仁德':'台南','台南':'台南','南紡':'台南','Focus':'台南',
+      '夢時代':'高雄','岡山':'高雄','高雄':'高雄','草衙':'高雄','義大':'高雄',
+      '大立':'高雄','駁二':'高雄','喜樂時代總圖':'高雄',
+      '屏東':'屏東',
+      '花蓮':'花蓮','台東':'台東',
+    };
+    var keys = Object.keys(MAP);
+    for (var j=0;j<keys.length;j++) { if (name.indexOf(keys[j])>=0) return MAP[keys[j]]; }
+    return null;
+  }
+
+  // ── Build cinema dots ─────────────────────────────────────────
+  var codeColor = {'ST':'#A78BFA','VS':'#F87171','GBA':'#60A5FA','SK':'#FB923C',
+    'MR':'#E879F9','IN89':'#FBBF24','JY':'#34D399','MRN':'#F472B6'};
+  var dots = [];
+  (DATA.cinemas||[]).forEach(function(c){
+    var city=_city(c.name); if(city&&CITY_XY[city]) dots.push({code:'ST',city:city,color:'#A78BFA',bo:c.bo,label:c.name,st:true});
+  });
+  ['N','C','S'].forEach(function(reg){
+    var arr=(DATA.wisonMTD&&DATA.wisonMTD[reg])||[];
+    arr.forEach(function(c){
+      var city=_city(c.name); if(city&&CITY_XY[city]) dots.push({code:'VS',city:city,color:'#F87171',bo:c.bo,label:c.name,st:false});
+    });
+  });
+  (DATA.otherCinemas||[]).forEach(function(c){
+    var city=c.region||_city(c.name);
+    var clr=codeColor[c.chain]||'#94A3B8';
+    if(city&&CITY_XY[city]) dots.push({code:c.chain,city:city,color:clr,bo:c.bo,label:c.name,st:false});
+  });
+
+  var cityCount={};
+  var dotSVG = dots.map(function(d){
+    var xy=CITY_XY[d.city], bx=xy[0], by=xy[1];
+    if(!cityCount[d.city]) cityCount[d.city]=0;
+    var i=cityCount[d.city]++;
+    var ang=i*2.399, dist=i===0?0:(2.5+Math.floor(i/6)*4.5);
+    var x=(bx+dist*Math.cos(ang)).toFixed(1), y=(by+dist*Math.sin(ang)).toFixed(1);
+    var r=d.st?3.8:2.5;
+    var ring=d.st?'<circle cx="'+x+'" cy="'+y+'" r="'+(r+2.5)+'" fill="none" stroke="'+d.color+'" stroke-width="0.9" opacity="0.45"/>':'';
+    return ring+'<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+d.color+'" opacity="'+(d.st?'0.95':'0.72')+'"><title>'+d.label+(d.bo?' '+d.bo.toFixed(1)+'萬':'')+'</title></circle>';
+  }).join('');
+
+  // ── Donut chart ───────────────────────────────────────────────
+  var DCX=85,DCY=85,DR=68,Dri=46,GAP=0.024;
+  var ang=-Math.PI/2, donutSVG='';
+  CHAIN_CFG.forEach(function(c,i){
+    var pct=vals[i]/total, sweep=pct*2*Math.PI-GAP;
+    if(sweep<=0) return;
+    var large=sweep>Math.PI?1:0;
+    var x1=(DCX+DR*Math.cos(ang)).toFixed(2), y1=(DCY+DR*Math.sin(ang)).toFixed(2);
+    var x2=(DCX+DR*Math.cos(ang+sweep)).toFixed(2), y2=(DCY+DR*Math.sin(ang+sweep)).toFixed(2);
+    var x3=(DCX+Dri*Math.cos(ang+sweep)).toFixed(2), y3=(DCY+Dri*Math.sin(ang+sweep)).toFixed(2);
+    var x4=(DCX+Dri*Math.cos(ang)).toFixed(2), y4=(DCY+Dri*Math.sin(ang)).toFixed(2);
+    donutSVG+='<path d="M'+x1+','+y1+' A'+DR+','+DR+',0,'+large+',1,'+x2+','+y2+' L'+x3+','+y3+' A'+Dri+','+Dri+',0,'+large+',0,'+x4+','+y4+' Z" fill="'+c.color+'" opacity="0.92"><title>'+c.key+': '+(pct*100).toFixed(1)+'% · '+vals[i].toFixed(1)+'萬</title></path>';
+    ang+=pct*2*Math.PI;
+  });
+  var topIdx=vals.indexOf(Math.max.apply(null,vals));
+  var topC=CHAIN_CFG[topIdx], topPct=(vals[topIdx]/total*100).toFixed(1);
+
+  // ── Legend ────────────────────────────────────────────────────
+  var legendHTML=CHAIN_CFG.map(function(c,i){
+    var pct=(vals[i]/total*100).toFixed(1), isST=c.key==='秀泰';
+    return '<div style="display:flex;align-items:center;gap:5px;padding:2.5px 0;">'
+      +'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+c.color+';flex-shrink:0;'+(isST?'box-shadow:0 0 6px '+c.color+';':'')+'"></span>'
+      +'<span style="font-size:10.5px;color:rgba(255,255,255,'+(isST?'.9':'.55')+');font-weight:'+(isST?700:400)+';flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+c.key+'</span>'
+      +'<span style="font-size:10px;color:'+c.color+';font-weight:700;min-width:30px;text-align:right;">'+pct+'%</span>'
+      +'<span style="font-size:9.5px;color:rgba(255,255,255,0.22);min-width:36px;text-align:right;">'+vals[i].toFixed(1)+'萬</span>'
       +'</div>';
   }).join('');
 
-  const el = document.getElementById('mktShareCompact');
-  if (el) el.innerHTML = rows;
+  // ── Taiwan SVG path ───────────────────────────────────────────
+  var TW = 'M75,8 C85,5 98,14 108,28 L115,44 C118,56 118,72 116,92 C114,112 112,132 108,153 C104,173 99,192 92,208 C85,224 76,236 65,240 C54,244 44,236 38,222 C32,208 29,190 28,170 C27,150 28,130 31,110 C34,90 39,72 46,56 C53,40 63,17 75,8Z';
+
+  // ── Assemble ──────────────────────────────────────────────────
+  var out = '<div style="display:flex;min-height:255px;">'
+    +'<div style="flex:0 0 44%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 6px 12px 14px;border-right:1px solid rgba(255,255,255,0.05);">'
+      +'<div style="font-size:8.5px;color:rgba(255,255,255,0.28);margin-bottom:5px;letter-spacing:1.2px;text-transform:uppercase;align-self:center;">影城分布圖</div>'
+      +'<svg viewBox="0 0 140 260" style="width:100%;max-width:185px;height:auto;" xmlns="http://www.w3.org/2000/svg">'
+        +'<defs>'
+          +'<radialGradient id="twBg" cx="48%" cy="50%" r="55%"><stop offset="0%" stop-color="#1e3c5c" stop-opacity="0.85"/><stop offset="100%" stop-color="#0a1525" stop-opacity="1"/></radialGradient>'
+          +'<filter id="glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'
+          +'<filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.6"/></filter>'
+        +'</defs>'
+        +'<path d="'+TW+'" filter="url(#shadow)" fill="url(#twBg)" stroke="rgba(80,180,255,0.28)" stroke-width="0.9"/>'
+        +'<line x1="26" y1="83" x2="120" y2="83" stroke="rgba(255,255,255,0.03)" stroke-width="0.6"/>'
+        +'<line x1="26" y1="133" x2="120" y2="133" stroke="rgba(255,255,255,0.03)" stroke-width="0.6"/>'
+        +'<line x1="26" y1="183" x2="120" y2="183" stroke="rgba(255,255,255,0.03)" stroke-width="0.6"/>'
+        +'<g filter="url(#glow)">'+dotSVG+'</g>'
+        +'<text x="72" y="40" font-size="5.5" fill="rgba(255,255,255,0.32)" text-anchor="middle" font-family="sans-serif">台北</text>'
+        +'<text x="42" y="128" font-size="5.5" fill="rgba(255,255,255,0.32)" text-anchor="middle" font-family="sans-serif">台中</text>'
+        +'<text x="52" y="196" font-size="5.5" fill="rgba(255,255,255,0.32)" text-anchor="middle" font-family="sans-serif">台南</text>'
+        +'<text x="62" y="212" font-size="5.5" fill="rgba(255,255,255,0.32)" text-anchor="middle" font-family="sans-serif">高雄</text>'
+        +'<text x="110" y="131" font-size="5.5" fill="rgba(255,255,255,0.32)" text-anchor="middle" font-family="sans-serif">花蓮</text>'
+        +'<text x="97" y="54" font-size="5" fill="rgba(255,255,255,0.22)" text-anchor="middle" font-family="sans-serif">宜蘭</text>'
+      +'</svg>'
+    +'</div>'
+    +'<div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 12px 10px 8px;gap:0;">'
+      +'<div style="font-size:8.5px;color:rgba(255,255,255,0.28);letter-spacing:1.2px;text-transform:uppercase;align-self:flex-start;margin-bottom:4px;">市場份額</div>'
+      +'<svg viewBox="0 0 170 170" style="width:100%;max-width:168px;height:auto;flex-shrink:0;" xmlns="http://www.w3.org/2000/svg">'
+        +'<defs><filter id="dg" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>'
+        +'<circle cx="'+DCX+'" cy="'+DCY+'" r="'+DR+'" fill="rgba(255,255,255,0.03)"/>'
+        +'<g filter="url(#dg)">'+donutSVG+'</g>'
+        +'<text x="'+DCX+'" y="'+(DCY-8)+'" text-anchor="middle" font-size="22" font-weight="900" fill="'+topC.color+'" font-family=\'Arial,sans-serif\'>'+topPct+'%</text>'
+        +'<text x="'+DCX+'" y="'+(DCY+8)+'" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.45)" font-family="sans-serif">'+topC.key+'</text>'
+        +'<text x="'+DCX+'" y="'+(DCY+20)+'" text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.22)" font-family="sans-serif">市場占比最高</text>'
+      +'</svg>'
+      +'<div style="width:100%;max-width:168px;margin-top:2px;">'+legendHTML+'</div>'
+    +'</div>'
+    +'</div>';
+
+  var el=document.getElementById('mktShareCompact');
+  if(el) el.innerHTML=out;
 }
 
 function renderAll() {
