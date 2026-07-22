@@ -2244,13 +2244,16 @@ function renderFilms() {
   document.getElementById('filmBody').innerHTML = sorted.map((m, i) => {
     const rank = i + 1;
     const cls  = rank===1?'fr1':rank===2?'fr2':rank===3?'fr3':'';
-    const tBO   = m.totalBO     > 10000 ? m.totalBO/10000     : (m.totalBO   ||0);
-    const sBO   = m.stBO        > 10000 ? m.stBO/10000        : (m.stBO      ||0);
-    const cumBO = m.cumBO       > 10000 ? m.cumBO/10000       : (m.cumBO     ||0);
-    const sMtd  = m.stMtdBO     > 10000 ? m.stMtdBO/10000     : (m.stMtdBO   ||0);
-    const wBO   = (m.wisonBO||0) > 10000 ? (m.wisonBO||0)/10000  : (m.wisonBO||0);
-    const wMtd  = m.wisonMtdBO  > 10000 ? m.wisonMtdBO/10000  : (m.wisonMtdBO||0);
-    const mMtd  = m.mktMtdBO    > 10000 ? m.mktMtdBO/10000    : (m.mktMtdBO  ||0);
+    // 欄位固定為「元」，一律 ÷10000 換算成萬；舊版用 >10000 門檻判斷單位，
+    // 會讓票房剛好落在1萬元以下的院線分帳（如8,161元、5,355元）被誤判成已是「萬元」，
+    // 導致市占%暴增千倍（2026-07-22 Kevina回報後修正）。
+    const tBO   = (m.totalBO   ||0) / 10000;
+    const sBO   = (m.stBO      ||0) / 10000;
+    const cumBO = (m.cumBO     ||0) / 10000;
+    const sMtd  = (m.stMtdBO   ||0) / 10000;
+    const wBO   = (m.wisonBO   ||0) / 10000;
+    const wMtd  = (m.wisonMtdBO||0) / 10000;
+    const mMtd  = (m.mktMtdBO  ||0) / 10000;
     const stShare    = tBO>0 && sBO>0  ? (sBO/tBO*100).toFixed(1)   : null;
     const stMtdShare = mMtd>0 && sMtd>0 ? (sMtd/mMtd*100).toFixed(1) : null;
     const wShare    = tBO>0  && wBO>0   ? (wBO/tBO*100).toFixed(1)    : null;
