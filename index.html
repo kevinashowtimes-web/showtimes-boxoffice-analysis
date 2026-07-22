@@ -675,7 +675,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
       <button id="mapBtn0" onclick="setMapMode('mtd')"
         style="font-size:11px;font-weight:700;padding:3px 11px;border-radius:20px;border:none;background:#dc2626;color:white;cursor:pointer;">當月</button>
       <button id="mapBtn1" onclick="setMapMode('hyf')"
-        style="font-size:11px;font-weight:700;padding:3px 11px;border-radius:20px;border:1px solid #e2e8f0;background:transparent;color:#94a3b8;cursor:pointer;">上半年</button>
+        style="font-size:11px;font-weight:700;padding:3px 11px;border-radius:20px;border:1px solid #e2e8f0;background:transparent;color:#94a3b8;cursor:pointer;">半年</button>
       <button id="mapBtn2" onclick="setMapMode('ann')"
         style="font-size:11px;font-weight:700;padding:3px 11px;border-radius:20px;border:1px solid #e2e8f0;background:transparent;color:#94a3b8;cursor:pointer;">年度</button>
     </div>
@@ -2381,7 +2381,7 @@ function renderTaiwanMap() {
   if (!svg) return;
 
   var ranking;
-  var _periodLabel = {mtd:'月累計 2026/7/1~'+DATA.date.slice(5), hyf:'上半年 2026/1/1~6/30', ann:'年度 2026/1/1~'+DATA.date.slice(5)};
+  var _periodLabel = {mtd:'月累計 2026/7/1~'+DATA.date.slice(5), hyf:'半年 2026/1/1~6/30', ann:'年度 2026/1/1~'+DATA.date.slice(5)};
   if (_mapMode==='mtd') ranking = DATA.mtdRanking;
   else if (_mapMode==='hyf') ranking = DATA.hyfRanking&&DATA.hyfRanking.length ? DATA.hyfRanking : [];
   else ranking = DATA.annRanking&&DATA.annRanking.length ? DATA.annRanking : [];
