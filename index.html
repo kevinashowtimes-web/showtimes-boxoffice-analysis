@@ -725,10 +725,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 
 
 <div class="sec-label">⑤ 院線競爭版圖</div>
-<div class="card" style="padding:0;overflow:hidden;margin-bottom:14px;background:linear-gradient(145deg,#0d1117 0%,#131c2e 55%,#0d1117 100%);border:1px solid rgba(255,255,255,0.07);">
-  <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 16px 9px;border-bottom:1px solid rgba(255,255,255,0.06);">
-    <span style="font-size:12px;font-weight:800;color:rgba(255,255,255,0.75);letter-spacing:.6px;">🗺 全台院線版圖</span>
-    <span id="mktTotalLabel" style="font-size:10.5px;color:rgba(255,255,255,0.3);"></span>
+<div class="card" style="padding:0;overflow:hidden;margin-bottom:14px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 16px 9px;border-bottom:1px solid rgba(0,0,0,0.07);">
+    <span style="font-size:12px;font-weight:800;color:#1e293b;letter-spacing:.6px;">🗺 全台院線版圖</span>
+    <span id="mktTotalLabel" style="font-size:10.5px;color:#94a3b8;"></span>
   </div>
   <div id="mktShareCompact"></div>
 </div>
@@ -1919,7 +1919,7 @@ function renderMktShare() {
   var SKIP_LABEL = {"基隆市":1,"新竹市":1,"嘉義市":1,"金門縣":1,"澎湖縣":1};
   var paths = TW.map(function(c,idx){
     var col = CC[c.ch] || CC["其他"];
-    return '<path d="'+c.d+'" fill="'+col.f+'" stroke="'+col.s+'" stroke-width="1" '
+    return '<path d="'+c.d+'" fill="'+col.t+'" stroke="'+col.s+'" stroke-width="1" '
       +'data-c="'+idx+'" class="twc" style="cursor:pointer;opacity:0.85"/>'; 
   }).join("");
 
@@ -1927,7 +1927,7 @@ function renderMktShare() {
     if(SKIP_LABEL[c.n]) return "";
     var col = CC[c.ch] || CC["其他"];
     var nm = c.n.replace(/[縣市]$/,"");
-    return '<text x="'+c.lx+'" y="'+c.ly+'" fill="'+col.t+'" font-size="9.5" '
+    return '<text x="'+c.lx+'" y="'+c.ly+'" fill="'+col.f+'" font-size="9.5" '
       +'text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" '
       +'pointer-events="none" font-weight="500">'+nm+"</text>";
   }).join("");
@@ -1963,7 +1963,7 @@ function renderMktShare() {
   // Legend: chain colors
   var chainLegend = ["秀泰","威秀","國賓","美麗華","其他"].map(function(nm){
     var col = CC[nm];
-    return '<span style="margin-right:8px;font-size:10px;color:'+col.t+'">'
+    return '<span style="margin-right:8px;font-size:10px;color:'+col.s+'">'
       +'<span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:'+col.s+';margin-right:2px;vertical-align:middle"></span>'
       +nm+"</span>";
   }).join("");
@@ -1972,7 +1972,7 @@ function renderMktShare() {
     '<div style="display:flex;gap:0;min-height:480px;background:transparent;border-radius:8px;overflow:hidden">'
     +'<div style="flex:1;position:relative;min-width:0;padding:8px 4px 32px 8px">'
     +'<svg id="twMapSvg" viewBox="0 0 800 900" style="width:100%;height:100%;max-height:480px;display:block">'
-    +"<rect width=\"800\" height=\"900\" fill=\"#131c2e\" />"
+    +"<rect width=\"800\" height=\"900\" fill=\"transparent\" />"
     +paths+labels
     +"<g>"+dotSvg+"</g>"
     +"</svg>"
@@ -1980,7 +1980,7 @@ function renderMktShare() {
     +'<div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:10px;color:#475569;white-space:nowrap">'
     +chainLegend+"</div>"
     +"</div>"
-    +'<div style="width:168px;padding:12px 12px 12px 10px;border-left:1px solid #1e3a5f;display:flex;flex-direction:column;background:transparent">'
+    +'<div style="width:168px;padding:12px 12px 12px 10px;border-left:1px solid #e2e8f0;display:flex;flex-direction:column;background:transparent">'
     +'<div style="font-size:11px;color:#475569;margin-bottom:4px">市場占有率</div>'
     +'<div style="font-size:22px;font-weight:700;color:#c084fc;line-height:1.1;margin-bottom:2px">'+stPct+"%</div>"
     +'<div style="font-size:10px;color:#475569;margin-bottom:10px">秀泰市占 | 全台'+totalWan+"萬</div>"
