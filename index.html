@@ -1871,11 +1871,11 @@ function renderMktShare() {
   ];
 
   var RC = {
-    N:{f:"#1e3a5f",s:"#3b82f6",t:"#93c5fd",h:"#2563eb"},
-    C:{f:"#14432a",s:"#22c55e",t:"#86efac",h:"#16a34a"},
-    S:{f:"#4a1942",s:"#e879f9",t:"#f0abfc",h:"#c026d3"},
-    E:{f:"#3b2800",s:"#f59e0b",t:"#fcd34d",h:"#d97706"},
-    I:{f:"#1e293b",s:"#64748b",t:"#94a3b8",h:"#475569"}
+    N:{f:"#1a3a6b",s:"#60a5fa",t:"#bfdbfe",h:"#2563eb"},
+    C:{f:"#14432a",s:"#4ade80",t:"#bbf7d0",h:"#15803d"},
+    S:{f:"#7c2d12",s:"#fb923c",t:"#fed7aa",h:"#ea580c"},
+    E:{f:"#713f12",s:"#fbbf24",t:"#fef08a",h:"#ca8a04"},
+    I:{f:"#0c4a6e",s:"#38bdf8",t:"#bae6fd",h:"#0284c7"}
   };
 
   var DOTS = [
@@ -1949,9 +1949,9 @@ function renderMktShare() {
   }).join("");
 
   el.innerHTML =
-    '<div style="display:flex;gap:0;min-height:480px">'
+    '<div style="display:flex;gap:0;min-height:480px;background:#0d1b2a;border-radius:8px;overflow:hidden">'
     +'<div style="flex:1;position:relative;min-width:0;padding:8px 4px 32px 8px">'
-    +'<svg id="twMapSvg" viewBox="0 0 800 900" style="width:100%;height:100%;max-height:480px;display:block">'
+    +'<svg id="twMapSvg" viewBox="0 0 800 900" style="width:100%;height:100%;max-height:480px;display:block"><rect width="800" height="900" fill="#0d1b2a"/>'
     +paths+labels
     +"<g>"+dots+"</g>"
     +"</svg>"
@@ -1959,7 +1959,7 @@ function renderMktShare() {
     +'<div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:10px;color:#475569;white-space:nowrap">'
     +legItems+'<span style="color:#f59e0b">&#9679; 秀泰影城</span></div>'
     +"</div>"
-    +'<div style="width:168px;padding:12px 12px 12px 10px;border-left:1px solid #1e293b;display:flex;flex-direction:column">'
+    +'<div style="width:168px;padding:12px 12px 12px 10px;border-left:1px solid #1e3a5f;display:flex;flex-direction:column;background:#0d1b2a">'
     +'<div style="font-size:11px;color:#475569;margin-bottom:4px">市場占有率</div>'
     +'<div style="font-size:22px;font-weight:700;color:#c084fc;line-height:1.1;margin-bottom:2px">'+stPct+"%</div>"
     +'<div style="font-size:10px;color:#475569;margin-bottom:10px">秀泰市占 | 全台'+totalWan+"萬</div>"
