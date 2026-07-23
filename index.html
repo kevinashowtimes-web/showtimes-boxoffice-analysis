@@ -2059,7 +2059,7 @@ function renderMktShare() {
       p.addEventListener("mouseleave",function(){
         this.setAttribute("fill",col.t);
         pop.style.opacity='0';
-        if(tip)tip.textContent="🔍 滚輪縮放 · 拖曳移動 · 雙擊重置";
+        if(tip)tip.textContent="🔍 滾輪縮放 · 拖曳移動 · 雙擊重置";
       });
       p.addEventListener("click",function(){
         if(drag.moved)return;
@@ -2077,3 +2077,2026 @@ function renderMktShare() {
     });
   }, 100);
 }
+
+function renderAll() {
+  saveSnapshot();
+  renderHeader();
+  renderKPIs();
+  renderST();
+  renderFilms();
+  renderMktShare();
+  renderFullRankings();
+  renderRegional();
+  renderTaiwanMap();
+  renderHistory();
+}
+
+function renderHeader() {
+  const wd = ['日','一','二','三','四','五','六'];
+  const d = new Date(DATA.date);
+  const wdStr = isNaN(d) ? '' : `（週${wd[d.getDay()]}）`;
+  document.getElementById('hdrDate').textContent = DATA.date + wdStr;
+  document.getElementById('hdrTime').textContent = DATA.lastUpdate || '—';
+}
+
+function renderKPIs() {
+  const st  = DATA.st;
+  const mkt = DATA.mkt;
+  const ws  = DATA.wison;
+
+  // 計算秀泰各項
+  const totalVis = DATA.cinemas.reduce((s,c)=>s+c.visitors, 0);
+  const totalBO  = DATA.cinemas.reduce((s,c)=>s+c.bo, 0);
+  const stATP    = totalVis > 0 ? +(totalBO * 10000 / totalVis).toFixed(1) : 0;
+  const stMS     = mkt.bo > 0 ? (st.bo / mkt.bo * 100) : 0;
+  const wsMS     = mkt.bo > 0 ? (ws.bo  / mkt.bo * 100) : 0;
+  const mktATP   = mkt.visitors > 0 ? +(mkt.bo * 10000 / mkt.visitors).toFixed(1) : 0;
+  const wsATP    = ws.visitors  > 0 ? +(ws.bo  * 10000 / ws.visitors).toFixed(1) : 0;
+  const ystChg   = st.ystBO > 0 ? (st.bo - st.ystBO) / st.ystBO * 100 : null;
+
+  // ── 日期 + 假日標示 ──────────────────────────────────────────
+  const dateStr = DATA.date;
+  const d = new Date(dateStr);
+  const weekdays = ['日','一','二','三','四','五','六'];
+  const wd = weekdays[d.getDay()];
+  const yy = d.getFullYear(), mm = d.getMonth()+1, dd = d.getDate();
+  const dateDisp = `今日 ${yy}/${mm}/${dd}（${wd}）`;
+  // 台灣國定假日 (MMDD)
+  const twHolidays = {
+    '0101':'元旦','0228':'和平紀念日','0403':'兒童節','0404':'清明節',
+    '0405':'清明節','0501':'勞動節','0619':'端午節','0912':'中秋節','1010':'國慶日',
+    '0121':'農曆春節','0122':'農曆春節','0123':'農曆春節','0124':'農曆春節',
+    '0125':'農曆春節','0126':'農曆春節',
+  };
+  const mmdd = String(mm).padStart(2,'0') + String(dd).padStart(2,'0');
+  const isHoliday = twHolidays[mmdd];
+  const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+
+  const dateTxt = document.getElementById('kpiDateTxt');
+  const badge   = document.getElementById('kpiHolidayBadge');
+  if (dateTxt) dateTxt.textContent = dateDisp;
+  if (badge) {
+    if (isHoliday) {
+      badge.style.display = '';
+      badge.style.background = '#FFF3E0'; badge.style.color = '#E65100'; badge.style.border = '1px solid #FFB74D';
+      badge.textContent = '🎌 ' + isHoliday;
+    } else if (isWeekend) {
+      badge.style.display = '';
+      badge.style.background = '#E8F5E9'; badge.style.color = '#2E7D32'; badge.style.border = '1px solid #81C784';
+      badge.textContent = '🌟 週末';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  // ── 全台 ────────────────────────────────────────────────────
+  const setEl = (id,v) => { const el=document.getElementById(id); if(el) el.innerHTML=v; };
+
+  setEl('b-mkt-bo',  mkt.bo > 0 ? fmtAuto(mkt.bo) : '—<span class="unit">萬</span>');
+  setEl('b-mkt-adm', mkt.visitors > 0 ? fmt(mkt.visitors)+'<span class="unit">人</span>' : '—<span class="unit">人</span>');
+  setEl('b-mkt-atp', mktATP > 0 ? fmtATP(mktATP)+'<span class="unit">元</span>' : '⚠ 待確認');
+
+  // ── 秀泰 ────────────────────────────────────────────────────
+  setEl('b-st-bo',   fmtW(st.bo)+'<span class="unit">萬</span>');
+  setEl('b-st-adm',  fmt(totalVis)+'<span class="unit">人</span>');
+  setEl('b-st-atp',  stATP > 0 ? fmtATP(stATP)+'<span class="unit">元</span>' : '—<span class="unit">元</span>');
+  setEl('b-st-ms',   (stMS > 0 ? stMS.toFixed(1) : '—')+'<span class="unit">%</span>');
+  setEl('b-st-ms-badge', '市佔率 ' + (stMS > 0 ? stMS.toFixed(1)+'%' : '—'));
+  // ── 上週同一星期幾比較 ─────────────────────────────────────────
+  const d7 = new Date(DATA.date);
+  d7.setDate(d7.getDate() - 7);
+  const d7Key = d7.toISOString().slice(0, 10);
+  const h7 = DATA.history[d7Key];
+  const vsWk = h7 ? 'vs 上週' + weekdays[d7.getDay()] : 'vs 上週';
+
+  // 秀泰 vs 上週
+  let stBOChg7 = null, stADMChg7 = null, stATPChg7 = null, stMSChg7 = null;
+  if (h7 && h7.stBO > 0) {
+    stBOChg7  = (st.bo - h7.stBO) / h7.stBO * 100;
+    if (h7.stVisitors > 0) {
+      stADMChg7 = (totalVis - h7.stVisitors) / h7.stVisitors * 100;
+      const lwStATP = +(h7.stBO * 10000 / h7.stVisitors).toFixed(1);
+      if (lwStATP > 0) stATPChg7 = (stATP - lwStATP) / lwStATP * 100;
+    }
+    const lwStMS = h7.mktBO > 0 ? h7.stBO / h7.mktBO * 100 : 0;
+    if (lwStMS > 0) stMSChg7 = stMS - lwStMS;
+  }
+  const closureDay = h7 && h7.closure;
+  const closureLabel = closureDay ? '<span style="color:#f59e0b;font-size:10px">⚠ 颱風停業（'+vsWk+'比較無效）</span>' : null;
+  const boSubEl = document.getElementById('b-st-bo-sub');
+  if (boSubEl) boSubEl.innerHTML = closureLabel || (stBOChg7 !== null ? deltaHtml(stBOChg7)+' '+vsWk : '— '+vsWk);
+  setEl('b-st-adm-sub', closureLabel || (stADMChg7 !== null ? deltaHtml(stADMChg7)+' '+vsWk : '— '+vsWk));
+  setEl('b-st-atp-sub', closureLabel || (stATPChg7 !== null ? deltaHtml(stATPChg7)+' '+vsWk : '— '+vsWk));
+  setEl('b-st-ms-sub',  closureLabel || (stMSChg7  !== null ? deltaHtml(stMSChg7,'%pts')+' '+vsWk  : '秀泰÷全台'));
+
+  // ── 威秀 主值 ────────────────────────────────────────────
+  setEl('b-ws-bo',  fmtW(ws.bo)+'<span class="unit">萬</span>');
+  setEl('b-ws-adm', ws.visitors > 0 ? fmt(ws.visitors)+'<span class="unit">人</span>' : '—<span class="unit">人</span>');
+  setEl('b-ws-atp', wsATP > 0 ? fmtATP(wsATP)+'<span class="unit">元</span>' : '⚠ 待確認');
+  setEl('b-ws-ms',  (wsMS > 0 ? wsMS.toFixed(1) : '—')+'<span class="unit">%</span>');
+  setEl('b-ws-ms-badge', '市佔率 ' + (wsMS > 0 ? wsMS.toFixed(1)+'%' : '—'));
+
+  // 威秀 vs 上週
+  let wsBOChg7 = null, wsADMChg7 = null, wsATPChg7 = null, wsMSChg7 = null;
+  if (h7 && h7.wisonBO > 0) {
+    wsBOChg7 = (ws.bo - h7.wisonBO) / h7.wisonBO * 100;
+    const lwWsMS = h7.mktBO > 0 ? h7.wisonBO / h7.mktBO * 100 : 0;
+    if (lwWsMS > 0) wsMSChg7 = wsMS - lwWsMS;
+    if (h7.wisonVisitors > 0 && ws.visitors > 0) {
+      wsADMChg7 = (ws.visitors - h7.wisonVisitors) / h7.wisonVisitors * 100;
+    }
+    if (h7.wisonATP > 0 && wsATP > 0) {
+      wsATPChg7 = (wsATP - h7.wisonATP) / h7.wisonATP * 100;
+    }
+  }
+  setEl('b-ws-bo-sub',  closureLabel || (wsBOChg7  !== null ? deltaHtml(wsBOChg7)+'  '+vsWk : '— '+vsWk));
+  setEl('b-ws-adm-sub', closureLabel || (ws.visitors > 0 ? (wsADMChg7 !== null ? deltaHtml(wsADMChg7)+' '+vsWk : '— '+vsWk) : '⚠ 待確認'));
+  setEl('b-ws-atp-sub', closureLabel || (wsATP     > 0 ? (wsATPChg7 !== null ? deltaHtml(wsATPChg7)+' '+vsWk : '— '+vsWk) : '⚠ 待確認'));
+  setEl('b-ws-ms-sub',  closureLabel || (wsMSChg7  !== null ? deltaHtml(wsMSChg7,'%pts')+' '+vsWk : '威秀÷全台'));
+
+  // 全台統計院線數
+  // 全台影城家數：優先用 DATA.mkt.cinemaCount（手動填入），否則累計排行數
+  const cinemaCount = (DATA.mkt.cinemaCount && DATA.mkt.cinemaCount > 0)
+    ? DATA.mkt.cinemaCount
+    : ((DATA.ytdRanking||[]).length + (DATA.mtdRanking||[]).length > 0
+        ? Math.max((DATA.ytdRanking||[]).length, (DATA.mtdRanking||[]).length) : 0);
+  const chainCount = DATA.competitors ? Object.keys(DATA.competitors).filter(k=>(DATA.competitors[k]||0)>0).length : 0;
+  setEl('b-mkt-chain-count', cinemaCount > 0
+    ? cinemaCount+'<span class="unit">家</span>'
+    : (chainCount > 0 ? chainCount+'<span class="unit">院線</span>' : '—<span class="unit">家</span>'));
+  // 更新 label
+  const chainLbl = document.querySelector('#b-mkt-chain-count')?.closest('.brand-metric')?.querySelector('.bm-lbl');
+  if (chainLbl) chainLbl.textContent = cinemaCount > 0 ? '統計影城' : '統計院線';
+
+  // 待確認提示（保留相容）
+
+
+  // ── 月累計（動態從 history[] 加總；ADM/ATP 由 monthlyArchive 補齊）────────
+  const curYM    = DATA.date.substring(0, 7);
+  const dynMTD   = calcMonthMTD(curYM);    // 從 history[] 實時加總
+  const arc      = getMonthArchive(curYM); // 已結束月份官方存檔（null=當月進行中）
+  const mtdMkt    = dynMTD.mktBO > 0 ? dynMTD.mktBO : (arc ? arc.mkt.bo   : (DATA.mtdMktTotal || 0));
+  const mtdMktAdm = arc ? arc.mkt.adm  : (DATA.mtdMktAdm  || 0);
+  const mtdMktAtp = arc ? arc.mkt.atp  : (DATA.mtdMktAtp  || 0);
+  const stMtdBO   = dynMTD.stBO  > 0 ? dynMTD.stBO  : (arc ? arc.st.bo   : (DATA.st.mtdBO  || 0));
+  const stMtdVis  = dynMTD.stAdm > 0 ? dynMTD.stAdm : (arc ? arc.st.adm  : DATA.cinemas.reduce((s,c)=>s+(c.mtdVisitors||0), 0));
+  const stMtdATP  = stMtdVis > 0 ? +(stMtdBO * 10000 / stMtdVis).toFixed(1) : 0;
+  const stMtdMS   = mtdMkt > 0 ? (stMtdBO / mtdMkt * 100) : 0;
+  const wsMtdBO   = dynMTD.wsBO  > 0 ? dynMTD.wsBO  : (arc ? arc.wison.bo : (ws.mtdBO       || 0));
+  const wsMtdVis  = arc ? arc.wison.adm : (ws.mtdVisitors || 0);
+  const wsMtdAtp  = arc ? arc.wison.atp : (ws.mtdAtp      || 0);
+  const wsMtdMS   = mtdMkt > 0 ? (wsMtdBO / mtdMkt * 100) : 0;
+  const dtMtd = new Date(DATA.date);
+
+  setEl('b-mkt-bo-mtd',  mtdMkt    > 0 ? `累積 ${fmtAuto(mtdMkt)}` : '月數據待整合');
+  setEl('b-mkt-adm-mtd', mtdMktAdm > 0 ? `累積 ${fmt(mtdMktAdm)} 人` : '月數據待整合');
+  setEl('b-mkt-atp-mtd', mtdMktAtp > 0 ? `月均 ${fmtATP(mtdMktAtp)} 元` : '月數據待整合');
+  setEl('b-mkt-ms-mtd',  `${dtMtd.getMonth()+1}/${dtMtd.getDate()} 全台基準`);
+  setEl('b-st-bo-mtd',  stMtdBO  > 0 ? `累積 ${fmtW(stMtdBO)} 萬` : '—');
+  setEl('b-st-adm-mtd', stMtdVis > 0 ? `累積 ${fmt(stMtdVis)} 人` : '—');
+  setEl('b-st-atp-mtd', stMtdATP > 0 ? `月均 ${fmtATP(stMtdATP)} 元` : '—');
+  setEl('b-st-ms-mtd',  stMtdMS  > 0 ? `月均 ${stMtdMS.toFixed(1)}%` : '—');
+  setEl('b-ws-bo-mtd',  wsMtdBO  > 0 ? `累積 ${fmtW(wsMtdBO)} 萬` : '⚠ 待確認');
+  setEl('b-ws-adm-mtd', wsMtdVis > 0 ? `累積 ${fmt(wsMtdVis)} 人` : '月數據待整合');
+  setEl('b-ws-atp-mtd', wsMtdAtp > 0 ? `月均 ${fmtATP(wsMtdAtp)} 元` : '月數據待整合');
+  setEl('b-ws-ms-mtd',  wsMtdMS  > 0 ? `月均 ${wsMtdMS.toFixed(1)}%` : '—');
+
+  // ── 院線競爭格局圖（保留原有 donut chart + vsBar 邏輯） ──────
+  const wiShare = wsMS;
+  const others  = 100 - stMS - wiShare;
+  if (typeof Chart !== 'undefined') {
+    const ctx = document.getElementById('chartDonut');
+    if (ctx) {
+      if (window._donutChart) { window._donutChart.destroy(); }
+      window._donutChart = new Chart(ctx, {
+        type:'doughnut',
+        data:{ labels:['秀泰','威秀','其他'],
+               datasets:[{data:[stMS,wiShare,others>0?others:0],
+                          backgroundColor:['#7052C0','#E05060','#A8B8C5'],
+                          borderWidth:0}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.label+': '+c.parsed.toFixed(1)+'%'}}}}
+      });
+    }
+  }
+
+  // legend
+  const leg = document.getElementById('compLegend');
+  if (leg) {
+    const rows = [
+      {label:'秀泰',  pct:stMS,   color:'var(--st)'},
+      {label:'威秀',  pct:wiShare, color:'#C62828'},
+      {label:'其他',  pct:others,  color:'#90A4AE'},
+    ];
+    leg.innerHTML = rows.map(r=>`
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+        <span style="width:10px;height:10px;border-radius:50%;background:${r.color};flex-shrink:0;"></span>
+        <span style="font-size:12px;flex:1;">${r.label}</span>
+        <strong style="font-size:13px;">${r.pct>0?r.pct.toFixed(1)+'%':'—'}</strong>
+      </div>`).join('');
+  }
+
+  // vsBar
+  const vsBar = document.getElementById('vsBar');
+  if (vsBar && stMS > 0 && wiShare > 0) {
+    vsBar.innerHTML = `
+      <div style="font-size:11px;color:var(--sub);margin-bottom:4px;">秀泰 vs 威秀 直接比較</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span style="font-size:11px;font-weight:700;color:var(--st);width:30px;text-align:right;">${stMS.toFixed(1)}%</span>
+        <div style="flex:1;height:10px;background:var(--gray-lt);border-radius:5px;overflow:hidden;">
+          <div style="height:100%;width:${(stMS/(stMS+wiShare)*100).toFixed(1)}%;background:var(--st);border-radius:5px;"></div>
+        </div>
+        <span style="font-size:11px;font-weight:700;color:#C62828;width:30px;">${wiShare.toFixed(1)}%</span>
+      </div>`;
+  } else {
+    if (vsBar) vsBar.innerHTML = '';
+  }
+}
+
+// ════ ② 秀泰各家排行 ════
+function renderST() {
+  // VS上週同日 helper: 7-day history key
+  const d7 = new Date(DATA.date); d7.setDate(d7.getDate()-7);
+  const d7Key = d7.toISOString().slice(0,10);
+  const h7 = DATA.history && DATA.history[d7Key];
+  const weekdays = ['日','一','二','三','四','五','六'];
+  const w7label = '上週' + weekdays[d7.getDay()];
+
+  // ── 當日排行 ───────────────────────────────────────────────────────────
+  const sorted = [...DATA.cinemas].sort((a,b) => b.bo - a.bo);
+  const bodyD = document.getElementById('stDailyBody');
+  if (bodyD) {
+    bodyD.innerHTML = '';
+    sorted.forEach((c, i) => {
+      const atp = c.avgPrice ? +(+c.avgPrice).toFixed(1) : (c.visitors > 0 ? +(c.bo * 10000 / c.visitors).toFixed(1) : 0);
+      const fb  = +(c.fb || 0);
+      const spp = c.visitors > 0 && fb > 0 ? +(fb * 10000 / c.visitors).toFixed(1) : 0;
+      // 票房 VS上週：per-cinema weekly, use c.w7BO if available, else c.ystBO
+      const w7bo  = c.w7BO  || 0;
+      const ystbo = c.ystBO || 0;
+      const refBO = w7bo > 0 ? w7bo : ystbo;
+      const boChip = refBO > 0 ? deltaHtml((c.bo - refBO) / refBO * 100) : '<span style="color:var(--mute);font-size:11px;">—</span>';
+      // Candy Bar VS上週：per-cinema weekly FB
+      const w7fb = c.w7FB || 0;
+      const cbChip = (w7fb > 0 && fb > 0) ? deltaHtml((fb - w7fb) / w7fb * 100) : '<span style="color:var(--mute);font-size:11px;">—</span>';
+      const cls = i < 3 ? 'rank-num r' + (i+1) : 'rank-num';
+      const bg = i%2===1 ? 'background:var(--gray-lt);' : '';
+      bodyD.innerHTML += `<tr style="${bg}">
+        <td style="text-align:center;padding:6px 6px;"><span class="${cls}">${i+1}</span></td>
+        <td style="padding:6px 8px;font-weight:600;white-space:nowrap;">${c.name}</td>
+        <td style="text-align:right;padding:6px 8px;font-weight:700;">${fmtW(c.bo)}</td>
+        <td style="text-align:right;padding:6px 8px;">${fmt(c.visitors)}</td>
+        <td style="text-align:right;padding:6px 8px;">${atp > 0 ? (+atp).toFixed(1) : '—'}</td>
+        <td style="text-align:right;padding:6px 8px;">${boChip}</td>
+        <td class="cb-td-first" style="text-align:right;padding:6px 8px;color:#2E7D32;font-weight:700;">${fb > 0 ? fmtW(fb) : '—'}</td>
+        <td class="cb-td" style="text-align:right;padding:6px 8px;color:#2E7D32;font-weight:700;">${spp > 0 ? (+spp).toFixed(1) : '—'}</td>
+        <td class="cb-td" style="text-align:right;padding:6px 8px;">${cbChip}</td>
+      </tr>`;
+    });
+    const totBO=sorted.reduce((s,c)=>s+c.bo,0),totVis=sorted.reduce((s,c)=>s+c.visitors,0),totFB=sorted.reduce((s,c)=>s+(c.fb||0),0);
+    const totW7BO=sorted.reduce((s,c)=>s+(c.w7BO||c.ystBO||0),0),totW7FB=sorted.reduce((s,c)=>s+(c.w7FB||0),0);
+    const totATP=totVis>0?+(totBO*10000/totVis).toFixed(1):0,totSPP=totVis>0&&totFB>0?+(totFB*10000/totVis).toFixed(1):0;
+    const totBoChip=totW7BO>0?deltaHtml((totBO-totW7BO)/totW7BO*100):'—';
+    const totCbChip=totW7FB>0&&totFB>0?deltaHtml((totFB-totW7FB)/totW7FB*100):'—';
+    bodyD.innerHTML+=`<tr style="background:var(--st-lt);border-top:2px solid var(--st);">
+      <td style="text-align:center;padding:6px 6px;font-weight:800;color:var(--st);">合計</td>
+      <td style="padding:6px 8px;font-weight:800;color:var(--st);">15家合計</td>
+      <td style="text-align:right;padding:6px 8px;font-weight:800;color:var(--st);">${fmtW(totBO)}</td>
+      <td style="text-align:right;padding:6px 8px;font-weight:800;color:var(--st);">${fmt(totVis)}</td>
+      <td style="text-align:right;padding:6px 8px;font-weight:800;color:var(--st);">${totATP>0?(+totATP).toFixed(1):'—'}</td>
+      <td style="text-align:right;padding:6px 8px;">${totBoChip}</td>
+      <td class="cb-td-first" style="text-align:right;padding:6px 8px;font-weight:800;color:#1B5E20;">${totFB>0?fmtW(totFB):'—'}</td>
+      <td class="cb-td" style="text-align:right;padding:6px 8px;font-weight:800;color:#1B5E20;">${totSPP>0?(+totSPP).toFixed(1):'—'}</td>
+      <td class="cb-td" style="text-align:right;padding:6px 8px;">${totCbChip}</td>
+    </tr>`;
+  }
+
+  // ── 本月累計 ───────────────────────────────────────────────────────────
+  const sortedMTD = [...DATA.cinemas].sort((a,b) => (b.mtdBO||b.bo) - (a.mtdBO||a.bo));
+  const bodyM = document.getElementById('stMTDBody');
+  if (bodyM) {
+    bodyM.innerHTML = '';
+    sortedMTD.forEach((c, i) => {
+      const mtdBO   = c.mtdBO  || c.bo;
+      const mtdVis  = c.mtdVisitors || c.visitors;
+      const mtdFB   = +(c.mtdFB || 0);
+      const mtdAtp  = mtdVis > 0 ? +(mtdBO * 10000 / mtdVis).toFixed(1) : 0;
+      const mtdSpp  = mtdVis > 0 && mtdFB > 0 ? +(mtdFB * 10000 / mtdVis).toFixed(1) : 0;
+      // VS上月同期：使用 c.lmtdBO / c.lmtdFB（上月截至同日累計）
+      const lmtdBO  = +(c.lmtdBO  || 0);
+      const lmtdFB  = +(c.lmtdFB  || 0);
+      const lmtdBOchip = lmtdBO > 0 ? deltaHtml((mtdBO - lmtdBO) / lmtdBO * 100) : '<span style="color:var(--mute);font-size:11px;">—</span>';
+      const lmtdFBchip = lmtdFB > 0 && mtdFB > 0 ? deltaHtml((mtdFB - lmtdFB) / lmtdFB * 100) : '<span style="color:var(--mute);font-size:11px;">—</span>';
+      const cls = i < 3 ? 'rank-num r' + (i+1) : 'rank-num';
+      const bg = i%2===1 ? 'background:var(--gray-lt);' : '';
+      bodyM.innerHTML += `<tr style="${bg}">
+        <td style="text-align:center;padding:6px 6px;"><span class="${cls}">${i+1}</span></td>
+        <td style="padding:6px 8px;font-weight:600;white-space:nowrap;">${c.name}</td>
+        <td style="text-align:right;padding:6px 8px;font-weight:700;color:var(--st);">${fmtW(mtdBO)}</td>
+        <td style="text-align:right;padding:6px 8px;">${fmt(mtdVis)}</td>
+        <td style="text-align:right;padding:6px 8px;">${mtdAtp>0?(+mtdAtp).toFixed(1):'—'}</td>
+        <td style="text-align:right;padding:6px 8px;">${lmtdBOchip}</td>
+        <td class="cb-td-first" style="text-align:right;padding:6px 8px;color:#2E7D32;font-weight:700;">${mtdFB>0?fmtW(mtdFB):'—'}</td>
+        <td class="cb-td" style="text-align:right;padding:6px 8px;color:#2E7D32;font-weight:700;">${mtdSpp>0?(+mtdSpp).toFixed(1):'—'}</td>
+        <td class="cb-td" style="text-align:right;padding:6px 8px;">${lmtdFBchip}</td>
+      </tr>`;
+    });
+    const mTotBO=sortedMTD.reduce((s,c)=>s+(c.mtdBO||c.bo),0),mTotVis=sortedMTD.reduce((s,c)=>s+(c.mtdVisitors||c.visitors),0),mTotFB=sortedMTD.reduce((s,c)=>s+(c.mtdFB||0),0);
+    const mTotLmtdBO=sortedMTD.reduce((s,c)=>s+(c.lmtdBO||0),0),mTotLmtdFB=sortedMTD.reduce((s,c)=>s+(c.lmtdFB||0),0);
+    const mTotATP=mTotVis>0?+(mTotBO*10000/mTotVis).toFixed(1):0,mTotSPP=mTotVis>0&&mTotFB>0?+(mTotFB*10000/mTotVis).toFixed(1):0;
+    bodyM.innerHTML+=`<tr style="background:var(--st-lt);border-top:2px solid var(--st);">
+      <td style="text-align:center;padding:6px 6px;font-weight:800;color:var(--st);">合計</td>
+      <td style="padding:6px 8px;font-weight:800;color:var(--st);">15家合計</td>
+      <td style="text-align:right;padding:6px 8px;font-weight:800;color:var(--st);">${fmtW(mTotBO)}</td>
+      <td style="text-align:right;padding:6px 8px;font-weight:800;color:var(--st);">${fmt(mTotVis)}</td>
+      <td style="text-align:right;padding:6px 8px;font-weight:800;color:var(--st);">${mTotATP>0?(+mTotATP).toFixed(1):'—'}</td>
+      <td style="text-align:right;padding:6px 8px;">${mTotLmtdBO>0?deltaHtml((mTotBO-mTotLmtdBO)/mTotLmtdBO*100):'—'}</td>
+      <td class="cb-td-first" style="text-align:right;padding:6px 8px;font-weight:800;color:#1B5E20;">${mTotFB>0?fmtW(mTotFB):'—'}</td>
+      <td class="cb-td" style="text-align:right;padding:6px 8px;font-weight:800;color:#1B5E20;">${mTotSPP>0?(+mTotSPP).toFixed(1):'—'}</td>
+      <td class="cb-td" style="text-align:right;padding:6px 8px;">${mTotLmtdFB>0&&mTotFB>0?deltaHtml((mTotFB-mTotLmtdFB)/mTotLmtdFB*100):'—'}</td>
+    </tr>`;
+  }
+}
+
+function renderFilms() {
+  const movies = DATA.movies;
+
+  if (!movies || movies.length === 0) {
+    document.getElementById('filmBody').innerHTML = `<tr><td colspan="15"><div class="empty-state"><div class="big">🎬</div>電影票房數據尚未填入</div></td></tr>`;
+    return;
+  }
+
+  // ── 上映天數動態計算（releaseDate → days）────────────────────────────
+  const _refDate = new Date(DATA.date);
+  const moviesWithDays = movies.map(m => {
+    const d = m.releaseDate
+      ? Math.floor((_refDate - new Date(m.releaseDate)) / 86400000) + 1
+      : (m.days || 0);
+    return Object.assign({}, m, { _days: Math.max(d, 1) });
+  });
+
+  // ── 排序：新片優先，次按全台當日 ──────────────────────────────────────
+  const sorted = [...moviesWithDays].sort((a,b) => {
+    const aNew = (a._days||99) <= 3 ? 1 : 0;
+    const bNew = (b._days||99) <= 3 ? 1 : 0;
+    if(bNew !== aNew) return bNew - aNew;
+    return (b.totalBO||0) - (a.totalBO||0);
+  });
+
+  document.getElementById('filmBody').innerHTML = sorted.map((m, i) => {
+    const rank = i + 1;
+    const cls  = rank===1?'fr1':rank===2?'fr2':rank===3?'fr3':'';
+    // 欄位固定為「元」，一律 ÷10000 換算成萬；舊版用 >10000 門檻判斷單位，
+    // 會讓票房剛好落在1萬元以下的院線分帳（如8,161元、5,355元）被誤判成已是「萬元」，
+    // 導致市占%暴增千倍（2026-07-22 Kevina回報後修正）。
+    const tBO   = (m.totalBO   ||0) / 10000;
+    const sBO   = (m.stBO      ||0) / 10000;
+    const cumBO = (m.cumBO     ||0) / 10000;
+    const sMtd  = (m.stMtdBO   ||0) / 10000;
+    const wBO   = (m.wisonBO   ||0) / 10000;
+    const wMtd  = (m.wisonMtdBO||0) / 10000;
+    const mMtd  = (m.mktMtdBO  ||0) / 10000;
+    const stShare    = tBO>0 && sBO>0  ? (sBO/tBO*100).toFixed(1)   : null;
+    const stMtdShare = mMtd>0 && sMtd>0 ? (sMtd/mMtd*100).toFixed(1) : null;
+    const wShare    = tBO>0  && wBO>0   ? (wBO/tBO*100).toFixed(1)    : null;
+    const wMtdShare  = mMtd>0 && wMtd>0  ? (wMtd/mMtd*100).toFixed(1) : null;
+    const isNew  = (m._days||99) <= 3;
+    const bg = i%2===1 ? 'background:var(--gray-lt);' : '';
+    return `<tr style="${bg}">
+      <td class="c" style="padding:7px 6px;"><span class="film-rank ${cls}">${rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':rank}</span></td>
+      <td style="padding:7px 8px;min-width:120px;"><span class="film-title">${m.title}</span>${isNew?'<span class="new-badge">NEW</span>':''}</td>
+      <td style="padding:7px 8px;font-size:11px;color:var(--sub);white-space:nowrap;">${m.dist||'—'}</td>
+      <td class="r" style="padding:7px 8px;color:var(--sub);white-space:nowrap;">${m.theaters>0?m.theaters+'廳':'—'}</td>
+      <td class="r" style="padding:7px 8px;color:var(--sub);">${m.sessions>0?m.sessions.toLocaleString():'—'}</td>
+      <td class="c" style="padding:7px 8px;color:var(--sub);white-space:nowrap;">${m._days>0?m._days+'天':'—'}</td>
+      <td class="r td-mkt td-mkt-first" style="padding:7px 8px;font-weight:700;color:#3F51B5;">${tBO>0?fmtAuto(tBO):'—'}</td>
+      <td class="r td-mkt" style="padding:7px 8px;font-weight:700;color:#3F51B5;">${cumBO>0?fmtAuto(cumBO):'—'}</td>
+      <td class="r td-mkt" style="padding:7px 8px;color:var(--sub);">${m.avgPrice>0?fmtATP(m.avgPrice):'—'}</td>
+      <td class="r td-st3 td-st3-first" style="padding:7px 8px;font-weight:700;color:var(--st);">${sBO>0?fmtAuto(sBO):'—'}</td>
+      <td class="r td-st3" style="padding:7px 8px;font-weight:700;color:var(--st);">${stShare?stShare+'%':'—'}</td>
+      <td class="r td-st3" style="padding:7px 8px;font-weight:700;color:var(--st-dk);">${sMtd>0?fmtAuto(sMtd):'—'}</td>
+      <td class="r td-ws3 td-ws3-first" style="padding:7px 8px;font-weight:700;color:#e97316;">${wBO>0?fmtAuto(wBO):'—'}</td>
+      <td class="r td-ws3" style="padding:7px 8px;font-weight:700;color:#e97316;">${wShare?wShare+'%':'—'}</td>
+      <td class="r td-ws3" style="padding:7px 8px;font-weight:600;color:#e97316;">${wMtd>0?fmtAuto(wMtd):'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ════ ④ 全台影城排行榜 ════
+const ST_LOGO_REG = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjAwIj4KICA8cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgcng9IjEyIiBmaWxsPSIjNkIyQThBIi8+CiAgPCEtLSBBYnN0cmFjdCBnZW9tZXRyaWMgbWFyayAo5q2l6ZqO5pa55aGKKSAtLT4KICA8cmVjdCB4PSI2OCIgeT0iNDIiIHdpZHRoPSI3MiIgaGVpZ2h0PSI0NCIgZmlsbD0id2hpdGUiLz4KICA8cmVjdCB4PSI0NCIgeT0iOTAiIHdpZHRoPSI1MiIgaGVpZ2h0PSI0MiIgZmlsbD0id2hpdGUiLz4KICA8cmVjdCB4PSIxMTIiIHk9IjEwNiIgd2lkdGg9IjMwIiBoZWlnaHQ9IjI4IiBmaWxsPSJ3aGl0ZSIvPgogIDwhLS0gU0hPV1RJTUUgdGV4dCAtLT4KICA8dGV4dCB4PSIxMDAiIHk9IjE1OCIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCxIZWx2ZXRpY2Esc2Fucy1zZXJpZiIKICAgICAgICBmb250LXNpemU9IjE4IiBmb250LXdlaWdodD0iOTAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBsZXR0ZXItc3BhY2luZz0iMiI+U0hPV1RJTUU8L3RleHQ+CiAgPCEtLSBDSU5FTUFTIHRleHQgLS0+CiAgPHRleHQgeD0iMTAwIiB5PSIxNzgiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC44NSkiIGZvbnQtZmFtaWx5PSJBcmlhbCxIZWx2ZXRpY2Esc2Fucy1zZXJpZiIKICAgICAgICBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNDAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBsZXR0ZXItc3BhY2luZz0iNSI+Q0lORU1BUzwvdGV4dD4KPC9zdmc+';
+const WS_LOGO_REG = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMiAyMiI+PHJlY3Qgd2lkdGg9IjIyIiBoZWlnaHQ9IjIyIiByeD0iNCIgZmlsbD0iIzRhNTA2OCIvPjxwb2x5bGluZSBwb2ludHM9IjIuNSw1LjUgNywxNS41IDExLDggMTUsMTUuNSAxOS41LDUuNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjQiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiIHN0cm9rZS1saW5lY2FwPSJidXR0Ii8+PC9zdmc+';
+
+function renderFullRankings() {
+  const renderTbl = (id, data) => {
+    const el = document.getElementById(id);
+    if (!el || !data || !data.length) {
+      if (el) el.innerHTML = '<tr><td colspan="6"><div class="empty-state" style="padding:20px 0;">數據未填入</div></td></tr>';
+      return;
+    }
+    el.innerHTML = '';
+    data.forEach((r, i) => {
+      const cls = r.rank <= 3 ? 'rank-num r' + r.rank : 'rank-num';
+      const stTag = r.st ? `<img src="${ST_LOGO_REG}" style="height:14px;width:auto;border-radius:2px;vertical-align:middle;margin-left:5px;opacity:.9;" alt="秀泰"/>` : '';
+      const atp = r.visitors > 0 ? +(r.bo * 10000 / r.visitors).toFixed(1) : 0;
+      const bg = r.st ? 'background:var(--st-lt);' : (i%2===1 ? 'background:var(--gray-lt);' : '');
+      el.innerHTML += `<tr style="${bg}">
+        <td style="text-align:center;padding:6px 6px;"><span class="${cls}">${r.rank}</span></td>
+        <td style="padding:6px 8px;font-weight:600;white-space:nowrap;">${r.name}${stTag}</td>
+        <td style="text-align:right;padding:6px 8px;font-weight:700;">${fmtW(r.bo)}</td>
+        <td style="text-align:right;padding:6px 8px;">${fmt(r.visitors)}</td>
+        <td style="text-align:right;padding:6px 8px;color:var(--sub);">${atp > 0 ? atp.toFixed(1) : '—'}</td>
+        <td style="text-align:right;padding:6px 8px;font-weight:800;color:${r.st ? 'var(--st)' : 'var(--text)'};">${r.mktPct.toFixed(1)}%</td>
+      </tr>`;
+    });
+  };
+  renderTbl('fullDailyBody', DATA.ytdRanking && DATA.ytdRanking.length ? DATA.ytdRanking : DATA.mtdRanking);
+  renderTbl('fullMTDBody',   DATA.mtdRanking);
+}
+
+// ════ 🔥 票房熱力圖 ════
+var _mapMode = 'mtd';
+
+var _MAP_MODES = ['mtd','hyf','ann'];
+function setMapMode(mode) {
+  _mapMode = mode;
+  var on  = 'font-size:11px;font-weight:700;padding:3px 11px;border-radius:20px;border:none;background:#dc2626;color:white;cursor:pointer;';
+  var off = 'font-size:11px;font-weight:700;padding:3px 11px;border-radius:20px;border:1px solid #e2e8f0;background:transparent;color:#94a3b8;cursor:pointer;';
+  _MAP_MODES.forEach(function(m,i){ var b=document.getElementById('mapBtn'+i); if(b) b.style.cssText=m===mode?on:off; });
+  renderTaiwanMap();
+}
+
+// 20-step hot→cold palette (rank 1=hottest red, rank 20=coldest blue)
+var _HM_PALETTE = [
+  '#7f1d1d','#9b1c1c','#b91c1c','#dc2626','#ef4444',   // 1-5  red
+  '#c2410c','#ea580c','#f97316','#fb923c','#fed7aa',   // 6-10 orange (fade)
+  '#a16207','#ca8a04','#eab308','#fde047','#fef08a',   // 11-15 yellow (fade)
+  '#15803d','#16a34a','#22c55e','#4ade80','#86efac'    // 16-20 green (fade)
+];
+// Remap by rank descending: rank1 gets palette[0], rank20 gets palette[19]
+// But we want hot=large BO, so rank1(best)=red, rank20(lowest)=green-faded
+
+function _hmColor(rank) {
+  var idx = Math.min(rank-1, _HM_PALETTE.length-1);
+  return _HM_PALETTE[idx];
+}
+
+// ── Squarified treemap layout ──────────────────────────────────
+function _squarify(items, x, y, w, h) {
+  var result = [];
+  if (!items.length) return result;
+  var remaining = items.slice().sort(function(a,b){return b.bo-a.bo;});
+  var remX=x, remY=y, remW=w, remH=h;
+  var totalVal = remaining.reduce(function(s,i){return s+i.bo;},0);
+
+  while (remaining.length) {
+    var isH = remW >= remH;
+    var stripItems=[], stripTotal=0, stripW=0, prevWorst=Infinity;
+    for (var i=0; i<remaining.length; i++) {
+      var ti = stripItems.concat([remaining[i]]);
+      var tt = stripTotal + remaining[i].bo;
+      var tw = (tt/totalVal) * (isH?remW:remH);
+      var worst=0;
+      ti.forEach(function(it){
+        var tl = (it.bo/tt)*(isH?remH:remW);
+        var asp = Math.max(tw/tl,tl/tw);
+        if(asp>worst) worst=asp;
+      });
+      if (stripItems.length>0 && worst>prevWorst+0.01) break;
+      prevWorst=worst; stripItems=ti; stripTotal=tt; stripW=tw;
+    }
+    var pos = isH?remY:remX;
+    stripItems.forEach(function(item){
+      var tl=(item.bo/stripTotal)*(isH?remH:remW);
+      if(isH) result.push({item:item,x:remX,y:pos,w:stripW,h:tl});
+      else    result.push({item:item,x:pos, y:remY,w:tl,  h:stripW});
+      pos+=tl;
+    });
+    totalVal-=stripTotal;
+    remaining=remaining.slice(stripItems.length);
+    if(isH){remX+=stripW;remW-=stripW;}
+    else   {remY+=stripW;remH-=stripW;}
+  }
+  return result;
+}
+
+function renderTaiwanMap() {
+  var svg = document.getElementById('taiwanMapSvg');
+  var lgEl = document.getElementById('heatmapLegend');
+  if (!svg) return;
+
+  var ranking;
+  var _periodLabel = {mtd:'月累計 2026/7/1~'+DATA.date.slice(5), hyf:'半年 2026/1/1~6/30', ann:'年度 2026/1/1~'+DATA.date.slice(5)};
+  if (_mapMode==='mtd') ranking = DATA.mtdRanking;
+  else if (_mapMode==='hyf') ranking = DATA.hyfRanking&&DATA.hyfRanking.length ? DATA.hyfRanking : [];
+  else ranking = DATA.annRanking&&DATA.annRanking.length ? DATA.annRanking : [];
+  var _subEl = document.getElementById('hmSubLabel');
+  if(_subEl) _subEl.textContent = (_periodLabel[_mapMode]||'') + '　面積＝票房規模　色溫＝市占高低';
+  if (!ranking||!ranking.length) {
+    svg.innerHTML='<rect width="620" height="300" fill="#f8f9fc"/><text x="310" y="155" text-anchor="middle" fill="#94a3b8" font-size="14">無排行資料</text>';
+    return;
+  }
+
+  var W=620, H=300, GAP=2;
+  // 放大區塊大小差異：power scaling（保留 _origBO 供顯示）
+  var _EXP = 1.8;
+  var _maxBO = Math.max.apply(null, ranking.map(function(r){return r.bo;}));
+  var layoutRanking = ranking.map(function(r){
+    return Object.assign({}, r, {_origBO: r.bo, bo: Math.pow(r.bo/_maxBO, _EXP)*_maxBO});
+  });
+  var tiles = _squarify(layoutRanking, 0, 0, W, H);
+
+  var out = '<defs>' +
+    '<filter id="hmGlow" x="-50%" y="-50%" width="200%" height="200%">' +
+      '<feGaussianBlur stdDeviation="3" result="b"/>' +
+      '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>' +
+    '</filter>' +
+    // subtle top-highlight gradient
+    '<linearGradient id="hmShine" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0%" stop-color="rgba(255,255,255,.13)"/>' +
+      '<stop offset="40%" stop-color="rgba(255,255,255,.03)"/>' +
+      '<stop offset="100%" stop-color="rgba(0,0,0,.15)"/>' +
+    '</linearGradient>' +
+  '</defs>';
+  out += '<rect width="620" height="300" fill="#f8f9fc"/>';
+
+  tiles.forEach(function(t) {
+    var r=t.item, col=_hmColor(r.rank);
+    var x=t.x+GAP/2, y=t.y+GAP/2, w=t.w-GAP, h=t.h-GAP;
+    if(w<2||h<2) return;
+    var rx=Math.min(4, w*0.08, h*0.08);
+
+    // base rect
+    out += '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" fill="'+col+'" rx="'+rx.toFixed(1)+'"/>';
+    // shine overlay
+    out += '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" fill="url(#hmShine)" rx="'+rx.toFixed(1)+'"/>';
+
+    // ST marker strip (left edge, purple)
+    if (r.st && w>8) {
+      out += '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="3" height="'+h.toFixed(1)+'" fill="rgba(192,132,252,.8)" rx="'+rx.toFixed(1)+'"/>';
+    }
+
+    // interactive overlay (invisible, for hover events)
+    var boStr = (r._origBO!==undefined ? r._origBO : r.bo).toFixed(1);
+    var visStr = r.visitors ? (+r.visitors).toLocaleString() : '—';
+    var unit = '月累計';
+    out += '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" fill="transparent" rx="'+rx.toFixed(1)+'"'+
+      ' data-name="'+(r.name||'').replace(/"/g,'&quot;')+'" data-bo="'+boStr+'"'+
+      ' data-rank="'+r.rank+'" data-st="'+r.st+'" data-vis="'+visStr+'" data-pct="'+(r.mktPct||0).toFixed(1)+'"'+
+      ' style="cursor:pointer;"'+
+      ' onmouseenter="showMapTip(event,this)" onmouseleave="hideMapTip()"'+
+      ' onmousemove="moveMapTip(event)"/>';
+
+    // ── 統一垂直堆疊文字佈局 ──────────────────────────────────
+    var _name = r.name||'';
+    var _boStr = (r._origBO!==undefined ? r._origBO : r.bo).toFixed(1);
+    var _pfx = _name.match(/^(台北|高雄|台中|台南|新竹|新店|板橋|南港|林口|中和|桃園|秀泰)/);
+
+    // 決定各層顯示條件
+    var _showRank = w>22 && h>16;
+    var _showCity = _pfx && w>50 && h>62;
+    var _showName = w>38 && h>28;
+    var _showBO   = w>44 && h>50;
+    var _showPct  = w>48 && h>70;
+
+    // 字型大小（依格子比例，限制上下界）
+    var _fsCity = Math.min(9,  Math.max(7,  w*0.09, h*0.10));
+    var _fsName = Math.min(12, Math.max(8,  w*0.11, h*0.13));
+    var _fsBO   = Math.min(11, Math.max(8,  w*0.09, h*0.11));
+    var _fsPct  = Math.min(9,  Math.max(7,  w*0.08, h*0.09));
+
+    // 計算總文字塊高度
+    var _lineGap = 3;
+    var _blockH = (_showCity ? _fsCity+_lineGap : 0)
+                + (_showName ? _fsName+_lineGap : 0)
+                + (_showBO   ? _fsBO  +_lineGap : 0)
+                + (_showPct  ? _fsPct          : 0);
+
+    // 起始 Y（讓文字塊垂直置中，留 rank 的空間）
+    var _rankH = _showRank ? 12 : 0;
+    var _avail = h - _rankH - 6;
+    var _startY = y + _rankH + 5 + (_avail - _blockH) / 2;
+    var _cy = _startY;
+
+    // Rank（左上角，不佔堆疊空間）
+    if (_showRank) {
+      out += '<text x="'+(x+4)+'" y="'+(y+10)+'" font-size="8" fill="rgba(255,255,255,.4)" font-weight="700" pointer-events="none">#'+r.rank+'</text>';
+    }
+    // City prefix
+    if (_showCity) {
+      _cy += _fsCity;
+      out += '<text x="'+(x+w/2).toFixed(1)+'" y="'+_cy.toFixed(1)+'" text-anchor="middle" font-size="'+_fsCity.toFixed(1)+'" fill="rgba(255,255,255,.55)" font-weight="600" font-family="\'PingFang TC\',\'Noto Sans TC\',sans-serif" pointer-events="none">'+_pfx[1]+'</text>';
+      _cy += _lineGap;
+    }
+    // Name（去除已顯示的城市前綴，否則顯示全名截字）
+    if (_showName) {
+      var _rawName = _showCity ? _name.slice(_pfx[1].length) : _name;
+      var _maxCh = Math.max(3, Math.floor((w-8)/_fsName));
+      var _dispName = _rawName.length>_maxCh ? _rawName.slice(0,_maxCh) : _rawName;
+      _cy += _fsName;
+      out += '<text x="'+(x+w/2).toFixed(1)+'" y="'+_cy.toFixed(1)+'" text-anchor="middle" font-size="'+_fsName.toFixed(1)+'" fill="rgba(255,255,255,.92)" font-weight="800" font-family="\'PingFang TC\',\'Noto Sans TC\',sans-serif" pointer-events="none">'+_dispName+'</text>';
+      _cy += _lineGap;
+    }
+    // BO
+    if (_showBO) {
+      _cy += _fsBO;
+      out += '<text x="'+(x+w/2).toFixed(1)+'" y="'+_cy.toFixed(1)+'" text-anchor="middle" font-size="'+_fsBO.toFixed(1)+'" fill="rgba(255,255,255,.78)" font-weight="700" pointer-events="none">'+_boStr+'萬</text>';
+      _cy += _lineGap;
+    }
+    // mktPct
+    if (_showPct) {
+      _cy += _fsPct;
+      out += '<text x="'+(x+w/2).toFixed(1)+'" y="'+_cy.toFixed(1)+'" text-anchor="middle" font-size="'+_fsPct.toFixed(1)+'" fill="rgba(255,255,255,.45)" pointer-events="none">市占 '+(r.mktPct||0).toFixed(1)+'%</text>';
+    }
+  });
+
+  svg.innerHTML = out;
+
+  // Legend
+  var lg = '<span style="font-size:9.5px;color:var(--sub);margin-right:4px;">市占高</span>';
+  ['#ef4444','#f97316','#eab308','#22c55e'].forEach(function(c){
+    lg += '<span style="display:inline-block;width:16px;height:10px;background:'+c+';border-radius:2px;"></span>';
+  });
+  lg += '<span style="font-size:9.5px;color:var(--sub);margin-left:4px;margin-right:16px;">低</span>';
+  lg += '<span style="display:inline-block;width:3px;height:10px;background:rgba(192,132,252,.8);border-radius:1px;margin-right:3px;"></span>';
+  lg += '<span style="font-size:9.5px;color:#a78bfa;">秀泰影城</span>';
+  if(lgEl) lgEl.innerHTML = lg;
+}
+
+function showMapTip(e, el) {
+  var tip = document.getElementById('mapTooltip');
+  if(!tip) return;
+  var isST = el.dataset.st==='true';
+  var nc = isST ? '#c4b5fd' : '#f1f5f9';
+  var unit = '月累計';
+  tip.innerHTML =
+    '<div style="font-weight:800;color:'+nc+';margin-bottom:2px;">#'+el.dataset.rank+'&ensp;'+el.dataset.name+'</div>'+
+    '<div style="color:#94a3b8;">'+unit+'票房&ensp;<span style="color:#fbbf24;font-weight:800;font-size:13px;">'+el.dataset.bo+'</span>&thinsp;萬元</div>'+
+    '<div style="color:#94a3b8;">市占率&ensp;<span style="color:#f1f5f9;font-weight:700;">'+el.dataset.pct+'%</span></div>'+
+    '<div style="color:#94a3b8;">來客數&ensp;<span style="color:#f1f5f9;">'+el.dataset.vis+'</span>&thinsp;人</div>';
+  tip.style.display='block';
+  tip.style.left=(e.clientX+16)+'px';
+  tip.style.top=(e.clientY-14)+'px';
+}
+function moveMapTip(e) {
+  var tip=document.getElementById('mapTooltip');
+  if(tip&&tip.style.display!=='none'){tip.style.left=(e.clientX+16)+'px';tip.style.top=(e.clientY-14)+'px';}
+}
+function hideMapTip() {
+  var t=document.getElementById('mapTooltip');
+  if(t) t.style.display='none';
+}
+
+// ════════════════════════════════════
+//  UPLOAD & PARSE
+// ════════════════════════════════════
+
+// Cinema name normalizer
+const CINEMA_MAP = [
+  {kw:['巨蛋秀泰','大巨蛋秀泰','巨蛋'],    n:'秀泰巨蛋'},
+  {kw:['欣欣秀泰','欣欣'],                  n:'秀泰欣欣'},
+  {kw:['土城秀泰','土城'],                  n:'秀泰土城'},
+  {kw:['樹林秀泰','樹林'],                  n:'秀泰樹林'},
+  {kw:['基隆秀泰','基隆'],                  n:'秀泰基隆'},
+  {kw:['文心秀泰','文心'],                  n:'秀泰文心'},
+  {kw:['站前秀泰','站前'],                  n:'秀泰站前'},
+  {kw:['麗寶秀泰','麗寶'],                  n:'秀泰麗寶'},
+  {kw:['北港秀泰','北港'],                  n:'秀泰北港'},
+  {kw:['嘉義秀泰','嘉義'],                  n:'秀泰嘉義'},
+  {kw:['仁德秀泰','仁德'],                  n:'秀泰仁德'},
+  {kw:['夢時代秀泰','夢時代'],              n:'秀泰夢時代'},
+  {kw:['岡山秀泰','岡山'],                  n:'秀泰岡山'},
+  {kw:['台東秀泰','台東'],                  n:'秀泰台東'},
+  {kw:['花蓮秀泰','花蓮'],                  n:'秀泰花蓮'},
+];
+function normCinema(raw) {
+  const s = String(raw||'').trim();
+  for (const m of CINEMA_MAP) {
+    if (m.kw.some(k => s.includes(k))) return m.n;
+    if (s.includes(m.n)) return m.n;
+  }
+  return null;
+}
+
+// Column keyword detector
+const COL_KEYS = {
+  date:     ['日期','date'],
+  cinema:   ['影城','戲院','分館','館別','院線','cinema','戲院名稱'],
+  bo:       ['票房','box','當日票房','日票房','總票房','票房收入'],
+  fb:       ['賣品','餐飲','f&b','food','賣品收入','飲食'],
+  visitors: ['來客','人次','入場','觀影','觀眾','人數','tickets','visitors','累積人次'],
+  shows:    ['場次','放映','sessions','shows','累積場次'],
+  ystBO:    ['昨日','前日','yesterday','昨天'],
+  mkt:      ['全台','市場','全國'],
+  mtd:      ['本月累計','月累計','mtd','月到'],
+  ytd:      ['本年累計','年累計','ytd','年到'],
+  mtdLM:   ['上月同期','上月'],
+  mtdLY:   ['去年同月','去年同期'],
+  ytdLY:   ['去年累計','去年ytd','去年年'],
+  cumBO:   ['累積票房'],          // 排行榜累計票房
+  rank:    ['排行','排名','rank'],
+  mktPct:  ['市佔率','市占','占比','pct','%'],
+  avgP:    ['平均票價','均價','avgprice'],
+  days:    ['天數','days'],
+};
+
+// Detect region from cinema name
+// 秀泰官方分區：北區(巨蛋/欣欣/基隆/樹林/土城/花蓮) 中區(文心/站前/麗寶) 南區(夢時代/岡山/仁德/台東/嘉義/北港)
+function detectRegion(name) {
+  const n = String(name);
+  // 秀泰內部分區優先（花蓮屬北區、台東/嘉義/北港屬南區）
+  if (/巨蛋|欣欣|基隆|樹林|土城|花蓮/.test(n)) return 'N';
+  if (/文心|站前|麗寶/.test(n)) return 'C';
+  if (/夢時代|岡山|仁德|台東|嘉義|北港/.test(n)) return 'S';
+  // 一般地理判斷（用於競品戲院）
+  if (/台北|新北|板橋|中和|新莊|淡水|林口|南港|北投|新店|汐止|三重|蘆洲|新竹|桃園|竹北|頭份|宜蘭/.test(n)) return 'N';
+  if (/台中|彰化|南投|雲林|苗栗|豐原|大里/.test(n)) return 'C';
+  if (/高雄|台南|屏東|澎湖|金門/.test(n)) return 'S';
+  return 'N'; // fallback
+}
+
+// Check if a set of headers looks like a ranking table (has 累積票房 + 戲院名稱)
+function isRankingFormat(colMap) {
+  return colMap.cumBO != null && colMap.cinema != null;
+}
+function detectCol(header) {
+  const h = String(header||'').toLowerCase();
+  for (const [key, kws] of Object.entries(COL_KEYS)) {
+    if (kws.some(k => h.includes(k))) return key;
+  }
+  return null;
+}
+
+// Parse a number: handles commas, yen sign, 万 suffix
+function parseNum(v) {
+  if (v == null || v === '') return null;
+  let s = String(v).replace(/,/g,'').replace(/[￥$¥]/g,'').trim();
+  let mul = 1;
+  if (s.endsWith('萬') || s.endsWith('万')) { mul = 10000; s = s.slice(0,-1); }
+  const n = parseFloat(s);
+  if (isNaN(n)) return null;
+  return n * mul;
+}
+
+// Decide if value looks like yen (raw) or 万
+function toWan(v) {
+  if (v == null) return null;
+  return v > 10000 ? +(v/10000).toFixed(2) : +v.toFixed(2);
+}
+
+let _parsedResult = null;
+let _loadedFiles  = [];
+
+function openUpload() {
+  _parsedResult = null;
+  _loadedFiles  = [];
+  document.getElementById('fileChips').innerHTML = '';
+  document.getElementById('previewSection').style.display = 'none';
+  document.getElementById('applyBtn').style.display = 'none';
+  document.getElementById('parseLog').textContent = '';
+  document.getElementById('previewTbl').innerHTML = '';
+  document.getElementById('fileInput').value = '';
+  document.getElementById('uploadOverlay').classList.add('open');
+}
+function closeUpload() {
+  document.getElementById('uploadOverlay').classList.remove('open');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('drag');
+  handleFiles(e.dataTransfer.files);
+}
+
+function handleFiles(files) {
+  for (const f of files) {
+    if (!_loadedFiles.find(x => x.name === f.name)) _loadedFiles.push(f);
+  }
+  renderChips();
+  parseAllFiles();
+}
+
+function removeFile(name) {
+  _loadedFiles = _loadedFiles.filter(f => f.name !== name);
+  renderChips();
+  if (_loadedFiles.length > 0) parseAllFiles();
+  else {
+    document.getElementById('previewSection').style.display = 'none';
+    document.getElementById('applyBtn').style.display = 'none';
+  }
+}
+
+function renderChips() {
+  document.getElementById('fileChips').innerHTML = _loadedFiles.map(f =>
+    `<div class="chip">📄 ${f.name} <span class="rm" onclick="removeFile('${f.name}')">✕</span></div>`
+  ).join('');
+}
+
+async function parseAllFiles() {
+  if (_loadedFiles.length === 0) return;
+  const logs = [];
+  // Merged result object
+  const result = { cinemas: {}, mkt:{}, st:{}, competitors:{}, date: null, ytdRanking:[], ytdMktTotal:null, mtdRanking:[], mtdMktTotal:null };
+
+  for (const file of _loadedFiles) {
+    logs.push(`📄 解析：${file.name}`);
+    try {
+      const ab = await file.arrayBuffer();
+      let rows = [];
+
+      if (file.name.endsWith('.csv')) {
+        const text = new TextDecoder('utf-8').decode(ab);
+        rows = text.split('\n').map(l => l.split(',').map(c => c.trim().replace(/^"|"$/g,'')));
+      } else {
+        const wb = XLSX.read(ab, {type:'array', cellDates:true});
+        for (const sheetName of wb.SheetNames) {
+          const ws = wb.Sheets[sheetName];
+          const sheetRows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+          rows = rows.concat(sheetRows);
+          logs.push(`  📋 工作表：${sheetName}（${sheetRows.length} 列）`);
+        }
+      }
+
+      // --- Strategy 1: columnar table (header row + data rows)
+      // Find header row (row with most non-empty cells)
+      let hdrIdx = -1, hdrScore = 0;
+      for (let i = 0; i < Math.min(rows.length, 10); i++) {
+        const score = rows[i].filter(c => String(c).trim().length > 0).length;
+        if (score > hdrScore) { hdrScore = score; hdrIdx = i; }
+      }
+
+      if (hdrIdx >= 0 && hdrScore >= 2) {
+        const headers = rows[hdrIdx].map(h => String(h).trim());
+        const colMap  = {};
+        headers.forEach((h, ci) => { const k = detectCol(h); if (k) colMap[k] = ci; });
+        logs.push(`  🔍 欄位偵測：${Object.entries(colMap).map(([k,v])=>k+'='+headers[v]).join(', ') || '無'}`);
+
+        // ── 排行榜格式 (累積票房 + 戲院名稱) ──
+        if (isRankingFormat(colMap)) {
+          logs.push(`  📊 偵測為【排行榜格式】，將匯入累計數據`);
+          const rankItems = [];
+          let mktTotal = 0;
+          for (let ri = hdrIdx + 1; ri < rows.length; ri++) {
+            const row = rows[ri];
+            const cinRaw = String(row[colMap.cinema]||'').trim();
+            if (!cinRaw || cinRaw.includes('總') || cinRaw.includes('合計')) {
+              // Footer: extract market total
+              const v = parseNum(row[colMap.cumBO] || row[colMap.cumBO]);
+              if (v != null && v > mktTotal) mktTotal = v;
+              continue;
+            }
+            const cumBOv = parseNum(row[colMap.cumBO]);
+            if (cumBOv == null) continue;
+            const boWan = toWan(cumBOv);
+            const rk    = colMap.rank    != null ? (parseNum(row[colMap.rank])||rankItems.length+1) : rankItems.length+1;
+            const vis   = colMap.visitors!= null ? parseNum(row[colMap.visitors]) : null;
+            const pct   = colMap.mktPct  != null ? parseFloat(String(row[colMap.mktPct]||'').replace('%','')) : null;
+            const isSTCin = /秀泰/.test(cinRaw);
+            rankItems.push({
+              rank: Math.round(rk), name: cinRaw, region: detectRegion(cinRaw),
+              st: isSTCin, bo: boWan,
+              visitors: vis != null ? Math.round(vis) : 0,
+              mktPct: pct != null ? +pct.toFixed(2) : 0,
+            });
+            // Also update individual cinema data
+            const normName = normCinema(cinRaw);
+            if (normName) {
+              if (!result.cinemas[normName]) result.cinemas[normName] = {};
+              result.cinemas[normName].ytdBO = boWan;
+              if (vis != null) result.cinemas[normName].ytdVisitors = Math.round(vis);
+            }
+          }
+          // Sort by bo desc and pick top 10
+          rankItems.sort((a,b)=>b.bo-a.bo);
+          const top10 = rankItems.slice(0,10).map((r,i)=>({...r, rank:i+1}));
+          // Determine if MTD or YTD by number of entries (MTD usually shorter period, hard to tell from data alone)
+          // Use file name hint or default to ytd if not obvious
+          const isMTD = _loadedFiles.some(f => /月|mtd/i.test(f.name));
+          if (isMTD) {
+            result.mtdRanking = top10;
+            result.mtdMktTotal = mktTotal > 0 ? toWan(mktTotal) : null;
+            const stRows = rankItems.filter(r=>r.st);
+            if (stRows.length > 0) result.st.mtdBO = +(stRows.reduce((s,r)=>s+r.bo,0)).toFixed(1);
+            logs.push(`  📅 匯入月累計排行 ${top10.length} 筆，秀泰 ${stRows.length} 家`);
+          } else {
+            result.ytdRanking = top10;
+            result.ytdMktTotal = mktTotal > 0 ? toWan(mktTotal) : null;
+            const stRows = rankItems.filter(r=>r.st);
+            if (stRows.length > 0) result.st.ytdBO = +(stRows.reduce((s,r)=>s+r.bo,0)).toFixed(1);
+            logs.push(`  📈 匯入年累計排行 ${top10.length} 筆，秀泰 ${stRows.length} 家`);
+          }
+        } else {
+        // ── 一般日報格式 ──
+        for (let ri = hdrIdx + 1; ri < rows.length; ri++) {
+          const row = rows[ri];
+          if (row.every(c => String(c).trim() === '')) continue;
+
+          // Date row
+          if (colMap.date != null && result.date === null) {
+            const dv = row[colMap.date];
+            if (dv instanceof Date) result.date = dv.toISOString().slice(0,10);
+            else if (String(dv).match(/\d{4}[-\/]\d{1,2}[-\/]\d{1,2}/)) {
+              result.date = String(dv).replace(/\//g,'-').slice(0,10);
+            }
+          }
+
+          // Cinema row
+          const cinemaCol = colMap.cinema ?? 0;
+          const cinName = normCinema(row[cinemaCol]);
+          if (cinName) {
+            if (!result.cinemas[cinName]) result.cinemas[cinName] = {};
+            const c = result.cinemas[cinName];
+            if (colMap.bo      != null) { const v = parseNum(row[colMap.bo]);      if (v != null) c.bo      = toWan(v); }
+            if (colMap.fb      != null) { const v = parseNum(row[colMap.fb]);      if (v != null) c.fb      = toWan(v); }
+            if (colMap.visitors!= null) { const v = parseNum(row[colMap.visitors]);if (v != null) c.visitors= Math.round(v); }
+            if (colMap.shows   != null) { const v = parseNum(row[colMap.shows]);   if (v != null) c.shows   = Math.round(v); }
+            if (colMap.ystBO   != null) { const v = parseNum(row[colMap.ystBO]);   if (v != null) c.ystBO   = toWan(v); }
+            logs.push(`  ✅ ${cinName}: bo=${c.bo??'—'} fb=${c.fb??'—'} vis=${c.visitors??'—'}`);
+          }
+
+          // Global fields (rows where first col is a label)
+          const label = String(row[0]||'').toLowerCase();
+          const val   = parseNum(row[1] || row[2]);
+          if (val != null) {
+            if (label.includes('全台') || label.includes('市場') || label.includes('全國')) { result.mkt.bo = toWan(val); logs.push(`  🌐 全台票房：${result.mkt.bo}萬`); }
+            if (label.includes('本月累計') || label.includes('月累計'))                     { result.st.mtdBO = toWan(val); }
+            if (label.includes('上月同期') || label.includes('上月'))                       { result.st.mtdLastMonthBO = toWan(val); }
+            if (label.includes('去年同月'))                                                  { result.st.mtdLastYearBO = toWan(val); }
+            if (label.includes('年累計') || label.includes('本年'))                         { result.st.ytdBO = toWan(val); }
+            if (label.includes('去年') && label.includes('年累計'))                         { result.st.ytdLastYearBO = toWan(val); }
+            if (label.includes('威秀'))                                                      { result.mkt.wison = toWan(val); result.competitors['威秀'] = toWan(val); }
+            if (label.includes('國賓'))                                                      { result.competitors['國賓'] = toWan(val); }
+            if (label.includes('美麗華'))                                                    { result.competitors['美麗華'] = toWan(val); }
+            if (label.includes('in89') || label.includes('IN89') || label.includes('豪華影城')) { result.competitors['in89'] = toWan(val); }
+            if (label.includes('新光'))                                                      { result.competitors['新光'] = toWan(val); }
+            if (label.includes('美麗新'))                                                    { result.competitors['美麗新台茂'] = toWan(val); }
+            if (label.includes('喜樂'))                                                      { result.competitors['喜樂'] = toWan(val); }
+            if (label.includes('絕色'))                                                      { result.competitors['絕色'] = toWan(val); }
+            if (label.includes('昨日') && !label.includes('昨日秀泰'))                      { result.st.ystBO = toWan(val); }
+          }
+        }
+        } // end else normal format
+      }
+    } catch(e) {
+      logs.push(`  ❌ 錯誤：${e.message}`);
+    }
+  }
+
+  _parsedResult = result;
+  showPreview(result, logs);
+}
+
+function showPreview(result, logs) {
+  document.getElementById('parseLog').textContent = logs.join('\n');
+  document.getElementById('previewSection').style.display = '';
+
+  const cinCount = Object.keys(result.cinemas).length;
+  let rows = '';
+
+  // Cinema rows
+  DATA.cinemas.forEach(c => {
+    const p = result.cinemas[c.name];
+    const found = p && (p.bo != null || p.fb != null || p.visitors != null);
+    rows += `<tr>
+      <td>${c.name}</td>
+      <td class="${found?'ok':'warn'}">${found?'✅ 找到':'⚠ 未找到'}</td>
+      <td>${p?.bo!=null?p.bo+'萬':'—'}</td>
+      <td>${p?.fb!=null?p.fb+'萬':'—'}</td>
+      <td>${p?.visitors!=null?p.visitors+'人':'—'}</td>
+      <td>${p?.shows!=null?p.shows+'場':'—'}</td>
+    </tr>`;
+  });
+
+  // Global rows
+  const globals = [
+    ['全台票房', result.mkt.bo!=null?result.mkt.bo+'萬':'—'],
+    ['本月累計', result.st.mtdBO!=null?result.st.mtdBO+'萬':'—'],
+    ['今年累計', result.st.ytdBO!=null?result.st.ytdBO+'萬':'—'],
+    ['威秀票房', result.mkt.wison!=null?result.mkt.wison+'萬':'—'],
+    ['國賓票房', result.competitors['國賓']!=null?result.competitors['國賓']+'萬':'—'],
+    ['新光票房', result.competitors['新光']!=null?result.competitors['新光']+'萬':'—'],
+    ['美麗新台茂', result.competitors['美麗新台茂']!=null?result.competitors['美麗新台茂']+'萬':'—'],
+    ['喜樂票房', result.competitors['喜樂']!=null?result.competitors['喜樂']+'萬':'—'],
+  ];
+
+  document.getElementById('previewTbl').innerHTML = `
+    <thead><tr><th>影城</th><th>狀態</th><th>票房(萬)</th><th>賣品(萬)</th><th>來客數</th><th>場次</th></tr></thead>
+    <tbody>${rows}</tbody>
+    <tfoot style="background:var(--gray-lt);">
+      ${globals.map(([k,v])=>`<tr><td colspan="2" style="font-weight:700;color:var(--sub);">${k}</td><td colspan="4" style="font-weight:700;">${v}</td></tr>`).join('')}
+    </tfoot>`;
+
+  const hasRanking = (result.ytdRanking?.length||0) + (result.mtdRanking?.length||0) > 0;
+  document.getElementById('applyBtn').style.display = (cinCount > 0 || hasRanking) ? '' : 'none';
+  if (cinCount === 0 && !hasRanking) document.getElementById('parseLog').textContent += '\n⚠ 未偵測到任何數據，請確認欄位名稱。';
+  if (hasRanking) document.getElementById('parseLog').textContent += `\n📊 排行榜：YTD ${result.ytdRanking?.length||0} 筆 / MTD ${result.mtdRanking?.length||0} 筆`;
+}
+
+function applyParsed() {
+  if (!_parsedResult) return;
+  const r = _parsedResult;
+
+  // Save current day before overwriting
+  saveSnapshot();
+
+  if (r.date) DATA.date = r.date;
+  DATA.lastUpdate = new Date().toTimeString().slice(0,5);
+  if (r.mkt.bo   != null) DATA.mkt.bo = r.mkt.bo;
+  if (r.mkt.wison!= null) { DATA.wison.bo = r.mkt.wison; DATA.competitors['威秀'] = r.mkt.wison; }
+  // 各競爭對手票房
+  ['威秀','國賓','美麗華','in89','新光','美麗新台茂','喜樂','絕色'].forEach(key => {
+    if (r.competitors[key] != null) DATA.competitors[key] = r.competitors[key];
+  });
+  // 自動計算其他 = 全台 - 已知各鏈 (若全台票房已知)
+  if (r.mkt.bo != null) {
+    const known = Object.entries(DATA.competitors).filter(([k])=>k!=='其他').reduce((s,[,v])=>s+(+v||0),0);
+    const other = +(DATA.mkt.bo - known).toFixed(1);
+    if (other > 0) DATA.competitors['其他'] = other;
+  }
+  if (r.st.ystBO != null) DATA.st.ystBO = r.st.ystBO;
+  if (r.st.mtdBO != null) DATA.st.mtdBO = r.st.mtdBO;
+  if (r.st.mtdLastMonthBO != null) DATA.st.mtdLastMonthBO = r.st.mtdLastMonthBO;
+  if (r.st.mtdLastYearBO  != null) DATA.st.mtdLastYearBO  = r.st.mtdLastYearBO;
+  if (r.st.ytdBO  != null) DATA.st.ytdBO  = r.st.ytdBO;
+  if (r.st.ytdLastYearBO  != null) DATA.st.ytdLastYearBO  = r.st.ytdLastYearBO;
+
+  // Ranking arrays
+  if (r.ytdRanking && r.ytdRanking.length > 0) { DATA.ytdRanking = r.ytdRanking; }
+  if (r.ytdMktTotal != null) DATA.ytdMktTotal = r.ytdMktTotal;
+  if (r.mtdRanking && r.mtdRanking.length > 0) { DATA.mtdRanking = r.mtdRanking; }
+  if (r.mtdMktTotal != null) DATA.mtdMktTotal = r.mtdMktTotal;
+
+  let applied = 0;
+  DATA.cinemas.forEach(c => {
+    const p = r.cinemas[c.name];
+    if (!p) return;
+    if (p.bo       != null) { c.ystBO = c.bo; c.bo = p.bo; applied++; }
+    if (p.fb       != null) c.fb       = p.fb;
+    if (p.visitors != null) c.visitors = p.visitors;
+    if (p.shows    != null) c.shows    = p.shows;
+    if (p.ystBO    != null) c.ystBO    = p.ystBO;
+    if (p.ytdBO    != null) c.ytdBO    = p.ytdBO;
+    if (p.ytdVisitors != null) c.ytdVisitors = p.ytdVisitors;
+    if (c.visitors > 0 && c.bo > 0) c.avgPrice = +(c.bo * 10000 / c.visitors).toFixed(1);
+  });
+
+  // Recalc daily totals from cinemas
+  const tBO  = DATA.cinemas.reduce((s,c)=>s+c.bo, 0);
+  const tFB  = DATA.cinemas.reduce((s,c)=>s+c.fb, 0);
+  const tVis = DATA.cinemas.reduce((s,c)=>s+c.visitors, 0);
+  if (tBO  > 0) { DATA.st.bo = +tBO.toFixed(1); DATA.competitors['秀泰'] = DATA.st.bo; }
+  if (tFB  > 0) DATA.st.fb = +tFB.toFixed(1);
+  if (tVis > 0) DATA.st.visitors = tVis;
+
+  const rankApplied = (r.ytdRanking?.length||0) + (r.mtdRanking?.length||0);
+  closeUpload();
+  renderAll();
+  toast(`✅ 已匯入 ${_loadedFiles.length} 個檔案${applied>0?'，更新 '+applied+' 家影城':''}${rankApplied>0?'，排行榜 '+rankApplied+' 筆':''}`);
+}
+
+// ════ ⑤ 分區域分析 ════
+function renderRegional() {
+  const container = document.getElementById('regionalSection');
+  if (!container) return;
+
+  // ── NOTE: 威秀共22家，含MuvieCinemas（在台北區）──
+  const CHAIN_CLR = {ST:'#7052C0',WS:'#E05060',GBA:'#3E8ED8',MR:'#2EAF96',JY:'#F0A030',IN89:'#B87A6A',SOKU:'#7A8EC8',MRT:'#C878B0',OTHER:'#A8B8C5'};
+  const CHAIN_LBL = {ST:'秀泰',WS:'威秀',GBA:'國賓',MR:'美麗華',JY:'喜樂時代',IN89:'in89',OTHER:'其他'};
+  const TABS = ['台北','新北','桃園','台中','台南','高雄','其他地區'];
+
+  // logos defined at module scope
+
+  // ── Competitive status logic ──────────────────────────────────────────────
+  const getStatus = stPct => {
+    if (stPct === 0) return {label:'尚未進入', color:'#757575', bg:'#F5F5F5',  icon:'⚪'};
+    if (stPct < 20)  return {label:'待發展',   color:'#C62828', bg:'#FFEBEE',  icon:'🔴'};
+    if (stPct < 40)  return {label:'競爭中',   color:'#E65100', bg:'#FFF3E0',  icon:'🟡'};
+    return               {label:'區域領先', color:'#2E7D32', bg:'#E8F5E9',  icon:'🟢'};
+  };
+
+  // ── Build cinema list for a region ────────────────────────────────────────
+  const getList = reg => {
+    const all = [];
+    DATA.cinemas.filter(c=>(REGION[reg]||[]).includes(c.name))
+      .forEach(c=>all.push({name:c.name,chain:'ST',chainL:'秀泰',bo:c.mtdBO||c.bo,vis:c.mtdVisitors||c.visitors}));
+    // 其他地區包含東部（花蓮威秀）及新竹威秀
+    const wsRegs = reg==='其他地區' ? ['東部','新竹'] : [reg];
+    wsRegs.forEach(r=>(WISON_REGION[r]||[]).forEach(c=>all.push({name:c.name,chain:'WS',chainL:'威秀',bo:c.bo,vis:c.vis})));
+    DATA.otherCinemas.filter(c=>c.region===reg||(reg==='其他地區'&&(c.region==='東部'||c.region==='新竹')))
+      .forEach(c=>all.push({name:c.name,chain:c.chain,chainL:c.chainL,bo:c.bo,vis:c.vis}));
+    return all.sort((a,b)=>b.bo-a.bo);
+  };
+
+  // ── Aggregate by chain ────────────────────────────────────────────────────
+  const byChain = list => {
+    const m = {};
+    list.forEach(c=>{
+      if(!m[c.chain]) m[c.chain]={bo:0,cnt:0,chainL:c.chainL};
+      m[c.chain].bo+=c.bo; m[c.chain].cnt++;
+    });
+    return m;
+  };
+
+  // ── Track active chart instance ───────────────────────────────────────────
+  let _regChart = null;
+  const destroyChart = () => { if (_regChart) { try{_regChart.destroy();}catch(e){} _regChart=null; } };
+
+  // ── Regional overview cards (top grid) ───────────────────────────────────
+  const overviewHtml = TABS.map(reg => {
+    const list   = getList(reg);
+    const chains = byChain(list);
+    const total  = list.reduce((s,c)=>s+c.bo,0);
+    const stBO   = chains['ST']?.bo||0;
+    const stPct  = total>0 ? stBO/total*100 : 0;
+    const status = getStatus(stPct);
+    const chainOrder = ['ST','WS','GBA','MR','JY','IN89','OTHER'];
+    const barSegs = chainOrder.filter(k=>chains[k]).map(k=>{
+      const p = (chains[k].bo/total*100).toFixed(1);
+      return `<div title="${CHAIN_LBL[k]} ${p}%" style="flex:${p};height:5px;background:${CHAIN_CLR[k]};"></div>`;
+    }).join('');
+    const stCinemas = (REGION[reg]||[]).length;
+    return `<div onclick="window._switchReg('${reg}')" id="regOv_${reg}"
+      style="cursor:pointer;padding:10px 12px;border-radius:10px;border:2px solid var(--border);background:var(--card);transition:all .2s;user-select:none;"
+      onmouseover="this.style.borderColor='var(--st)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;">
+        <span style="font-size:13px;font-weight:800;">${reg}</span>
+        <span style="font-size:10px;padding:2px 7px;border-radius:10px;background:${status.bg};color:${status.color};font-weight:700;">${status.label}</span>
+      </div>
+      <div style="font-size:22px;font-weight:900;color:${stPct>0?'var(--st)':'var(--sub)'};">${stPct>0?stPct.toFixed(1)+'%':'—'}</div>
+      <div style="font-size:10px;color:var(--sub);margin-bottom:6px;">秀泰市占 | 秀泰${stCinemas}家｜共${list.length}家</div>
+      <div style="display:flex;gap:1px;border-radius:3px;overflow:hidden;height:5px;">${barSegs}</div>
+    </div>`;
+  }).join('');
+
+  // ── Build per-region content ───────────────────────────────────────────────
+  const buildContent = reg => {
+    const list   = getList(reg);
+    const chains = byChain(list);
+    const total  = list.reduce((s,c)=>s+c.bo,0);
+    const maxBO  = list[0]?.bo||1;
+    const stBO   = chains['ST']?.bo||0;
+    const wsBO   = chains['WS']?.bo||0;
+    const stPct  = total>0 ? stBO/total*100 : 0;
+    const wsPct  = total>0 ? wsBO/total*100 : 0;
+    const status = getStatus(stPct);
+    const chainOrder = ['ST','WS','GBA','MR','JY','IN89','OTHER'];
+
+    // Competitive insight text
+    let insight = '';
+    const stCnt = (REGION[reg]||[]).length;
+    const wsCnt = reg==='其他地區' ? ((WISON_REGION['東部']||[]).length+(WISON_REGION['新竹']||[]).length) : (WISON_REGION[reg]||[]).length;
+    if (stPct === 0) {
+      insight = `⚠ 秀泰在${reg}目前尚無佈局。威秀已有 ${wsCnt} 家，本月累計 ${fmtW(wsBO)}萬（市占${wsPct.toFixed(1)}%）。屬高度潛力進入市場，建議納入中期展店評估。`;
+    } else if (stPct < 20) {
+      const gap = wsBO - stBO;
+      insight = `秀泰 ${stCnt} 家在${reg}市占 ${stPct.toFixed(1)}%，威秀 ${wsCnt} 家市占 ${wsPct.toFixed(1)}%，差距 ${fmtW(gap>0?gap:0)}萬。本區具明顯成長空間，強化映期排程與行銷資源可提升競爭力。`;
+    } else if (stPct < 40) {
+      insight = `${reg}地區競爭激烈，秀泰 ${stCnt} 家市占 ${stPct.toFixed(1)}%，威秀 ${wsCnt} 家市占 ${wsPct.toFixed(1)}%。維持差異化服務（ATP、賣品）是鞏固市占的關鍵。`;
+    } else {
+      insight = `秀泰在${reg}地區 ${stCnt} 家市占 ${stPct.toFixed(1)}%，明顯領先威秀 ${wsCnt} 家（${wsPct.toFixed(1)}%）。維持優勢同時留意競爭者動態，避免市占流失。`;
+    }
+
+    // Chart data (stored as JSON in dataset for renderChart to pick up)
+    const getLbl = k => (k==='WS' && reg==='台北') ? '威秀(含Muvie)' : CHAIN_LBL[k];
+    const chartLabels = chainOrder.filter(k=>chains[k]).map(k=>getLbl(k));
+    const chartData   = chainOrder.filter(k=>chains[k]).map(k=>+chains[k].bo.toFixed(1));
+    const chartColors = chainOrder.filter(k=>chains[k]).map(k=>CHAIN_CLR[k]);
+
+    // Chain summary cards
+    const summaryCards = chainOrder.filter(k=>chains[k]).map(k=>{
+      const d=chains[k]; const pct=(d.bo/total*100).toFixed(1);
+      return `<div style="display:flex;flex-direction:column;align-items:center;padding:6px 8px;border-radius:8px;background:${CHAIN_CLR[k]}18;border:1.5px solid ${CHAIN_CLR[k]}44;flex:1;min-width:72px;">
+        <div style="font-size:10px;font-weight:800;color:${CHAIN_CLR[k]};margin-bottom:1px;">${getLbl(k)}</div>
+        <div style="font-size:14px;font-weight:800;color:${CHAIN_CLR[k]};">${fmtW(d.bo)}<span style="font-size:9px;">萬</span></div>
+        <div style="font-size:10px;color:var(--sub);">${pct}%｜${d.cnt}家</div>
+      </div>`;
+    }).join('');
+
+    // Cinema rows
+    const rows = list.map((c,i)=>{
+      const w = Math.round(c.bo/maxBO*100);
+      const atp = c.vis>0 ? +(c.bo*10000/c.vis).toFixed(1) : 0;
+      const isST = c.chain==='ST', isWS = c.chain==='WS';
+      const bg = isST?'var(--st-lt)':isWS?'#FFF5F5':(i%2===0?'var(--card)':'var(--gray-lt)');
+      const logoEl = isST
+        ? `<img src="${ST_LOGO_REG}" style="height:15px;width:auto;border-radius:2px;vertical-align:middle;" alt="ST"/>`
+        : isWS ? `<img src="${WS_LOGO_REG}" style="height:15px;width:auto;border-radius:2px;vertical-align:middle;" alt="WS"/>` : '';
+      return `<div style="display:flex;align-items:center;gap:7px;padding:4px 10px;border-radius:5px;margin-bottom:2px;background:${bg};border-left:3px solid ${CHAIN_CLR[c.chain]};">
+        <span style="width:18px;text-align:center;font-size:11px;font-weight:800;color:var(--sub);flex-shrink:0;">${i+1}</span>
+        <span style="width:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center;">${logoEl}</span>
+        <span style="width:150px;flex-shrink:0;font-size:12px;font-weight:${isST||isWS?700:500};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.name}</span>
+        <div style="flex:1;height:5px;background:rgba(0,0,0,.07);border-radius:3px;overflow:hidden;min-width:30px;"><div style="height:100%;width:${w}%;background:${CHAIN_CLR[c.chain]};border-radius:3px;"></div></div>
+        <span style="width:62px;text-align:right;font-size:13px;font-weight:800;color:${CHAIN_CLR[c.chain]};flex-shrink:0;">${fmtW(c.bo)}<span style="font-size:9px;font-weight:400;color:var(--sub);">萬</span></span>
+        <span style="width:44px;text-align:right;font-size:10px;color:var(--sub);flex-shrink:0;">${atp>0?'ATP '+fmtATP(atp):'—'}</span>
+        <span style="width:48px;text-align:right;font-size:10px;color:var(--sub);flex-shrink:0;">${c.vis>0?fmt(c.vis)+'人':'—'}</span>
+      </div>`;
+    }).join('');
+
+    return `
+    <!-- donut + insight -->
+    <div class="reg-main-grid" style="display:grid;grid-template-columns:180px 1fr;gap:14px;align-items:start;margin-bottom:14px;">
+      <div>
+        <div style="position:relative;height:170px;">
+          <canvas id="regDonut" data-labels='${JSON.stringify(chartLabels)}' data-values='${JSON.stringify(chartData)}' data-colors='${JSON.stringify(chartColors)}'></canvas>
+        </div>
+        <div style="font-size:11px;text-align:center;padding:3px 0;border-radius:6px;background:${status.bg};color:${status.color};font-weight:700;margin-top:6px;">${status.icon} ${reg}地區：${status.label}</div>
+      </div>
+      <div>
+        <div style="padding:10px 14px;border-radius:8px;background:${status.bg};border-left:3px solid ${status.color};margin-bottom:10px;">
+          <div style="font-size:11px;font-weight:700;color:${status.color};margin-bottom:4px;">📊 競爭態勢分析</div>
+          <div style="font-size:12px;line-height:1.7;color:var(--text);">${insight}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">${summaryCards}</div>
+      </div>
+    </div>
+    <!-- cinema rows -->
+    <div style="font-size:11px;font-weight:700;color:var(--sub);margin-bottom:6px;">本月累計票房排行 | 共 ${list.length} 家</div>
+    <div style="overflow-x:auto;">${rows}</div>`;
+  };
+
+  // ── Tabs bar ──────────────────────────────────────────────────────────────
+  const renderTabs = cur => TABS.map(t=>
+    `<button onclick="window._switchReg('${t}')" id="regTab_${t}"
+      style="padding:6px 14px;border-radius:20px;border:1.5px solid ${t===cur?'var(--st)':'var(--border)'};background:${t===cur?'var(--st)':'var(--card)'};color:${t===cur?'#fff':'var(--sub)'};font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s;">${t}</button>`
+  ).join('');
+
+  // ── Render a region ───────────────────────────────────────────────────────
+  const render = reg => {
+    destroyChart();
+    container.innerHTML = `<div class="card" style="padding:14px 16px;">
+      <!-- Overview grid -->
+      <div style="margin-bottom:14px;">
+        <div style="font-size:11px;font-weight:700;color:var(--sub);margin-bottom:8px;">地區競爭概覽 — 點擊地區查看詳情</div>
+        <div class="reg-ov-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;">${overviewHtml}</div>
+      </div>
+      <!-- Tabs -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;border-top:1px solid var(--border);padding-top:12px;">${renderTabs(reg)}</div>
+      <!-- Content -->
+      <div id="regContent">${buildContent(reg)}</div>
+    </div>`;
+
+    // Highlight selected overview card
+    TABS.forEach(t=>{
+      const el=document.getElementById('regOv_'+t);
+      if(el) el.style.borderColor = t===reg?'var(--st)':'var(--border)';
+    });
+
+    // Render Chart.js donut for this region
+    requestAnimationFrame(()=>{
+      const canvas = document.getElementById('regDonut');
+      if(!canvas || typeof Chart==='undefined') return;
+      try {
+        const labels = JSON.parse(canvas.dataset.labels||'[]');
+        const values = JSON.parse(canvas.dataset.values||'[]');
+        const colors = JSON.parse(canvas.dataset.colors||'[]');
+        _regChart = new Chart(canvas.getContext('2d'), {
+          type:'doughnut',
+          data:{ labels, datasets:[{ data:values, backgroundColor:colors, borderWidth:3, borderColor:'#ffffff' }] },
+          options:{
+            responsive:true, maintainAspectRatio:false, cutout:'64%',
+            plugins:{
+              legend:{ display:false },
+              tooltip:{ callbacks:{ label: ctx => ` ${ctx.label}: ${ctx.parsed.toFixed(1)}萬 (${(ctx.parsed/ctx.dataset.data.reduce((a,b)=>a+b,0)*100).toFixed(1)}%)` } }
+            }
+          }
+        });
+      } catch(e){ console.warn('regDonut error',e); }
+    });
+  };
+
+  window._switchReg = reg => render(reg);
+  render('台北');
+  renderHistory();
+}
+
+// ════════════════════════════════════
+//  SNAPSHOT / HISTORY FILTER STATE
+// ════════════════════════════════════
+
+function saveSnapshot() {
+  const key = DATA.date;
+  if (!key) return;
+  const existing = DATA.history[key] || {};
+  DATA.history[key] = Object.assign({}, existing, {
+    date: DATA.date,
+    mktBO: DATA.mkt.bo,
+    mktVisitors: DATA.mkt.visitors || existing.mktVisitors || 0,
+    mktATP: DATA.mkt.atp || existing.mktATP || 0,
+    stBO: DATA.st.bo,
+    stFB: DATA.st.fb,
+    stVisitors: DATA.st.visitors,
+    ystBO: DATA.st.ystBO,
+    mtdBO: DATA.st.mtdBO,
+    ytdBO: DATA.st.ytdBO,
+    wisonBO: DATA.wison.bo,
+    wisonVisitors: DATA.wison.visitors || existing.wisonVisitors || 0,
+    wisonATP: DATA.wison.atp || existing.wisonATP || 0,
+    mktShare: DATA.mkt.bo > 0 ? +(DATA.st.bo / DATA.mkt.bo * 100).toFixed(1) : 0,
+    competitors: Object.assign({}, DATA.competitors),
+    cinemas: DATA.cinemas.map(c => ({
+      name:c.name, bo:c.bo, fb:c.fb, visitors:c.visitors, shows:c.shows, avgPrice:c.avgPrice, seats:c.seats
+    })),
+  });
+}
+
+let _histFilterMode = 'all';
+
+function setHistoryFilter(mode) {
+  _histFilterMode = mode;
+  const allKeys = Object.keys(DATA.history).sort();
+  const latestDate = allKeys[allKeys.length - 1] || DATA.date;
+  let fromDate = '', toDate = latestDate;
+  if (mode === '7d') {
+    const d = new Date(latestDate); d.setDate(d.getDate() - 6);
+    fromDate = d.toISOString().slice(0,10);
+  } else if (mode === '14d') {
+    const d = new Date(latestDate); d.setDate(d.getDate() - 13);
+    fromDate = d.toISOString().slice(0,10);
+  } else if (mode === 'month') {
+    fromDate = latestDate.slice(0,8) + '01';
+  } else {
+    fromDate = allKeys[0] || '';
+  }
+  document.getElementById('histFrom').value = fromDate;
+  document.getElementById('histTo').value   = toDate;
+  ['7d','14d','month','all'].forEach(m => {
+    const el = document.getElementById('hq-' + m);
+    if (el) el.classList.toggle('active', m === mode);
+  });
+  renderHistory();
+}
+
+function onHistDateChange() {
+  _histFilterMode = 'custom';
+  ['7d','14d','month','all'].forEach(m => {
+    const el = document.getElementById('hq-' + m);
+    if (el) el.classList.remove('active');
+  });
+  renderHistory();
+}
+
+
+function renderHistory() {
+  const allKeys = Object.keys(DATA.history).sort().reverse(); // newest first
+  const btn = document.getElementById('histBtn');
+  const cnt = document.getElementById('histCount');
+  if (allKeys.length === 0) {
+    document.getElementById('historyContent').innerHTML =
+      '<div class="empty-state"><div class="big">🗂</div>尚無歷史紀錄</div>';
+    if (btn) btn.style.display = 'none';
+    return;
+  }
+  if (btn) {
+    btn.style.display = '';
+    const oldest = allKeys[allKeys.length - 1]; // allKeys 是 reverse sort，最後一筆 = 最舊
+    const newest = allKeys[0];
+    const fmt = d => d ? d.slice(0, 7).replace('-', '/') : '';
+    cnt.textContent = oldest ? '(' + fmt(oldest) + '～' + fmt(newest) + ')' : '';
+  }
+
+  // Read filter dates
+  const fromVal = (document.getElementById('histFrom')?.value) || '';
+  const toVal   = (document.getElementById('histTo')?.value)   || '';
+
+  // Filter keys
+  const keys = allKeys.filter(k => {
+    if (fromVal && k < fromVal) return false;
+    if (toVal   && k > toVal)   return false;
+    return true;
+  });
+
+  // Update info label
+  const infoEl = document.getElementById('histFilterInfo');
+  if (infoEl) infoEl.textContent = keys.length > 0 ? `共 ${keys.length} 天` : '無符合紀錄';
+
+  if (keys.length === 0) {
+    document.getElementById('historyContent').innerHTML =
+      '<div class="empty-state" style="padding:20px;">📭 此區間無紀錄</div>';
+    document.getElementById('histRangeSummary').innerHTML = '';
+    return;
+  }
+
+  // ── Range summary stats ──
+  const sumSt  = keys.reduce((s,k)=> s + (DATA.history[k].stBO||0), 0);
+  const sumMkt = keys.reduce((s,k)=> s + (DATA.history[k].mktBO||0), 0);
+  const sumVis = keys.reduce((s,k)=> s + (DATA.history[k].stVisitors||0), 0);
+  const avgShare = sumMkt > 0 ? (sumSt/sumMkt*100).toFixed(1) : '—';
+  const avgBO  = (sumSt / keys.length).toFixed(1);
+  const summaryEl = document.getElementById('histRangeSummary');
+  if (summaryEl) {
+    summaryEl.innerHTML = `
+      <div class="hist-summary-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">
+        <div style="background:var(--st-lt);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:11px;color:var(--sub);margin-bottom:2px;">區間秀泰票房</div>
+          <div style="font-size:18px;font-weight:700;color:var(--st);">${fmtW(sumSt)}<span style="font-size:11px;">萬</span></div>
+        </div>
+        <div style="background:var(--bg-2);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:11px;color:var(--sub);margin-bottom:2px;">日均票房</div>
+          <div style="font-size:18px;font-weight:700;">${avgBO}<span style="font-size:11px;">萬</span></div>
+        </div>
+        <div style="background:var(--bg-2);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:11px;color:var(--sub);margin-bottom:2px;">平均市占率</div>
+          <div style="font-size:18px;font-weight:700;">${avgShare}<span style="font-size:11px;">%</span></div>
+        </div>
+        <div style="background:var(--bg-2);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:11px;color:var(--sub);margin-bottom:2px;">區間來客數</div>
+          <div style="font-size:18px;font-weight:700;">${sumVis>0?sumVis.toLocaleString():'—'}</div>
+        </div>
+      </div>`;
+  }
+
+  // ── Table rows ──
+  const sortedAllKeys = Object.keys(DATA.history).sort().reverse();
+  const rows_arr = keys.map((k) => {
+    const h = DATA.history[k];
+    const isCurrent = k === DATA.date;
+    const idx = sortedAllKeys.indexOf(k);
+    const prevKey = sortedAllKeys[idx + 1];
+    const prev = prevKey ? DATA.history[prevKey] : null;
+    const chg = prev && prev.stBO > 0 ? ((h.stBO - prev.stBO) / prev.stBO * 100).toFixed(1) : null;
+    const chgHtml = chg != null
+      ? `<span class="delta ${+chg>=0?'up':'dn'}">${+chg>=0?'▲':'▼'}${Math.abs(chg)}%</span>`
+      : '<span class="delta flat">—</span>';
+    const d = new Date(k);
+    const dow = ['日','一','二','三','四','五','六'][d.getDay()];
+    const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+    const rowBg = isCurrent ? 'background:var(--st-lt);font-weight:700;' : isWeekend ? 'background:rgba(255,111,0,0.07);' : '';
+    return `<tr style="${rowBg}">
+      <td>${k} <span style="color:${isWeekend?'#E65100':'var(--sub)'};font-size:10px;font-weight:${isWeekend?700:400};">(${dow})</span>${isWeekend?'<span style="font-size:9px;background:#E65100;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;">週末</span>':''}${isCurrent?' <span style="font-size:10px;background:var(--st);color:#fff;padding:1px 5px;border-radius:4px;margin-left:4px;">今日</span>':''}</td>
+      <td class="r">${fmtW(h.stBO)}</td>
+      <td class="r">${h.mktShare}%</td>
+      <td class="r">${h.stVisitors ? h.stVisitors.toLocaleString() : '—'}</td>
+      <td class="r">${fmtW(h.mktBO)}</td>
+      <td class="r">${chgHtml}</td>
+      <td class="c"><button onclick="viewHistoryDay('${k}')" style="border:none;background:${isWeekend?'#FFF3E0':' var(--st-lt)'};color:${isWeekend?'#E65100':'var(--st)'};border-radius:6px;padding:2px 8px;cursor:pointer;font-size:11px;font-weight:700;">${isWeekend?'📊 完整報表':'查看'}</button></td>
+    </tr>`;
+  });
+
+  // Split: show first 3, collapse the rest
+  const SHOW_COUNT = 3;
+  const visibleRows = rows_arr.slice(0, SHOW_COUNT).join('');
+  const hiddenRows  = rows_arr.slice(SHOW_COUNT).join('');
+  const hiddenCount = rows_arr.length - SHOW_COUNT;
+
+  const hiddenSection = hiddenCount > 0 ? `
+    <tr id="histExpandRow">
+      <td colspan="7" style="padding:0;border:none;">
+        <button onclick="toggleHistExpand()" id="histExpandBtn"
+          style="width:100%;padding:9px;background:var(--gray-lt);border:1px dashed var(--border);border-radius:0 0 8px 8px;cursor:pointer;color:var(--sub);font-size:12px;font-weight:600;">
+          ▼ 展開更多紀錄（${hiddenCount} 天）
+        </button>
+      </td>
+    </tr>
+    <tbody id="histHiddenRows" style="display:none;">${hiddenRows}</tbody>
+    <tr id="histCollapseRow" style="display:none;">
+      <td colspan="7" style="padding:0;border:none;">
+        <button onclick="toggleHistExpand()"
+          style="width:100%;padding:9px;background:var(--gray-lt);border:1px dashed var(--border);border-radius:0 0 8px 8px;cursor:pointer;color:var(--sub);font-size:12px;font-weight:600;">
+          ▲ 收起
+        </button>
+      </td>
+    </tr>` : '';
+
+  document.getElementById('historyContent').innerHTML = `
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;">
+    <table class="tbl" style="min-width:480px;">
+      <thead><tr>
+        <th>日期</th><th class="r">秀泰票房(萬)</th><th class="r">市占</th>
+        <th class="r">來客數</th><th class="r">全台票房(萬)</th><th class="r">較前日</th><th class="c">明細</th>
+      </tr></thead>
+      <tbody>${visibleRows}</tbody>
+      ${hiddenSection}
+    </table>
+    </div>`;
+}
+
+function toggleHistExpand() {
+  const hidden  = document.getElementById('histHiddenRows');
+  const btnRow  = document.getElementById('histExpandRow');
+  const colRow  = document.getElementById('histCollapseRow');
+  if (!hidden) return;
+  const isOpen = hidden.style.display !== 'none';
+  hidden.style.display  = isOpen ? 'none' : '';
+  btnRow.style.display  = isOpen ? '' : 'none';
+  colRow.style.display  = isOpen ? 'none' : '';
+}
+
+// View a historical day — full dashboard overlay
+function viewHistoryDay(date) {
+  const h = DATA.history[date];
+  if (!h) return;
+  const d = new Date(date);
+  const dow = ['日','一','二','三','四','五','六'][d.getDay()];
+  const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+  const weekendBadge = isWeekend
+    ? '<span style="background:#E65100;color:#fff;padding:2px 10px;border-radius:4px;font-size:11px;font-weight:700;margin-left:10px;">📌 週末</span>'
+    : '';
+
+  // 座位數來自當前 DATA
+  const seatsMap = {};
+  DATA.cinemas.forEach(function(c){ seatsMap[c.name] = c.seats || 0; });
+
+  // 影城排行（by 票房）
+  const cinemas = (h.cinemas||[]).slice().sort(function(a,b){return b.bo-a.bo;});
+  const totalVisH = cinemas.reduce(function(s,c){return s+(c.visitors||0);},0) || h.stVisitors || 0;
+  const totalBOH  = cinemas.reduce(function(s,c){return s+(c.bo||0);},0);
+  const totalFBH  = cinemas.reduce(function(s,c){return s+(c.fb||0);},0);
+  const stATP  = totalVisH>0 ? +(totalBOH*10000/totalVisH).toFixed(1) : 0;
+  const stMS   = h.mktBO>0 ? +(h.stBO/h.mktBO*100).toFixed(1) : 0;
+  const wiMS   = (h.mktBO>0&&h.wisonBO>0) ? +(h.wisonBO/h.mktBO*100).toFixed(1) : 0;
+  const stAvg  = cinemas.length ? totalBOH/cinemas.length : 1;
+  const ystChg = h.ystBO>0 ? (h.stBO-h.ystBO)/h.ystBO*100 : null;
+
+  // 前一天（異常對比）
+  const allKeys = Object.keys(DATA.history).sort();
+  const idx = allKeys.indexOf(date);
+  const prevKey = idx>0 ? allKeys[idx-1] : null;
+  const prev = prevKey ? DATA.history[prevKey] : null;
+
+  // 月累計（從 history[] 動態加總）
+  const ym = date.substring(0,7);
+  const mtdKeys = allKeys.filter(function(k){return k.startsWith(ym)&&k<=date;});
+  const mtdStBO  = mtdKeys.reduce(function(s,k){return s+(DATA.history[k].stBO||0);},0);
+  const mtdStVis = mtdKeys.reduce(function(s,k){return s+(DATA.history[k].stVisitors||0);},0);
+  const mtdMktBO = mtdKeys.reduce(function(s,k){return s+(DATA.history[k].mktBO||0);},0);
+  const mtdWsBO  = mtdKeys.reduce(function(s,k){return s+(DATA.history[k].wisonBO||0);},0);
+  const mtdStATP = mtdStVis>0 ? +(mtdStBO*10000/mtdStVis).toFixed(1) : 0;
+  const mtdStMS  = mtdMktBO>0 ? +(mtdStBO/mtdMktBO*100).toFixed(1) : 0;
+  const mtdWsMS  = mtdMktBO>0 ? +(mtdWsBO/mtdMktBO*100).toFixed(1) : 0;
+
+  // ──────────────────── ① 三品牌 KPI ────────────────────
+  const brandHtml =
+    '<div class="brand-grid">'
+
+    // 全台市場
+    + '<div class="brand-card mkt">'
+    + '<div class="brand-card-hdr"><span class="brand-name">🇹🇼 全台市場</span></div>'
+    + '<div class="brand-metrics">'
+    + '<div class="brand-metric"><div class="bm-lbl">票房 BO</div>'
+    + '<div class="bm-val">' + (h.mktBO>0?fmtAuto(h.mktBO)+'<span class="unit">萬</span>':'—') + '</div>'
+    + '<div class="bm-mtd">' + (mtdMktBO>0?'累積 '+fmtAuto(mtdMktBO)+'（'+mtdKeys.length+'日）':'—') + '</div></div>'
+    + '<div class="brand-metric"><div class="bm-lbl">來客數 ADM</div>'
+    + '<div class="bm-val">'+(h.mktVisitors>0?fmt(h.mktVisitors):'—')+'<span class="unit">人</span></div>'
+    + '<div class="bm-mtd">'+(h.mktVisitors>0?'ATP '+fmtATP(h.mktATP||0)+'元':'⚠ 待確認')+'</div></div>'
+    + '<div class="brand-metric"><div class="bm-lbl">平均票價 ATP</div>'
+    + '<div class="bm-val">'+(h.mktATP>0?fmtATP(h.mktATP):'—')+'<span class="unit">元</span></div>'
+    + '<div class="bm-mtd">—</div></div>'
+    + '<div class="brand-metric"><div class="bm-lbl">市佔率</div>'
+    + '<div class="bm-val ms-hi">100<span class="unit">%</span></div>'
+    + '<div class="bm-sub">全台基準</div></div>'
+    + '</div></div>'
+
+    // 秀泰影城
+    + '<div class="brand-card st">'
+    + '<div class="brand-card-hdr"><span class="brand-name" style="display:flex;align-items:center;gap:6px;"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjAwIj4KICA8cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgcng9IjEyIiBmaWxsPSIjNkIyQThBIi8+CiAgPCEtLSBBYnN0cmFjdCBnZW9tZXRyaWMgbWFyayAo5q2l6ZqO5pa55aGKKSAtLT4KICA8cmVjdCB4PSI2OCIgeT0iNDIiIHdpZHRoPSI3MiIgaGVpZ2h0PSI0NCIgZmlsbD0id2hpdGUiLz4KICA8cmVjdCB4PSI0NCIgeT0iOTAiIHdpZHRoPSI1MiIgaGVpZ2h0PSI0MiIgZmlsbD0id2hpdGUiLz4KICA8cmVjdCB4PSIxMTIiIHk9IjEwNiIgd2lkdGg9IjMwIiBoZWlnaHQ9IjI4IiBmaWxsPSJ3aGl0ZSIvPgogIDwhLS0gU0hPV1RJTUUgdGV4dCAtLT4KICA8dGV4dCB4PSIxMDAiIHk9IjE1OCIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCxIZWx2ZXRpY2Esc2Fucy1zZXJpZiIKICAgICAgICBmb250LXNpemU9IjE4IiBmb250LXdlaWdodD0iOTAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBsZXR0ZXItc3BhY2luZz0iMiI+U0hPV1RJTUU8L3RleHQ+CiAgPCEtLSBDSU5FTUFTIHRleHQgLS0+CiAgPHRleHQgeD0iMTAwIiB5PSIxNzgiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC44NSkiIGZvbnQtZmFtaWx5PSJBcmlhbCxIZWx2ZXRpY2Esc2Fucy1zZXJpZiIKICAgICAgICBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNDAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBsZXR0ZXItc3BhY2luZz0iNSI+Q0lORU1BUzwvdGV4dD4KPC9zdmc+" style="height:28px;width:auto;border-radius:4px;vertical-align:middle;" alt="Showtime Cinemas"/>秀泰影城</span>'
+    + '</div>'
+    + '<div class="brand-metrics">'
+    + '<div class="brand-metric"><div class="bm-lbl">票房 BO</div>'
+    + '<div class="bm-val">' + fmtW(h.stBO) + '<span class="unit">萬</span></div>'
+    + '<div class="bm-sub">' + (ystChg!==null?deltaHtml(ystChg)+' vs 昨日':'— vs 昨日') + '</div>'
+    + '<div class="bm-mtd">' + (mtdStBO>0?'累積 '+fmtW(mtdStBO)+'萬':'—') + '</div></div>'
+    + '<div class="brand-metric"><div class="bm-lbl">來客數 ADM</div>'
+    + '<div class="bm-val">' + (totalVisH>0?fmt(totalVisH):'—') + '<span class="unit">人</span></div>'
+    + '<div class="bm-sub">15家合計</div>'
+    + '<div class="bm-mtd">' + (mtdStVis>0?'累積 '+fmt(mtdStVis)+'人':'—') + '</div></div>'
+    + '<div class="brand-metric"><div class="bm-lbl">平均票價 ATP</div>'
+    + '<div class="bm-val">' + (stATP>0?fmtATP(stATP):'—') + '<span class="unit">元</span></div>'
+    + '<div class="bm-sub">BO÷ADM</div>'
+    + '<div class="bm-mtd">' + (mtdStATP>0?'月均 '+fmtATP(mtdStATP)+'元':'—') + '</div></div>'
+    + '<div class="brand-metric"><div class="bm-lbl">市佔率</div>'
+    + '<div class="bm-val ms-st">' + (stMS>0?stMS:'—') + '<span class="unit">%</span></div>'
+    + '<div class="bm-sub">秀泰÷全台</div>'
+    + '<div class="bm-mtd">' + (mtdStMS>0?'月均 '+mtdStMS+'%':'—') + '</div></div>'
+    + '</div></div>'
+
+    // 威秀影城
+    + '<div class="brand-card ws">'
+    + '<div class="brand-card-hdr"><span class="brand-name" style="display:flex;align-items:center;gap:6px;"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjAwIj4KICA8cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgcng9IjM4IiBmaWxsPSIjNGE1MDY4Ii8+CiAgPHBvbHlsaW5lIHBvaW50cz0iMjAsNDIgNjIsMTIyIDEwMCw2MCAxMzgsMTIyIDE4MCw0MiIKICAgIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMjEiCiAgICBzdHJva2UtbGluZWpvaW49Im1pdGVyIiBzdHJva2UtbGluZWNhcD0iYnV0dCIvPgogIDx0ZXh0IHg9IjEwMCIgeT0iMTU2IiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsLEhlbHZldGljYSxzYW5zLXNlcmlmIgogICAgZm9udC1zaXplPSIyMCIgZm9udC13ZWlnaHQ9IjkwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgbGV0dGVyLXNwYWNpbmc9IjMiPlZJRVNIT1c8L3RleHQ+CiAgPHRleHQgeD0iMTAwIiB5PSIxNzYiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC43NSkiIGZvbnQtZmFtaWx5PSJBcmlhbCxIZWx2ZXRpY2Esc2Fucy1zZXJpZiIKICAgIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI0MDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGxldHRlci1zcGFjaW5nPSI2Ij5DSU5FTUFTPC90ZXh0Pgo8L3N2Zz4=" style="height:28px;width:auto;border-radius:4px;vertical-align:middle;" alt="Vieshow Cinemas"/>威秀影城</span>'
+    + '</div>'
+    + '<div class="brand-metrics">'
+    + '<div class="brand-metric"><div class="bm-lbl">票房 BO</div>'
+    + '<div class="bm-val">' + (h.wisonBO>0?fmtW(h.wisonBO)+'<span class="unit">萬</span>':'—') + '</div>'
+    + '<div class="bm-mtd">' + (mtdWsBO>0?'累積 '+fmtW(mtdWsBO)+'萬':'—') + '</div></div>'
+    + '<div class="brand-metric"><div class="bm-lbl">來客數 ADM</div>'
+    + '<div class="bm-val">'+(h.wisonVisitors>0?fmt(h.wisonVisitors):'—')+'<span class="unit">人</span></div>'
+    + '<div class="bm-sub">'+(h.wisonVisitors>0?'來源：威秀各家加總':'⚠ 待確認')+'</div>'
+    + '<div class="bm-mtd">'+(h.wisonVisitors>0?'累積 待整合':'月數據待整合')+'</div></div>'
+    + '<div class="brand-metric"><div class="bm-lbl">平均票價 ATP</div>'
+    + '<div class="bm-val">'+(h.wisonATP>0?fmtATP(h.wisonATP):'—')+'<span class="unit">元</span></div>'
+    + '<div class="bm-sub">'+(h.wisonATP>0?'BO÷ADM':'⚠ 待確認')+'</div>'
+    + '<div class="bm-mtd">月數據待整合</div></div>'
+    + '<div class="brand-metric"><div class="bm-lbl">市佔率</div>'
+    + '<div class="bm-val ms-ws">' + (wiMS>0?wiMS:'—') + '<span class="unit">%</span></div>'
+    + '<div class="bm-sub">威秀÷全台</div>'
+    + '<div class="bm-mtd">' + (mtdWsMS>0?'月均 '+mtdWsMS+'%':'—') + '</div></div>'
+    + '</div></div>'
+    + '</div>';
+
+  // ──────────────────── ② 各家排行榜 ────────────────────
+  const rankRowsHtml = cinemas.map(function(c,i){
+    const n=i+1;
+    const seats=c.seats||seatsMap[c.name]||0;
+    const occ=c.shows>0&&seats>0?(c.visitors/(c.shows*seats)*100):0;
+    const vsAvg=stAvg>0?(c.bo-stAvg)/stAvg*100:null;
+    const spp=c.visitors>0&&c.fb>0 ? +(c.fb*10000/c.visitors).toFixed(1) : 0;
+    const cls=n===1?'r1':n===2?'r2':n===3?'r3':'';
+    return '<tr>'
+      +'<td class="c"><span class="rank-num '+cls+'">'+n+'</span></td>'
+      +'<td><strong style="font-size:12px;">'+c.name+'</strong>'
+      +(vsAvg!==null&&vsAvg>15?'<span style="font-size:9px;background:#E8F5E9;color:var(--up);padding:1px 4px;border-radius:3px;margin-left:3px;">↑均</span>':'')
+      +(vsAvg!==null&&vsAvg<-15?'<span style="font-size:9px;background:#FFEBEE;color:var(--dn);padding:1px 4px;border-radius:3px;margin-left:3px;">↓均</span>':'')
+      +'</td>'
+      +'<td class="r" style="font-weight:700;color:var(--st);">'+fmtW(c.bo)+'</td>'
+      +'<td class="r" style="color:var(--green);">'+(c.fb>0?fmtW(c.fb):'—')+'</td>'
+      +'<td class="r">'+fmt(c.visitors||0)+'</td>'
+      +'<td class="r">'+(c.shows>0?c.shows:'—')+'</td>'
+      +'<td class="r">'+(c.avgPrice>0?'$'+fmtATP(c.avgPrice):'—')+'</td>'
+      +'<td class="r">'+(spp>0?fmtATP(spp):'—')+'</td>'
+      +'<td class="r">'+(occ>0?occ.toFixed(1)+'%':'—')+'</td>'
+      +'</tr>';
+  }).join('');
+
+  const rankHtml = cinemas.length>0
+    ? '<div class="ranking-grid" style="display:grid;grid-template-columns:1fr;gap:14px;">'
+      +'<div class="card" style="padding:0;overflow:hidden;">'
+      +'<div class="rank-hdr rank-hdr-st">🏬 秀泰影城　當日排行</div>'
+      +'<div style="overflow-x:auto;"><table class="tbl">'
+      +'<thead><tr><th class="c" style="width:32px;">#</th><th>影城</th>'
+      +'<th class="r">票房(萬)</th><th class="r">餐飲(萬)</th><th class="r">來客數</th>'
+      +'<th class="r">場次</th><th class="r">均票價</th><th class="r">賣品/人</th><th class="r">滿座%</th></tr></thead>'
+      +'<tbody>'+rankRowsHtml+'</tbody></table></div></div></div>'
+    : '<div class="card" style="padding:20px;text-align:center;color:var(--sub);">各家明細未儲存</div>';
+
+  // ──────────────────── ③ 院線競爭 ────────────────────
+  const comp = h.competitors;
+  let compBodyHtml = '';
+  if (comp && Object.values(comp).some(function(v){return v>0;})) {
+    const colors = {'秀泰':'#5B3A8E','威秀':'#A63248','國賓':'#2B5F90','美麗華':'#7B4A8E','in89':'#C07E35','新光':'#A04535','美麗新台茂':'#9B4070','美麗新':'#9B4070','喜樂':'#3A7D5E','其他':'#8A9BAB'};
+    const labels = Object.keys(comp).filter(function(k){return comp[k]>0;});
+    const vals   = labels.map(function(k){return comp[k];});
+    const total  = vals.reduce(function(a,b){return a+b;},0);
+    compBodyHtml =
+      '<div class="reg-main-grid" style="display:grid;grid-template-columns:180px 1fr;gap:12px;align-items:start;">'
+      +'<div style="position:relative;height:160px;"><canvas id="hdonut_'+date+'"></canvas></div>'
+      +'<div>'+labels.map(function(k,i){
+        const p=(vals[i]/total*100).toFixed(1);
+        return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px;">'
+          +'<span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+(colors[k]||'#A8B8C5')+';margin-right:5px;"></span>'
+          +'<b style="'+(k==='秀泰'?'color:var(--st)':'')+'">'+k+'</b></span>'
+          +'<span><b style="'+(k==='秀泰'?'color:var(--st)':'')+'">'+p+'%</b> <span style="color:var(--sub);font-size:10px;">'+vals[i].toFixed(1)+'萬</span></span>'
+          +'</div>';
+      }).join('')+'</div>'
+      +'</div>';
+  } else {
+    compBodyHtml = '<div style="padding:16px;text-align:center;color:var(--sub);">院線數據未儲存</div>';
+  }
+  const compHtml = '<div class="card" style="padding:14px;"><div class="sec-label" style="margin:0 0 10px;">③ 院線市占競爭</div>'+compBodyHtml+'</div>';
+
+  // ──────────────────── ④ 地區別分析 ────────────────────
+  var regHtml = '';
+  if (cinemas.length > 0 && typeof REGION !== 'undefined') {
+    const regionGroups = {
+      '北部': (REGION['台北']||[]).concat(REGION['新北']||[]).concat(REGION['桃園']||[]),
+      '中部': (REGION['台中']||[]),
+      '南部': (REGION['台南']||[]).concat(REGION['高雄']||[]),
+      '其他地區': (REGION['其他地區']||[]),
+    };
+    const regions = ['北部','中部','南部','其他地區'];
+    const regData = regions.map(function(reg){
+      const names = regionGroups[reg] || [];
+      const rc = cinemas.filter(function(c){return names.indexOf(c.name)>=0;});
+      const rBO  = rc.reduce(function(s,c){return s+(c.bo||0);},0);
+      const rVis = rc.reduce(function(s,c){return s+(c.visitors||0);},0);
+      const rATP = rVis>0 ? +(rBO*10000/rVis).toFixed(1) : 0;
+      const rShare = totalBOH>0&&rBO>0 ? +(rBO/totalBOH*100).toFixed(1) : 0;
+      return {reg, rc, rBO, rVis, rATP, rShare};
+    }).filter(function(r){return r.rBO>0;});
+
+    const regCardsHtml = regData.map(function(r){
+      const cinemaRows = r.rc.map(function(c){
+        return '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border-lt);font-size:11px;">'
+          +'<span style="font-weight:600;">'+c.name+'</span>'
+          +'<span style="color:var(--st);font-weight:700;">'+fmtW(c.bo)+'萬</span>'
+          +'</div>';
+      }).join('');
+      return '<div class="card" style="padding:12px;">'
+        +'<div style="font-size:12px;font-weight:800;color:var(--st);margin-bottom:8px;">'+r.reg+'</div>'
+        +'<div style="display:flex;gap:12px;margin-bottom:8px;">'
+        +'<div><div style="font-size:10px;color:var(--sub);">票房</div><div style="font-size:16px;font-weight:800;">'+fmtW(r.rBO)+'<span style="font-size:10px;">萬</span></div></div>'
+        +'<div><div style="font-size:10px;color:var(--sub);">比重</div><div style="font-size:16px;font-weight:800;">'+r.rShare+'<span style="font-size:10px;">%</span></div></div>'
+        +'<div><div style="font-size:10px;color:var(--sub);">均票</div><div style="font-size:16px;font-weight:800;">'+(r.rATP>0?fmtATP(r.rATP):'—')+'<span style="font-size:10px;">元</span></div></div>'
+        +'</div>'
+        +cinemaRows
+        +'</div>';
+    }).join('');
+
+    regHtml = '<div class="card" style="padding:14px;">'
+      +'<div class="sec-label" style="margin:0 0 10px;">⑤ 地區別分析</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;">'+regCardsHtml+'</div>'
+      +'</div>';
+  }
+
+  // ──────────────────── ⑤ 收入結構 ────────────────────
+  const hasFB = totalFBH > 0;
+  const revHtml = cinemas.filter(function(c){return c.bo>0;}).map(function(c){
+    const maxRev = Math.max.apply(null,cinemas.map(function(x){return (x.bo||0)+(x.fb||0);})) || 1;
+    const tot=(c.bo||0)+(c.fb||0), boPct=tot>0?c.bo/tot*100:100, barW=tot/maxRev*100;
+    return '<div class="mix-row">'
+      +'<div class="mix-label"><span style="font-weight:700;font-size:11px;">'+c.name+'</span>'
+      +'<span style="font-size:10px;color:var(--sub);">'+fmtW(c.bo)+'萬'+(c.fb>0?' + '+fmtW(c.fb)+'萬':'')+'</span></div>'
+      +'<div class="mix-track" style="width:'+Math.max(barW,3)+'%;"><div class="mix-bo" style="width:'+boPct+'%;"></div><div class="mix-fb" style="width:'+(100-boPct)+'%;"></div></div>'
+      +'</div>';
+  }).join('');
+  const revStructHtml = (cinemas.length>0&&(hasFB||totalBOH>0))
+    ? '<div class="card" style="padding:14px;">'
+      +'<div class="sec-label" style="margin:0 0 10px;">'+(hasFB?'⑥ 收入結構（票房 + 餐飲）':'⑥ 票房分布')+'</div>'
+      +revHtml
+      +(hasFB?'':'<div style="font-size:11px;color:var(--sub);margin-top:6px;text-align:center;">賣品數據未儲存</div>')
+      +'</div>'
+    : '';
+
+  // ──────────────────── 異常波動 ────────────────────
+  var alertHtml = '';
+  if (prev && prev.cinemas && prev.cinemas.length > 0) {
+    cinemas.forEach(function(c){
+      if (c.bo<=0) return;
+      const prevC = prev.cinemas.find(function(pc){return pc.name===c.name;});
+      if (!prevC||prevC.bo<=0) return;
+      const chg=(c.bo-prevC.bo)/prevC.bo*100;
+      if (Math.abs(chg)<15) return;
+      alertHtml += '<div style="padding:8px 12px;border-radius:8px;margin-bottom:5px;background:'+(chg>0?'var(--up-lt)':'var(--dn-lt)')+';border-left:4px solid '+(chg>0?'var(--up)':'var(--dn)')+';display:flex;align-items:center;flex-wrap:wrap;gap:6px;">'
+        +'<strong style="font-size:12px;">'+c.name+'</strong>'
+        +'<span>'+deltaHtml(chg)+'</span>'
+        +'<span style="font-size:10px;color:var(--sub);">vs '+prevKey+'（前日）</span>'
+        +'<span style="margin-left:auto;font-size:11px;color:var(--sub);">'+fmtW(prevC.bo)+'萬 → '+fmtW(c.bo)+'萬</span>'
+        +'</div>';
+    });
+  }
+  const alertSection = alertHtml
+    ? '<div class="card" style="padding:14px;"><div class="sec-label" style="margin:0 0 10px;">⚠ 異常波動（>±15%）</div>'+alertHtml+'</div>'
+    : '';
+
+  // ──────────────────── 整體組裝 ────────────────────
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay open';
+  overlay.style.cssText = 'z-index:2000;align-items:flex-start;overflow-y:auto;padding:16px;';
+  overlay.innerHTML =
+    '<div style="background:var(--bg);max-width:1000px;width:100%;margin:0 auto;padding-bottom:24px;">'
+    // Header
+    +'<div class="card" style="padding:16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;">'
+    +'<div>'
+    +'<div style="display:flex;align-items:center;gap:8px;">'
+    +'<span style="font-size:20px;font-weight:800;">📅 '+date+'（週'+dow+'）</span>'+weekendBadge+'</div>'
+    +'<div style="font-size:11px;color:var(--sub);margin-top:3px;">歷史儀表板 · 秀泰影城每日營運</div>'
+    +'</div>'
+    +'<button onclick="this.closest(\'.overlay\').remove()" style="border:none;background:var(--bg-2);border-radius:8px;width:36px;height:36px;font-size:18px;cursor:pointer;color:var(--sub);">✕</button>'
+    +'</div>'
+    // ① KPI
+    +'<div class="sec-label" style="margin-bottom:8px;">① 關鍵指標 KPI</div>'
+    +brandHtml
+    // ② 各家排行
+    +'<div class="sec-label" style="margin:14px 0 8px;">② 秀泰各家影城排行榜</div>'
+    +rankHtml
+    // ③ 院線市占
+    +'<div style="margin-top:14px;">'+compHtml+'</div>'
+    // ④ 地區別
+    +(regHtml?'<div style="margin-top:14px;">'+regHtml+'</div>':'')
+    // ⑤⑥ 收入結構
+    +(revStructHtml?'<div style="margin-top:14px;">'+revStructHtml+'</div>':'')
+    // 異常
+    +(alertSection?'<div style="margin-top:14px;">'+alertSection+'</div>':'')
+    +'</div>';
+
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+
+  // 繪製甜甜圈圖
+  setTimeout(function(){
+    const ctx = document.getElementById('hdonut_'+date);
+    if (ctx && h.competitors && typeof Chart!=='undefined') {
+      const colors2 = {'秀泰':'#7052C0','威秀':'#E05060','國賓':'#3E8ED8','美麗華':'#C878B0','in89':'#F0A030','新光':'#7A8EC8','美麗新台茂':'#C878B0','美麗新':'#C878B0','喜樂':'#2EAF96','其他':'#A8B8C5'};
+      const comp2 = h.competitors;
+      const labels2 = Object.keys(comp2).filter(function(k){return comp2[k]>0;});
+      const vals2   = labels2.map(function(k){return comp2[k];});
+      if (labels2.length>0) {
+        new Chart(ctx,{
+          type:'doughnut',
+          data:{labels:labels2,datasets:[{data:vals2,backgroundColor:labels2.map(function(k){return colors2[k]||'#A8B8C5';}),borderWidth:3,borderColor:'#ffffff'}]},
+          options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.label+': '+c.parsed.toFixed(1)+'萬';}}}}}
+        });
+      }
+    }
+  }, 80);
+}
+function scrollToHistory() {
+  document.getElementById('historyCard').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// ════════════════════════════════════
+//  EXPORT
+// ════════════════════════════════════
+function exportHTML() {
+  const blob = new Blob([document.documentElement.outerHTML], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '秀泰影城每日營運儀表板_' + (DATA.date||'report') + '.html';
+  a.click();
+}
+// ════════════════════════════════════════════════════════════
+//  月份自動化管理系統（Month Auto-Archive System）
+//  ▸ MTD BO 由 history[] 動態加總 → 新增歷史紀錄後立即反映
+//  ▸ 已結束月份的 ADM/ATP 由 monthlyArchive + localStorage 補齊
+//  ▸ 頁面載入時靜默補齊所有尚未存檔的過去月份
+// ════════════════════════════════════════════════════════════
+
+/** localStorage 優先 → DATA.monthlyArchive 兜底 */
+function getMonthArchive(ym) {
+  try {
+    const ls = localStorage.getItem('st_monthArchive');
+    if (ls) { const obj = JSON.parse(ls); if (obj[ym]) return obj[ym]; }
+  } catch(e) {}
+  return (DATA.monthlyArchive && DATA.monthlyArchive[ym]) ? DATA.monthlyArchive[ym] : null;
+}
+
+/** 存入 localStorage */
+function storeMonthArchive(ym, data) {
+  try {
+    const ls  = localStorage.getItem('st_monthArchive');
+    const obj = ls ? JSON.parse(ls) : {};
+    obj[ym] = Object.assign({}, data, { _fetchedAt: new Date().toISOString() });
+    localStorage.setItem('st_monthArchive', JSON.stringify(obj));
+    console.log('[AutoArchive] ✅', ym, obj[ym]);
+  } catch(e) { console.warn('[AutoArchive] localStorage 失敗', e); }
+}
+
+/** 從 history[] 動態加總指定月份 */
+function calcMonthMTD(ym) {
+  const entries = Object.values(DATA.history).filter(v => v.date && v.date.startsWith(ym));
+  const stBO  = entries.reduce((s,v) => s + (v.stBO      || 0), 0);
+  const mktBO = entries.reduce((s,v) => s + (v.mktBO     || 0), 0);
+  const wsBO  = entries.reduce((s,v) => s + (v.wisonBO   || 0), 0);
+  const stAdm = entries.reduce((s,v) => s + (v.stVisitors|| 0), 0);
+  const cinemas = {};
+  entries.forEach(v => {
+    (v.cinemas || []).forEach(c => {
+      if (!cinemas[c.name]) cinemas[c.name] = { bo:0, visitors:0 };
+      cinemas[c.name].bo       += (c.bo       || 0);
+      cinemas[c.name].visitors += (c.visitors || 0);
+    });
+  });
+  return { stBO, mktBO, wsBO, stAdm, days: entries.length, cinemas };
+}
+
+/**
+ * 向台北票房觀測站抓取月份完整數據（靜默執行）
+ * GitHub Pages (https) → 觀測站 (http) 可能觸發 Mixed-Content 限制，失敗時靜默跳過
+ */
+async function fetchAndArchiveMonth(ym) {
+  const [yr, mo] = ym.split('-');
+  const lastDay  = new Date(+yr, +mo, 0).getDate();
+  const fd = new FormData();
+  fd.append('region_selected', '0');
+  fd.append('startyear',  yr);        fd.append('startmonth', String(+mo));
+  fd.append('startday',   '1');       fd.append('endyear',    yr);
+  fd.append('endmonth',   String(+mo)); fd.append('endday', String(lastDay));
+  fd.append('query', '查詢');
+  try {
+    const res = await fetch('http://www.taipeitheater.org.tw/taiwan/tbopercentage2.php',
+      { method:'POST', body:fd, mode:'cors' });
+    if (!res.ok) return null;
+    const html = await res.text();
+    const doc  = new DOMParser().parseFromString(html, 'text/html');
+    const theaters = [];
+    Array.from(doc.querySelectorAll('table tr')).forEach(r => {
+      const cells = Array.from(r.querySelectorAll('td')).map(c => (c.textContent||'').trim());
+      if (cells.length >= 9 && /^\d+$/.test(cells[0])) {
+        theaters.push({ name:cells[1],
+          bo:  parseFloat(cells[5].replace(/,/g,'')) || 0,
+          adm: parseInt(cells[7].replace(/,/g,''),10) || 0 });
+      }
+    });
+    if (!theaters.length) return null;
+    const sumBO  = kw => theaters.filter(t=>t.name.includes(kw)).reduce((s,t)=>s+t.bo, 0);
+    const sumAdm = kw => theaters.filter(t=>t.name.includes(kw)).reduce((s,t)=>s+t.adm,0);
+    const gtBO  = theaters.reduce((s,t)=>s+t.bo, 0);
+    const gtAdm = theaters.reduce((s,t)=>s+t.adm,0);
+    const stBO_=sumBO('秀泰'), stAdm_=sumAdm('秀泰');
+    const wsBO_=sumBO('威秀'), wsAdm_=sumAdm('威秀');
+    const archive = {
+      st:    { bo:+stBO_.toFixed(1),  adm:stAdm_, atp:stAdm_>0?+((stBO_*10000/stAdm_).toFixed(1)):0, ms:gtBO>0?+(stBO_/gtBO*100).toFixed(1):0 },
+      mkt:   { bo:+gtBO.toFixed(1),   adm:gtAdm,  atp:gtAdm >0?+(gtBO *10000/gtAdm).toFixed(1):0 },
+      wison: { bo:+wsBO_.toFixed(1),  adm:wsAdm_, atp:wsAdm_>0?+((wsBO_*10000/wsAdm_).toFixed(1)):0, ms:gtBO>0?+(wsBO_/gtBO*100).toFixed(1):0 },
+    };
+    storeMonthArchive(ym, archive);
+    return archive;
+  } catch(e) {
+    console.warn('[AutoArchive] 抓取', ym, '失敗:', e.message);
+    return null;
+  }
+}
+
+/** 頁面載入：靜默補齊所有 history[] 中有資料但尚未存檔的過去月份 */
+async function autoArchivePastMonths() {
+  const curYM = DATA.date.substring(0, 7);
+  const missing = [...new Set(
+    Object.values(DATA.history)
+      .filter(v => v.date && v.date.substring(0,7) < curYM)
+      .map(v => v.date.substring(0,7))
+  )].filter(ym => !getMonthArchive(ym));
+  if (!missing.length) return;
+  console.log('[AutoArchive] 補齊：', missing);
+  for (const ym of missing) await fetchAndArchiveMonth(ym);
+  renderKPIs();
+}
+
+renderAll();
+autoArchivePastMonths().catch(() => {});
+
+// ════════════════════════════════════
+//  HALL DB MODAL
+// ════════════════════════════════════
+function openHallDB() {
+  const tbl = document.getElementById('hallSummaryTbl');
+  const detail = document.getElementById('hallDetail');
+
+  // Build summary table
+  let html = '<thead><tr style="background:var(--st);color:#fff;">'
+    + '<th style="padding:8px 10px;text-align:left;">影城</th>'
+    + '<th style="padding:8px 10px;text-align:center;">廳數</th>'
+    + '<th style="padding:8px 10px;text-align:right;">總座位</th>'
+    + '<th style="padding:8px 10px;text-align:right;">平均座位/廳</th>'
+    + '<th style="padding:8px 10px;text-align:left;">各廳座位分佈</th>'
+    + '</tr></thead><tbody>';
+
+  const order = ['秀泰文心','秀泰站前','秀泰夢時代','秀泰巨蛋','秀泰岡山','秀泰樹林','秀泰嘉義','秀泰欣欣','秀泰基隆','秀泰麗寶','秀泰土城','秀泰花蓮','秀泰台東','秀泰仁德','秀泰北港'];
+  let totalHalls = 0, totalSeats = 0;
+
+  order.forEach((name, idx) => {
+    const d = HALL_DB[name];
+    if (!d) return;
+    totalHalls += d.halls;
+    totalSeats += d.totalSeats;
+    const bg = idx % 2 === 0 ? 'var(--card)' : 'var(--gray-lt)';
+    const maxS = Math.max(...d.hallSeats.filter(s=>s>0));
+    const bars = d.hallSeats.map(s => {
+      if (!s) return '<span style="display:inline-block;width:6px;height:14px;background:var(--border);border-radius:2px;margin:0 1px;" title="未開放"></span>';
+      const h = Math.round(s / maxS * 28);
+      return `<span style="display:inline-block;width:6px;height:${h}px;background:var(--st);border-radius:2px;margin:0 1px;vertical-align:bottom;" title="${s}座"></span>`;
+    }).join('');
+    html += `<tr style="background:${bg};">
+      <td style="padding:7px 10px;font-weight:600;">${name}</td>
+      <td style="padding:7px 10px;text-align:center;">${d.halls}</td>
+      <td style="padding:7px 10px;text-align:right;">${d.totalSeats.toLocaleString()}</td>
+      <td style="padding:7px 10px;text-align:right;">${d.avgSeats}</td>
+      <td style="padding:7px 10px;">${bars}</td>
+    </tr>`;
+  });
+
+  html += `<tr style="background:var(--st-lt);font-weight:700;">
+    <td style="padding:7px 10px;">合計</td>
+    <td style="padding:7px 10px;text-align:center;">${totalHalls}</td>
+    <td style="padding:7px 10px;text-align:right;">${totalSeats.toLocaleString()}</td>
+    <td style="padding:7px 10px;text-align:right;">${Math.round(totalSeats/totalHalls)}</td>
+    <td style="padding:7px 10px;"></td>
+  </tr>`;
+  html += '</tbody>';
+  tbl.innerHTML = html;
+
+  // Build detail (each cinema expandable)
+  let dhtml = '<div style="font-size:.8rem;color:var(--sub);margin-bottom:8px;">點擊影城名稱可展開各廳明細</div>';
+  order.forEach(name => {
+    const d = HALL_DB[name];
+    if (!d) return;
+    const hallRows = d.hallSeats.map((s,i) => {
+      const label = `${i+1}廳`;
+      const pct = d.totalSeats > 0 ? (s/d.totalSeats*100).toFixed(1) : 0;
+      return `<td style="padding:4px 8px;text-align:center;color:${s?'var(--text)':'var(--sub)'};">${label}<br><b>${s||'—'}</b>${s?`<br><span style="font-size:.7rem;color:var(--sub);">${pct}%</span>`:''}</td>`;
+    }).join('');
+    dhtml += `<details style="margin-bottom:6px;border:1px solid var(--border);border-radius:6px;overflow:hidden;">
+      <summary style="padding:9px 14px;cursor:pointer;background:var(--gray-lt);font-weight:600;list-style:none;display:flex;justify-content:space-between;">
+        <span>${name}</span>
+        <span style="color:var(--sub);font-weight:400;">${d.halls}廳｜${d.totalSeats.toLocaleString()}座｜平均${d.avgSeats}座/廳</span>
+      </summary>
+      <div style="padding:10px;overflow-x:auto;"><table style="border-collapse:collapse;font-size:.82rem;"><tr>${hallRows}</tr></table></div>
+    </details>`;
+  });
+  detail.innerHTML = dhtml;
+
+  document.getElementById('hallDBModal').style.display = 'block';
+}
+
+function closeHallDB() {
+  document.getElementById('hallDBModal').style.display = 'none';
+}
+
+function toggleHistExpand() {
+  const hidden  = document.getElementById('histHiddenRows');
+  const btnRow  = document.getElementById('histExpandRow');
+  const colRow  = document.getElementById('histCollapseRow');
+  if (!hidden) return;
+  const isOpen = hidden.style.display !== 'none';
+  hidden.style.display  = isOpen ? 'none' : '';
+  btnRow.style.display  = isOpen ? '' : 'none';
+  colRow.style.display  = isOpen ? 'none' : '';
+}
+</script>
+</body>
+</html>
