@@ -1872,12 +1872,13 @@ function renderMktShare() {
 
   // Chain colors: fill, stroke, label, hover
   var CC = {
-    "秀泰":{f:"#1a0a35",s:"#a855f7",t:"#d8b4fe",h:"#7c3aed",dot:"#c084fc"},
-    "威秀":{f:"#3b0000",s:"#f87171",t:"#fca5a5",h:"#dc2626",dot:"#ef4444"},
-    "國賓":{f:"#0a1a3b",s:"#60a5fa",t:"#bfdbfe",h:"#2563eb",dot:"#3b82f6"},
-    "美麗華":{f:"#0a2a1a",s:"#34d399",t:"#a7f3d0",h:"#059669",dot:"#10b981"},
-    "其他":{f:"#141e2e",s:"#475569",t:"#94a3b8",h:"#334155",dot:"#64748b"}
+    "秀泰":{f:"#3b2070",s:"#9b72e8",t:"#d8b4fe",h:"#7c3aed",dot:"#c084fc"},
+    "威秀":{f:"#6a1525",s:"#e05060",t:"#fca5a5",h:"#c04050",dot:"#e05060"},
+    "國賓":{f:"#0f2d5c",s:"#3e8ed8",t:"#bfdbfe",h:"#1d6ab0",dot:"#3e8ed8"},
+    "美麗華":{f:"#083830",s:"#2eaf96",t:"#a7f3d0",h:"#1a8a74",dot:"#2eaf96"},
+    "其他":{f:"#1e2a3e",s:"#5a6a7e",t:"#94a3b8",h:"#334155",dot:"#64748b"}
   };
+  var COUNTY_RG={"台北市":"台北","新北市":"新北","基隆市":"新北","桃園縣":"桃園","新竹市":"桃園","新竹縣":"桃園","苗栗縣":"桃園","宜蘭縣":"桃園","台中市":"台中","彰化縣":"台中","南投縣":"台中","雲林縣":"台中","嘉義市":"台南","嘉義縣":"台南","台南市":"台南","高雄市":"高雄","屏東縣":"高雄","花蓮縣":"其他地區","台東縣":"其他地區","澎湖縣":"其他地區","金門縣":"其他地區"};
 
   // Cinema dots: [x, y, chain, name]
   var DOTS = [
@@ -1968,10 +1969,10 @@ function renderMktShare() {
   }).join("");
 
   el.innerHTML =
-    '<div style="display:flex;gap:0;min-height:480px;background:#0d1b2a;border-radius:8px;overflow:hidden">'
+    '<div style="display:flex;gap:0;min-height:480px;background:transparent;border-radius:8px;overflow:hidden">'
     +'<div style="flex:1;position:relative;min-width:0;padding:8px 4px 32px 8px">'
     +'<svg id="twMapSvg" viewBox="0 0 800 900" style="width:100%;height:100%;max-height:480px;display:block">'
-    +"<rect width=\"800\" height=\"900\" fill=\"#0d1b2a\" />"
+    +"<rect width=\"800\" height=\"900\" fill=\"#131c2e\" />"
     +paths+labels
     +"<g>"+dotSvg+"</g>"
     +"</svg>"
@@ -1979,7 +1980,7 @@ function renderMktShare() {
     +'<div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:10px;color:#475569;white-space:nowrap">'
     +chainLegend+"</div>"
     +"</div>"
-    +'<div style="width:168px;padding:12px 12px 12px 10px;border-left:1px solid #1e3a5f;display:flex;flex-direction:column;background:#0d1b2a">'
+    +'<div style="width:168px;padding:12px 12px 12px 10px;border-left:1px solid #1e3a5f;display:flex;flex-direction:column;background:transparent">'
     +'<div style="font-size:11px;color:#475569;margin-bottom:4px">市場占有率</div>'
     +'<div style="font-size:22px;font-weight:700;color:#c084fc;line-height:1.1;margin-bottom:2px">'+stPct+"%</div>"
     +'<div style="font-size:10px;color:#475569;margin-bottom:10px">秀泰市占 | 全台'+totalWan+"萬</div>"
@@ -1994,14 +1995,9 @@ function renderMktShare() {
     ps.forEach(function(p){
       var idx = parseInt(p.getAttribute("data-c"));
       var c = TW[idx]; var col = CC[c.ch]||CC["其他"];
-      p.addEventListener("mouseenter", function(){
-        this.setAttribute("fill", col.h);
-        if(tip) tip.textContent = c.n + " ▶ " + c.ch + " 主力區";
-      });
-      p.addEventListener("mouseleave", function(){
-        this.setAttribute("fill", col.f);
-        if(tip) tip.textContent = "";
-      });
+      p.addEventListener("mouseenter",function(){this.setAttribute("fill",col.h);if(tip)tip.textContent=c.n+" ▶ "+c.ch+" 主力　點擊查看地區詳情";});
+      p.addEventListener("mouseleave",function(){this.setAttribute("fill",col.f);if(tip)tip.textContent="";});
+      p.addEventListener("click",function(){var rg=COUNTY_RG[c.n]||"其他地區";var sec=document.getElementById("regionalSection");if(sec){var tabs=sec.querySelectorAll("[data-tab]");if(!tabs.length)tabs=sec.querySelectorAll("button");tabs.forEach(function(t){if(t.textContent.trim()===rg||t.getAttribute("data-tab")===rg)t.click();});sec.scrollIntoView({behavior:"smooth",block:"start"});}if(tip)tip.textContent="▶ 已跳至「"+rg+"」地區詳情";});
     });
   }, 100);
 }
