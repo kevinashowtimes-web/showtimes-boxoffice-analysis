@@ -1878,7 +1878,15 @@ function renderMktShare() {
     "美麗華":{f:"#083830",s:"#2eaf96",t:"#a7f3d0",h:"#1a8a74",dot:"#2eaf96"},
     "其他":{f:"#1e2a3e",s:"#5a6a7e",t:"#94a3b8",h:"#334155",dot:"#64748b"}
   };
-  var COUNTY_RG={"台北市":"台北","新北市":"新北","基隆市":"新北","桃園縣":"桃園","新竹市":"桃園","新竹縣":"桃園","苗栗縣":"桃園","宜蘭縣":"桃園","台中市":"台中","彰化縣":"台中","南投縣":"台中","雲林縣":"台中","嘉義市":"台南","嘉義縣":"台南","台南市":"台南","高雄市":"高雄","屏東縣":"高雄","花蓮縣":"其他地區","台東縣":"其他地區","澎湖縣":"其他地區","金門縣":"其他地區"};
+  // County → region tab mapping for click interaction
+  var COUNTY_RG = {
+    "台北市":"台北","新北市":"新北","基隆市":"新北",
+    "桃園縣":"桃園","新竹市":"桃園","新竹縣":"桃園","苗栗縣":"桃園","宜蘭縣":"桃園",
+    "台中市":"台中","彰化縣":"台中","南投縣":"台中","雲林縣":"台中",
+    "嘉義市":"台南","嘉義縣":"台南","台南市":"台南",
+    "高雄市":"高雄","屏東縣":"高雄",
+    "花蓮縣":"其他地區","台東縣":"其他地區","澎湖縣":"其他地區","金門縣":"其他地區"
+  };
 
   // Cinema dots: [x, y, chain, name]
   var DOTS = [
@@ -1988,76 +1996,98 @@ function renderMktShare() {
     +"</div>"
     +"</div>";
 
-  // Hover events
+  // Hover + Click events
   setTimeout(function(){
-    var svg=document.getElementById("twMapSvg");
-    var mapWrap=svg?svg.parentElement:null;
-    var ps=el.querySelectorAll(".twc");
-    var tip=document.getElementById("twTip");
-    if(tip)tip.textContent="🔍 滾輪縮放 · 拖曳移動 · 雙擊重置";
-    var pop=document.createElement("div");
-    pop.style.cssText="position:absolute;top:10px;right:10px;background:#fff;border-radius:10px;padding:10px 13px;box-shadow:0 4px 16px rgba(0,0,0,0.13);font-size:12px;pointer-events:none;opacity:0;transition:opacity .15s;min-width:120px;border:1px solid #e2e8f0;z-index:20;";
-    if(mapWrap)mapWrap.appendChild(pop);
+    var svg = document.getElementById("twMapSvg");
+    var mapWrap = svg ? svg.parentElement : null;
+    var ps = el.querySelectorAll(".twc");
+    var tip = document.getElementById("twTip");
+    if(tip) tip.textContent = "🔍 滾輪縮放 · 拖曳移動 · 雙擊重置";
+
+    // ── Floating info popup ──────────────────────────────
+    var pop = document.createElement("div");
+    pop.style.cssText = "position:absolute;top:10px;right:10px;background:#fff;"
+      +"border-radius:10px;padding:10px 13px;box-shadow:0 4px 16px rgba(0,0,0,0.13);"
+      +"font-size:12px;pointer-events:none;opacity:0;transition:opacity .15s;"
+      +"min-width:120px;border:1px solid #e2e8f0;z-index:20;";
+    if(mapWrap) mapWrap.appendChild(pop);
+
+    // ── Zoom / pan state ─────────────────────────────────
     var vb={x:0,y:0,w:800,h:900};
-    function applyVB(){if(svg)svg.setAttribute("viewBox",vb.x+" "+vb.y+" "+vb.w+" "+vb.h);}
-    var drag={on:false,sx:0,sy:0,ox:0,oy:0,moved:false};
+    function applyVB(){ if(svg) svg.setAttribute("viewBox",vb.x+" "+vb.y+" "+vb.w+" "+vb.h); }
+
     if(svg){
       svg.style.cursor="grab";
       svg.addEventListener("wheel",function(e){
         e.preventDefault();
         var rect=svg.getBoundingClientRect();
-        var mx=(e.clientX-rect.left)/rect.width,my=(e.clientY-rect.top)/rect.height;
-        var vx=vb.x+mx*vb.w,vy=vb.y+my*vb.h;
+        var mx=(e.clientX-rect.left)/rect.width, my=(e.clientY-rect.top)/rect.height;
+        var vx=vb.x+mx*vb.w, vy=vb.y+my*vb.h;
         var f=e.deltaY>0?1.18:0.85;
-        var nw=Math.min(800,Math.max(100,vb.w*f));var nh=nw*900/800;
+        var nw=Math.min(800,Math.max(100,vb.w*f)); var nh=nw*900/800;
         vb.x=Math.max(-100,Math.min(700,vx-mx*nw));
         vb.y=Math.max(-100,Math.min(800,vy-my*nh));
-        vb.w=nw;vb.h=nh;applyVB();
+        vb.w=nw; vb.h=nh; applyVB();
       },{passive:false});
+      var drag={on:false,sx:0,sy:0,ox:0,oy:0,moved:false};
       svg.addEventListener("mousedown",function(e){
-        if(e.button!==0)return;
+        if(e.button!==0) return;
         drag={on:true,sx:e.clientX,sy:e.clientY,ox:vb.x,oy:vb.y,moved:false};
-        svg.style.cursor="grabbing";e.preventDefault();
+        svg.style.cursor="grabbing"; e.preventDefault();
       });
       document.addEventListener("mousemove",function(e){
-        if(!drag.on)return;
-        var dx=e.clientX-drag.sx,dy=e.clientY-drag.sy;
-        if(Math.abs(dx)>3||Math.abs(dy)>3)drag.moved=true;
+        if(!drag.on) return;
+        var dx=e.clientX-drag.sx, dy=e.clientY-drag.sy;
+        if(Math.abs(dx)>3||Math.abs(dy)>3) drag.moved=true;
         var r=svg.getBoundingClientRect();
-        vb.x=drag.ox-dx*(vb.w/r.width);vb.y=drag.oy-dy*(vb.h/r.height);
+        vb.x=drag.ox-dx*(vb.w/r.width); vb.y=drag.oy-dy*(vb.h/r.height);
         applyVB();
       });
       document.addEventListener("mouseup",function(){
-        if(drag.on){drag.on=false;if(svg)svg.style.cursor="grab";}
+        if(drag.on){drag.on=false; if(svg)svg.style.cursor="grab";}
       });
       svg.addEventListener("dblclick",function(){
-        vb={x:0,y:0,w:800,h:900};applyVB();
-        if(tip)tip.textContent="🔍 滾輪縮放 · 拖曳移動 · 雙擊重置";
+        vb={x:0,y:0,w:800,h:900}; applyVB();
+        if(tip) tip.textContent="🔍 滾輪縮放 · 拖曳移動 · 雙擊重置";
       });
     }
-    var ST_RG={'台北':['秀泰巨蛋','秀泰欣欣'],'新北':['秀泰土城','秀泰樹林','秀泰基隆'],'桃園':[],'台中':['秀泰文心','秀泰站前','秀泰麗寶','秀泰北港'],'台南':['秀泰仁德','秀泰嘉義'],'高雄':['秀泰夢時代','秀泰岡山'],'其他地區':['秀泰台東','秀泰花蓮']};
+
+    // ── County hover + click ─────────────────────────────
+    var drag=drag||{};
+    // ── Region cinema data panel ─────────────────────────
+    var ST_REGION={
+      '台北':['秀泰巨蛋','秀泰欣欣'],
+      '新北':['秀泰土城','秀泰樹林','秀泰基隆'],
+      '桃園':[],
+      '台中':['秀泰文心','秀泰站前','秀泰麗寶','秀泰北港'],
+      '台南':['秀泰仁德','秀泰嘉義'],
+      '高雄':['秀泰夢時代','秀泰岡山'],
+      '其他地區':['秀泰台東','秀泰花蓮']
+    };
     var det=document.createElement('div');
     det.id='twRegDet';
     det.style.cssText='display:none;padding:14px 16px;border-top:1px solid #e2e8f0;background:#f8faff;';
     el.appendChild(det);
-    function showRD(rgName){
-      var nm=ST_RG[rgName]||[];
-      var sd=(DATA.cinemas||[]).filter(function(c){return nm.indexOf(c.name)>=0;});
+
+    function showRegionDetail(rgName){
+      var stNames=ST_REGION[rgName]||[];
+      var stData=(DATA.cinemas||[]).filter(function(c){return stNames.indexOf(c.name)>=0;});
       var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
         +'<span style="font-size:13px;font-weight:700;color:#1e293b">📍 '+rgName+' 地區・秀泰影城今日數據</span>'
-        +'<button onclick="document.getElementById(\'twRegDet\').style.display=\'none\'" style="font-size:12px;color:#94a3b8;background:none;border:none;cursor:pointer;padding:2px 8px">✕</button>'
+        +'<button onclick="document.getElementById(\'twRegDet\').style.display=\'none\'"'
+        +' style="font-size:12px;color:#94a3b8;background:none;border:none;cursor:pointer;padding:2px 8px">✕</button>'
         +'</div>';
-      if(sd.length>0){
+      if(stData.length>0){
         h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;">';
-        sd.forEach(function(c){
+        stData.forEach(function(c){
           var chg=c.ystBO>0?((c.bo-c.ystBO)/c.ystBO*100):null;
           var cc=chg===null?'#94a3b8':chg>=0?'#16a34a':'#dc2626';
-          var ar=chg===null?'':chg>=0?'▲':'▼';
+          var arrow=chg===null?'':chg>=0?'▲':'▼';
           h+='<div style="background:#fff;border-radius:8px;padding:10px 12px;border:1px solid #e2e8f0;border-left:3px solid #9b72e8">'
             +'<div style="font-size:11px;font-weight:600;color:#7c3aed;margin-bottom:5px">'+c.name+'</div>'
             +'<div style="font-size:20px;font-weight:700;color:#1e293b">'+c.bo.toFixed(1)+'<span style="font-size:11px;font-weight:400;color:#64748b"> 萬</span></div>'
             +'<div style="font-size:10px;color:#475569;margin-top:2px">'+(c.visitors||0).toLocaleString()+' 人　ATP '+(c.avgPrice||0).toFixed(0)+' 元</div>'
-            +(chg!==null?'<div style="font-size:10px;color:'+cc+';margin-top:3px">'+ar+' '+(chg>=0?'+':'')+chg.toFixed(1)+'% vs昨日</div>':'')
+            +(chg!==null?'<div style="font-size:10px;color:'+cc+';margin-top:3px">'+arrow+' '+(chg>=0?'+':'')+chg.toFixed(1)+'% vs昨日</div>':'')
             +'</div>';
         });
         h+='</div>';
@@ -2067,39 +2097,43 @@ function renderMktShare() {
       det.innerHTML=h; det.style.display='block';
       det.scrollIntoView({behavior:'smooth',block:'nearest'});
     }
+
     ps.forEach(function(p){
       var idx=parseInt(p.getAttribute("data-c"));
-      var c=TW[idx];var col=CC[c.ch]||CC["其他"];
+      var c=TW[idx]; var col=CC[c.ch]||CC["其他"];
       var rgName=COUNTY_RG[c.n]||"其他地區";
       p.addEventListener("mouseenter",function(){
-        if(drag.on)return;
+        if(drag.on) return;
         this.setAttribute("fill",col.h);
-        pop.innerHTML='<div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:4px">'+c.n+'</div>'
-          +'<div style="display:inline-block;background:'+col.t+';color:'+col.f+';border-radius:4px;padding:2px 7px;font-size:10px;font-weight:600;margin-bottom:6px">'+rgName+'</div>'
+        pop.innerHTML=
+          '<div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:4px">'+c.n+'</div>'
+          +'<div style="display:inline-block;background:'+col.t+';color:'+col.f
+          +';border-radius:4px;padding:2px 7px;font-size:10px;font-weight:600;margin-bottom:6px">'+rgName+'</div>'
           +'<div style="display:flex;align-items:center;gap:5px;margin-bottom:2px">'
           +'<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+col.s+'"></span>'
           +'<span style="color:#334155;font-size:11px">'+c.ch+' 主力</span></div>'
           +'<div style="font-size:10px;color:#94a3b8;margin-top:5px;border-top:1px solid #f1f5f9;padding-top:5px">點擊查看地區詳情 →</div>';
         pop.style.opacity='1';
-        if(tip)tip.textContent="";
+        if(tip) tip.textContent="";
       });
       p.addEventListener("mouseleave",function(){
         this.setAttribute("fill",col.t);
         pop.style.opacity='0';
-        if(tip)tip.textContent="🔍 滾輪縮放 · 拖曳移動 · 雙擊重置";
+        if(tip) tip.textContent="🔍 滾輪縮放 · 拖曳移動 · 雙擊重置";
       });
       p.addEventListener("click",function(){
-        if(drag.moved)return;
-        showRD(rgName);
+        if(drag.moved) return;
+        showRegionDetail(rgName);
         var rgSec=document.getElementById("regionalSection");
         if(rgSec){
           var tabs=rgSec.querySelectorAll("[data-tab]");
-          if(!tabs.length)tabs=rgSec.querySelectorAll("button, .tab-btn, [class*=tab]");
+          if(!tabs.length) tabs=rgSec.querySelectorAll("button, .tab-btn, [class*=tab]");
           tabs.forEach(function(t){
-            if(t.textContent.trim()===rgName||t.getAttribute("data-tab")===rgName)t.click();
+            if(t.textContent.trim()===rgName||t.getAttribute("data-tab")===rgName) t.click();
           });
+          rgSec.scrollIntoView({behavior:"smooth",block:"start"});
         }
-        if(tip)tip.textContent="▶ 已跳至「"+rgName+"」地區詳情";
+        if(tip) tip.textContent="▶ 已跳至「"+rgName+"」地區詳情";
       });
     });
   }, 100);
