@@ -1980,7 +1980,7 @@ function renderMktShare() {
 
   // 主地圖裁切座標範圍（緊貼台灣本島實際邊界，減少留白）
   var MAPVB = {x:367, y:23, w:427, h:854};
-  var MAP_H = 1060; // 放大地圖高度(px)
+  var MAP_H = 1430; // 放大地圖高度(px)（第六輪UX：圖例移出地圖後再放大約35%，提升地圖可視空間利用率）
 
   // ── 影城層級資料 ──────────────────────────────────────────
   var ST_COUNTY = {
@@ -2135,7 +2135,7 @@ function renderMktShare() {
     var nm = c.n.replace(/[縣市]$/,"");
     return '<text x="'+c.lx+'" y="'+c.ly+'" fill="'+tc+'" font-size="9" opacity="0.6" '
       +'text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" '
-      +'pointer-events="none" font-weight="600">'+nm+"</text>";
+      +'pointer-events="none" font-weight="600" class="twLabel" data-county="'+c.n+'">'+nm+"</text>";
   }).join("");
 
   // ── 泡泡層：全部19縣市統一顯示「品牌泡泡」(龍頭+第二名，無文字堆疊) ──
@@ -2147,7 +2147,7 @@ function renderMktShare() {
     var leaderColor = (BRAND[r.leaderChain]||BRAND.OTH).color;
     var dash = isLimited ? 'stroke-dasharray="3,2"' : '';
     var op = isLimited ? '0.5' : '0.8';
-    var svg = '<g class="bub" data-county="'+r.county+'" style="cursor:pointer">'
+    var svg = '<g class="bub" data-county="'+r.county+'" style="cursor:pointer;transform-box:fill-box;transform-origin:center;transition:transform .15s ease;">'
       +'<circle cx="'+base.lx+'" cy="'+base.ly+'" r="'+leaderR+'" fill="'+leaderColor+'" fill-opacity="'+op+'" '
       +'stroke="#ffffff" stroke-width="1.6" '+dash+' filter="url(#bubShadow)" class="bubGlow"/>';
     if(r.secondChain){
@@ -2161,27 +2161,28 @@ function renderMktShare() {
     return svg;
   }).join("");
 
-  // ── 圖例：底圖(4級市場規模) + 品牌色 ────────
+  // ── 圖例：底圖(4級市場規模) + 品牌色（第六輪UX：移入右側面板頂部KPI下方，不再疊加於地圖上遮擋北部縣市）────────
   var sizeLegendHtml = SIZE_TIERS.map(function(t){
-    return '<span style="display:inline-flex;align-items:center;gap:4px;margin-right:8px;margin-bottom:3px;">'
-      +'<span style="width:13px;height:13px;border-radius:3px;background:'+t.color+';border:1px solid #cbd5e1;display:inline-block;"></span>'
-      +'<span style="font-size:9.5px;color:#475569;">'+t.label+'</span></span>';
+    return '<span style="display:inline-flex;align-items:center;gap:3px;margin-right:7px;">'
+      +'<span style="width:10px;height:10px;border-radius:3px;background:'+t.color+';border:1px solid #cbd5e1;display:inline-block;"></span>'
+      +'<span style="font-size:9px;color:#64748b;">'+t.label+'</span></span>';
   }).join("");
 
   var brandLegend = Object.keys(BRAND).map(function(k){
     var b=BRAND[k];
-    return '<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;">'
-      +'<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+b.color+';opacity:.9;border:1.5px solid #ffffff;box-shadow:0 0 0 1px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.15);flex-shrink:0;"></span>'
-      +'<span style="font-size:10px;color:'+b.color+';font-weight:700;">'+b.label+'</span></div>';
+    return '<span style="display:inline-flex;align-items:center;gap:3px;margin-right:7px;">'
+      +'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+b.color+';border:1px solid #ffffff;box-shadow:0 0 0 1px rgba(0,0,0,.12);flex-shrink:0;"></span>'
+      +'<span style="font-size:9px;color:'+b.color+';font-weight:700;">'+b.label+'</span></span>';
   }).join("");
 
   var legendCard =
-    '<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 11px;box-shadow:0 2px 8px rgba(15,23,42,.08);">'
-    +'<div style="font-size:10px;font-weight:800;color:#334155;margin-bottom:6px;">🗺️ 底圖＝市場規模</div>'
-    +'<div style="display:flex;flex-wrap:wrap;margin-bottom:8px;">'+sizeLegendHtml+'</div>'
-    +'<div style="font-size:10px;font-weight:800;color:#334155;margin-bottom:6px;border-top:1px solid #f1f5f9;padding-top:7px;">🎯 泡泡＝龍頭/第二品牌市占</div>'
-    +'<div style="display:flex;flex-wrap:wrap;">'+brandLegend+'</div>'
-    +'<div style="font-size:8.5px;color:#94a3b8;margin-top:6px;border-top:1px solid #f1f5f9;padding-top:6px;line-height:1.6;">💡 點擊任一縣市，右側面板顯示完整競爭戰況（點擊其他縣市可切換，點面板內「清除選取」返回總覽）</div>'
+    '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:7px 9px;margin-bottom:10px;">'
+    +'<div style="display:flex;flex-wrap:wrap;align-items:center;margin-bottom:4px;">'
+    +'<span style="font-size:9px;font-weight:800;color:#334155;margin-right:6px;">🗺️ 市場規模</span>'+sizeLegendHtml
+    +'</div>'
+    +'<div style="display:flex;flex-wrap:wrap;align-items:center;">'
+    +'<span style="font-size:9px;font-weight:800;color:#334155;margin-right:6px;">🎯 品牌泡泡</span>'+brandLegend
+    +'</div>'
     +'</div>';
 
   // ── 右側戰情面板：KPI + 策略分析（全台總覽時顯示）─────────
@@ -2276,25 +2277,30 @@ function renderMktShare() {
     '<div style="display:flex;gap:14px;align-items:flex-start;background:#ffffff;border-radius:8px;overflow:visible;flex-wrap:wrap;">'
     +'<div id="mapWrapOuter" style="position:relative;flex:0 0 auto;padding:8px;background:#f8fafc;border-radius:8px;">'
     +'<svg id="twMapSvg" viewBox="'+MAPVB.x+' '+MAPVB.y+' '+MAPVB.w+' '+MAPVB.h+'" preserveAspectRatio="xMidYMid meet" style="height:'+MAP_H+'px;width:auto;max-width:100%;aspect-ratio:'+MAPVB.w+'/'+MAPVB.h+';display:block">'
-    +'<defs><filter id="bubShadow" x="-60%" y="-60%" width="220%" height="220%">'
+    +'<defs>'
+    +'<filter id="bubShadow" x="-60%" y="-60%" width="220%" height="220%">'
     +'<feDropShadow dx="0" dy="1.5" stdDeviation="2.2" flood-color="#1e293b" flood-opacity="0.18"/>'
-    +'</filter></defs>'
+    +'</filter>'
+    +'<filter id="countyGlow" x="-60%" y="-60%" width="220%" height="220%">'
+    +'<feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#f59e0b" flood-opacity="0.55"/>'
+    +'</filter>'
+    +'</defs>'
     +"<rect x=\""+MAPVB.x+"\" y=\""+MAPVB.y+"\" width=\""+MAPVB.w+"\" height=\""+MAPVB.h+"\" fill=\"#f8fafc\" />"
     +paths+labels
     +'<g id="bubbleLayer">'+bubbleSvg+'</g>'
     +"</svg>"
     +'<div id="twTip" style="position:absolute;bottom:8px;left:12px;font-size:11px;color:#64748b;pointer-events:none;min-height:14px"></div>'
-    +'<div style="position:absolute;top:10px;right:10px;width:220px;">'+legendCard+'</div>'
     +"</div>"
-    +'<div style="flex:1 1 360px;min-width:300px;padding:14px 14px 14px 4px;display:flex;flex-direction:column;background:#ffffff;">'
+    +'<div style="flex:1 1 360px;min-width:280px;padding:14px 14px 14px 4px;display:flex;flex-direction:column;background:#ffffff;">'
     +'<div style="font-size:12px;font-weight:800;color:#1e293b;margin-bottom:10px;">📊 秀泰競爭情報中心</div>'
-    +'<div id="mktDefaultPanel">'
     +kpiHtml
+    +legendCard
+    +'<div id="mktDefaultPanel">'
     +'<div style="border-top:1px solid #e5e7eb;padding-top:10px;">'+strategyHtml+'</div>'
     +'</div>'
     +'<div id="mktCityPanel" style="display:none;"></div>'
     +'<div style="font-size:9px;color:#94a3b8;margin-top:8px;border-top:1px solid #e5e7eb;padding-top:8px;line-height:1.6;">'
-    +'※ 底圖顏色代表市場規模(4級距，依資料分位數切分)；泡泡代表龍頭/第二品牌市占(全19縣市統一顯示，大小依市占比例)。點擊任一縣市，右側面板將顯示完整競爭戰況(市場規模/TOP品牌/主要影城/競爭強度/拓點機會)，選取狀態會持續保留，直到點擊其他縣市或按下清除選取。資料涵蓋秀泰15家自有影城＋全國MTD(7/1-25)排行約40家主要競爭戲院(合計約55家，涵蓋全國約90%票房)。標示「資料有限」之縣市僅追蹤到單一品牌戲院，不代表真實市場獨占。外島(金門/澎湖)無追蹤戲院資料，暫不納入地圖範圍。台茂與美麗新為同一品牌(美麗新台茂)，故僅以棕色「美麗新」呈現。'
+    +'※ 底圖顏色代表市場規模(4級距，依資料分位數切分)；泡泡代表龍頭/第二品牌市占(全19縣市統一顯示，大小依市占比例)。點擊任一縣市，右側面板將顯示完整競爭戰況(市場規模/TOP品牌/主要影城/競爭強度/拓點機會)；選取縣市於地圖上僅以柔和外光暈＋對應泡泡微放大＋城市名稱加粗標示，選取狀態會持續保留，直到點擊其他縣市或按下清除選取。資料涵蓋秀泰15家自有影城＋全國MTD(7/1-25)排行約40家主要競爭戲院(合計約55家，涵蓋全國約90%票房)。標示「資料有限」之縣市僅追蹤到單一品牌戲院，不代表真實市場獨占。外島(金門/澎湖)無追蹤戲院資料，暫不納入地圖範圍。台茂與美麗新為同一品牌(美麗新台茂)，故僅以棕色「美麗新」呈現。'
     +'</div>'
     +'</div>'
     +'</div>';
@@ -2310,12 +2316,24 @@ function renderMktShare() {
     if(tip) tip.textContent = "🔍 滾輪縮放 · 拖曳移動 · 點擊縣市查看完整競爭戰況(右側面板)";
 
     var selectedCounty = null;
+    var labelEls = el.querySelectorAll(".twLabel");
 
+    // 第六輪UX：選取效果改為輕量化 — 柔和外光暈(filter) + 泡泡微放大(transform) + 城市名稱加粗，
+    // 不再用粗橘色框線框住整個縣市形狀
     function updateSelectionHighlight(){
       ps.forEach(function(p){
         var idx=parseInt(p.getAttribute("data-c")); var c=TW[idx];
-        if(c.n===selectedCounty){ p.setAttribute("stroke","#f59e0b"); p.setAttribute("stroke-width","3"); }
-        else { p.setAttribute("stroke","#ffffff"); p.setAttribute("stroke-width","1.2"); }
+        if(c.n===selectedCounty){ p.setAttribute("filter","url(#countyGlow)"); }
+        else { p.removeAttribute("filter"); }
+      });
+      labelEls.forEach(function(t){
+        var cn = t.getAttribute("data-county");
+        if(cn===selectedCounty){ t.setAttribute("font-weight","800"); t.setAttribute("opacity","1"); t.setAttribute("font-size","10.5"); }
+        else { t.setAttribute("font-weight","600"); t.setAttribute("opacity","0.6"); t.setAttribute("font-size","9"); }
+      });
+      bubs.forEach(function(b){
+        var cn = b.getAttribute("data-county");
+        b.style.transform = (cn===selectedCounty) ? "scale(1.22)" : "scale(1)";
       });
     }
 
@@ -2426,11 +2444,10 @@ function renderMktShare() {
       var idx=parseInt(p.getAttribute("data-c"));
       var c=TW[idx];
       p.addEventListener("mouseenter",function(){
-        if(drag.on || c.n===selectedCounty) return;
+        if(drag.on) return;
         this.setAttribute("stroke","#38bdf8"); this.setAttribute("stroke-width","2");
       });
       p.addEventListener("mouseleave",function(){
-        if(c.n===selectedCounty) return;
         this.setAttribute("stroke","#ffffff"); this.setAttribute("stroke-width","1.2");
       });
       p.addEventListener("click",function(){
