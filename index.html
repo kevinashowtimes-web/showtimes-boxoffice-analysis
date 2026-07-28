@@ -1943,7 +1943,7 @@ function renderMktShare() {
   var el = document.getElementById('mktShareCompact');
   if (!el) return;
 
-  // 品牌固定色彩（2026-07-28 依營運長規格重新設計；美麗新台茂=同一品牌，採棕色"美麗新"）
+  // 品牌固定色彩（2026-07-29 依營運長規格新增 in89；美麗新台茂＝同一品牌，採棕色"美麗新"）
   var BRAND = {
     WS:  {label:'威秀',   color:'#E53935'},
     GBA: {label:'國賓',   color:'#1E88E5'},
@@ -1951,9 +1951,11 @@ function renderMktShare() {
     SOKU:{label:'新光',   color:'#F39C12'},
     MRN: {label:'美麗新', color:'#8D6E63'},
     JY:  {label:'喜樂',   color:'#F1C40F'},
+    IN89:{label:'in89',  color:'#37474F'},
     OTH: {label:'其他',   color:'#95A5A6'},
   };
 
+  // 外島(金門/澎湖)無追蹤戲院資料，且座標位置造成地圖左側大量留白，暫不納入地圖範圍(僅於footnote註明)
   var TW = [
     {n:"台北市",d:"M691.8,68.8 L696.5,72.6 L695.4,78.2 L701.4,87.9 L699.0,91.5 L705.6,98.2 L703.1,103.3 L709.2,111.6 L699.0,117.0 L700.1,127.9 L692.2,126.8 L685.4,120.9 L683.9,114.1 L678.6,116.3 L677.3,110.8 L681.4,102.0 L677.5,95.4 L671.6,93.2 L673.0,87.5 L680.3,78.4 L691.8,68.8Z",lx:687,ly:98},
     {n:"新北市",d:"M676.0,195.8 L669.8,187.9 L665.0,175.1 L669.8,169.1 L662.1,156.7 L654.7,158.0 L649.0,155.0 L650.5,147.7 L645.3,143.2 L645.4,124.4 L654.9,123.1 L662.0,113.5 L657.7,104.1 L649.4,101.8 L636.6,90.6 L653.4,86.0 L662.4,78.8 L662.4,73.8 L669.4,60.3 L682.0,49.6 L687.1,47.5 L696.5,48.5 L705.6,55.5 L707.2,62.6 L715.6,70.5 L719.2,68.3 L721.6,76.9 L706.1,84.7 L712.0,96.9 L729.0,106.0 L733.7,103.7 L730.9,92.5 L739.7,91.0 L740.6,86.4 L748.9,88.4 L764.0,89.9 L763.6,96.0 L765.9,103.2 L765.7,109.1 L770.6,113.3 L780.7,114.9 L781.3,116.1 L778.2,119.1 L763.2,123.3 L749.3,127.9 L750.7,136.2 L736.8,144.5 L731.8,152.5 L726.7,152.6 L717.8,161.1 L705.6,164.1 L698.8,170.9 L699.3,183.2 L686.4,192.5 L676.0,195.8Z M685.4,121.6 L693.4,126.9 L700.3,124.2 L700.7,114.1 L712.9,112.6 L703.9,108.5 L704.4,95.4 L699.2,91.4 L700.8,87.2 L696.1,79.4 L696.7,72.9 L692.6,69.6 L681.1,78.1 L671.6,93.2 L680.7,99.5 L678.4,116.1 L683.6,113.8 L685.4,121.6Z",lx:718,ly:155},
@@ -1973,10 +1975,11 @@ function renderMktShare() {
     {n:"高雄市",d:"M414.9,613.1 L418.4,611.0 L431.6,616.8 L435.4,615.0 L450.3,618.7 L456.1,611.3 L463.2,612.0 L470.8,594.7 L493.7,572.4 L502.2,555.2 L507.3,550.2 L510.7,539.0 L508.2,529.9 L509.6,522.4 L520.2,524.4 L520.7,521.1 L545.0,504.0 L549.9,492.7 L560.1,484.7 L571.4,481.1 L581.4,482.7 L582.9,489.2 L585.2,494.3 L577.3,506.7 L587.8,514.3 L585.6,521.8 L576.6,525.6 L562.3,537.9 L562.2,549.0 L555.2,556.3 L557.1,571.1 L552.0,590.2 L545.0,600.0 L544.3,606.3 L547.7,619.1 L552.1,621.3 L552.9,629.4 L543.7,624.8 L536.3,630.9 L525.6,621.1 L520.5,620.9 L514.9,626.1 L508.6,619.6 L499.6,623.9 L491.7,631.8 L474.6,631.1 L470.7,650.0 L471.0,659.0 L467.4,671.3 L467.0,684.4 L469.4,689.9 L464.7,705.8 L464.7,716.1 L460.0,715.6 L442.1,699.7 L431.0,682.4 L430.1,672.8 L434.6,665.8 L418.2,629.6 L414.9,613.1Z",lx:498,ly:585},
     {n:"屏東縣",d:"M520.9,816.1 L522.8,807.7 L517.1,779.9 L510.1,769.1 L508.6,757.8 L493.6,738.1 L470.4,723.5 L464.7,716.1 L464.7,705.8 L469.4,689.9 L467.0,684.4 L467.4,671.3 L471.0,659.0 L470.7,650.0 L474.6,631.1 L491.7,631.8 L499.6,623.9 L508.6,619.6 L514.9,626.1 L520.5,620.9 L525.6,621.1 L536.3,630.9 L543.7,624.8 L552.9,629.4 L558.9,654.1 L550.2,659.3 L539.2,665.6 L532.2,679.8 L527.8,698.4 L532.8,711.7 L530.5,718.3 L537.1,727.9 L531.1,733.6 L529.0,741.4 L536.9,747.5 L535.4,758.5 L539.2,765.2 L552.8,773.6 L559.2,770.8 L558.6,792.9 L560.1,820.9 L548.8,832.9 L548.2,840.7 L552.9,853.0 L531.2,839.2 L524.8,848.0 L523.1,834.9 L517.5,821.1 L520.9,816.1Z",lx:510,ly:712},
     {n:"花蓮縣",d:"M585.6,521.8 L587.8,514.3 L577.3,506.7 L585.2,494.3 L582.9,489.2 L589.3,485.4 L587.8,480.1 L594.4,469.6 L607.0,470.1 L611.4,453.5 L621.9,450.4 L624.6,444.7 L628.1,424.1 L626.5,415.0 L621.2,410.2 L634.9,377.4 L634.9,362.2 L632.2,358.3 L637.7,341.4 L643.5,336.5 L645.4,328.1 L637.0,323.4 L638.5,313.3 L647.9,308.2 L648.5,302.2 L656.9,292.7 L657.2,287.9 L666.6,279.1 L670.1,268.8 L678.1,273.8 L689.9,276.1 L700.3,281.1 L699.0,277.4 L706.5,275.1 L704.7,268.3 L721.4,277.6 L734.6,280.9 L726.5,296.0 L712.6,309.1 L711.6,325.1 L703.5,335.4 L703.4,341.7 L709.3,352.8 L701.2,365.9 L702.2,370.3 L699.5,387.9 L694.5,402.3 L693.1,416.3 L690.1,422.0 L684.9,456.0 L682.2,461.1 L681.8,475.9 L679.2,489.2 L668.7,488.4 L659.9,500.8 L664.5,507.0 L655.5,520.9 L647.0,549.2 L643.6,553.7 L644.3,562.0 L634.5,569.1 L631.1,562.0 L622.3,557.5 L618.1,544.5 L608.1,544.5 L606.0,539.9 L595.6,536.9 L587.8,521.1 L585.6,521.8Z",lx:660,ly:420},
-    {n:"台東縣",d:"M663.7,539.0 L663.5,539.2 L659.6,542.9 L660.1,561.3 L663.7,563.0 L660.2,565.3 L656.6,569.3 L651.5,571.8 L642.2,598.4 L634.4,611.0 L631.9,615.3 L626.3,624.3 L617.9,628.1 L618.3,633.3 L618.7,641.9 L612.8,651.2 L604.0,659.8 L587.4,670.6 L581.6,689.9 L576.4,695.2 L569.1,721.3 L558.9,749.9 L559.2,770.8 L552.8,773.6 L539.2,765.2 L535.4,758.5 L536.9,747.5 L529.0,741.4 L531.1,733.6 L537.1,727.9 L530.5,718.3 L532.8,711.7 L527.8,698.4 L532.2,679.8 L539.2,665.6 L550.2,659.3 L555.6,659.5 L558.9,654.1 L560.6,639.7 L553.6,635.7 L552.9,629.4 L552.1,621.3 L547.7,619.1 L544.3,606.3 L545.0,600.0 L552.0,590.2 L557.1,571.1 L555.2,556.3 L562.2,549.0 L562.3,537.9 L576.6,525.6 L585.6,521.8 L587.8,521.1 L595.6,536.9 L606.0,539.9 L608.1,544.5 L618.1,544.5 L622.3,557.5 L631.1,562.0 L634.5,569.1 L644.3,562.0 L643.6,553.7 L647.0,549.2 L655.5,520.9 L664.5,507.0 L659.9,500.8 L668.7,488.4 L679.2,489.2 L674.7,501.2 L672.6,516.8 L666.2,524.1 L663.7,539.0Z",lx:620,ly:660},
-    {n:"澎湖縣",d:"M318.7,460.2 L308.7,459.8 L302.5,465.0 L301.1,471.8 L294.9,472.0 L300.0,462.0 L292.5,462.0 L292.7,454.5 L299.4,456.1 L301.0,451.0 L302.0,447.8 L296.1,436.6 L290.0,437.7 L283.7,444.4 L282.3,458.5 L278.2,450.4 L281.7,440.4 L286.7,441.0 L291.0,433.8 L296.8,431.9 L304.9,455.0 L311.1,448.2 L318.7,460.2Z",lx:300,ly:454},
-    {n:"金門縣",d:"M52.9,253.9 L44.7,263.8 L36.4,258.3 L41.8,253.3 L37.7,243.7 L43.4,239.7 L53.9,246.2 L58.8,235.7 L64.7,230.7 L73.4,242.0 L72.4,253.0 L67.4,258.5 L58.0,252.2 L52.9,253.9Z M32.6,254.6 L25.7,258.7 L27.4,248.9 L32.6,254.6Z",lx:52,ly:250}
+    {n:"台東縣",d:"M663.7,539.0 L663.5,539.2 L659.6,542.9 L660.1,561.3 L663.7,563.0 L660.2,565.3 L656.6,569.3 L651.5,571.8 L642.2,598.4 L634.4,611.0 L631.9,615.3 L626.3,624.3 L617.9,628.1 L618.3,633.3 L618.7,641.9 L612.8,651.2 L604.0,659.8 L587.4,670.6 L581.6,689.9 L576.4,695.2 L569.1,721.3 L558.9,749.9 L559.2,770.8 L552.8,773.6 L539.2,765.2 L535.4,758.5 L536.9,747.5 L529.0,741.4 L531.1,733.6 L537.1,727.9 L530.5,718.3 L532.8,711.7 L527.8,698.4 L532.2,679.8 L539.2,665.6 L550.2,659.3 L555.6,659.5 L558.9,654.1 L560.6,639.7 L553.6,635.7 L552.9,629.4 L552.1,621.3 L547.7,619.1 L544.3,606.3 L545.0,600.0 L552.0,590.2 L557.1,571.1 L555.2,556.3 L562.2,549.0 L562.3,537.9 L576.6,525.6 L585.6,521.8 L587.8,521.1 L595.6,536.9 L606.0,539.9 L608.1,544.5 L618.1,544.5 L622.3,557.5 L631.1,562.0 L634.5,569.1 L644.3,562.0 L643.6,553.7 L647.0,549.2 L655.5,520.9 L664.5,507.0 L659.9,500.8 L668.7,488.4 L679.2,489.2 L674.7,501.2 L672.6,516.8 L666.2,524.1 L663.7,539.0Z",lx:620,ly:660}
   ];
+
+  // 主地圖裁切座標範圍（排除外島後，緊貼台灣本島實際邊界，放大地圖有效面積）
+  var MAPVB = {x:352, y:25, w:460, h:855};
 
   // County → region tab mapping for click interaction（沿用既有標籤頁分區，供點擊跳轉用）
   var COUNTY_RG = {
@@ -2031,10 +2034,10 @@ function renderMktShare() {
     {name:'屏東國賓',county:'屏東縣',chain:'GBA',bo:409.21,vis:18220},
     {name:'高雄草衙道國賓',county:'高雄市',chain:'GBA',bo:399.31,vis:17670},
     {name:'新莊國賓',county:'新北市',chain:'GBA',bo:362.52,vis:15763},
-    {name:'高雄in89大立',county:'高雄市',chain:'OTH',bo:357.74,vis:13059},
+    {name:'高雄in89大立',county:'高雄市',chain:'IN89',bo:357.74,vis:13059},
     {name:'台北大國賓',county:'台北市',chain:'GBA',bo:325.50,vis:10881},
     {name:'台南Focus威秀',county:'台南市',chain:'WS',bo:343.50,vis:13245},
-    {name:'嘉義in89',county:'嘉義市',chain:'OTH',bo:303.32,vis:9609},
+    {name:'嘉義in89',county:'嘉義市',chain:'IN89',bo:303.32,vis:9609},
     {name:'淡水國賓',county:'新北市',chain:'GBA',bo:277.55,vis:12739},
     // 微風(台北)：全國MTD排行未列入(規模過小)，秀泰內部亦無其MTD實查數據，暫不納入
   ];
@@ -2068,31 +2071,44 @@ function renderMktShare() {
   var countyStatsByName = {}; countyStats.forEach(function(r){countyStatsByName[r.county]=r;});
 
   var TAG_INFO = {
-    dominant:{label:'主導市場', color:'#16a34a'},
-    hot:     {label:'高競爭區', color:'#f59e0b'},
+    dominant:{label:'👑 主導市場', color:'#16a34a'},
+    hot:     {label:'🔥 高競爭市場', color:'#f59e0b'},
     leading: {label:'領先未主導', color:'#64748b'},
     limited: {label:'資料有限', color:'#475569'}
   };
 
-  // ── 底圖：市場規模淺灰藍漸層（商業分析儀表板風格；與品牌顏色完全脫鉤，避免深灰/黑色）─────────
-  var sizeVals = countyStats.map(function(r){return r.size;});
-  var minSize = sizeVals.length ? Math.min.apply(null,sizeVals) : 0;
-  var maxSize = sizeVals.length ? Math.max.apply(null,sizeVals) : 1;
-  function sizeColor(size){
-    if(size==null || size<=0) return '#f1f5f9';
-    var span = Math.sqrt(maxSize)-Math.sqrt(minSize);
-    var t = span>0 ? (Math.sqrt(size)-Math.sqrt(minSize))/span : 1;
-    t = Math.max(0,Math.min(1,t));
-    var c1=[241,245,249], c2=[148,163,184];
-    var rgb=c1.map(function(v,i){return Math.round(v+(c2[i]-v)*t);});
-    return 'rgb('+rgb[0]+','+rgb[1]+','+rgb[2]+')';
-  }
-  function sizeTextColor(){ return '#334155'; }
+  // 北部6縣市地理位置緊密、泡泡易重疊誤點 → 移出主地圖泡泡層，改用右側「北部特寫」清單呈現
+  var NORTH_CLUSTER = ['台北市','新北市','基隆市','桃園縣','新竹市','新竹縣'];
+  var mapCountyStats = countyStats.filter(function(r){ return NORTH_CLUSTER.indexOf(r.county)<0; });
+  var northCountyStats = countyStats.filter(function(r){ return NORTH_CLUSTER.indexOf(r.county)>=0; })
+    .sort(function(a,b){ return b.size-a.size; });
 
-  // ── 泡泡半徑：Square Root Scale，對齊使用者指定的4個級距 ──
+  // ── 底圖：市場規模4級灰藍分級（資料驅動分位數切分，避免黑色與過度淺灰，提升層級對比）─────────
+  var sizeValsAll = countyStats.map(function(r){return r.size;}).filter(function(v){return v>0;}).sort(function(a,b){return a-b;});
+  function quantile(arr,q){
+    if(!arr.length) return 0;
+    var pos=(arr.length-1)*q, base=Math.floor(pos), rest=pos-base;
+    return arr[base+1]!==undefined ? arr[base]+rest*(arr[base+1]-arr[base]) : arr[base];
+  }
+  var q1=quantile(sizeValsAll,0.25), q2=quantile(sizeValsAll,0.5), q3=quantile(sizeValsAll,0.75);
+  var SIZE_TIERS = [
+    {max:q1,      label:'小市場',   color:'#e2e8f0', text:'#334155'},
+    {max:q2,      label:'中市場',   color:'#a9bbd1', text:'#1e293b'},
+    {max:q3,      label:'大市場',   color:'#6f89ad', text:'#f8fafc'},
+    {max:Infinity,label:'超大市場', color:'#3f5872', text:'#f8fafc'}
+  ];
+  function sizeTier(size){
+    if(size==null || size<=0) return null;
+    for(var i=0;i<SIZE_TIERS.length;i++){ if(size<=SIZE_TIERS[i].max) return SIZE_TIERS[i]; }
+    return SIZE_TIERS[SIZE_TIERS.length-1];
+  }
+  function sizeColor(size){ var t=sizeTier(size); return t? t.color : '#f1f5f9'; }
+  function sizeTextColor(size){ var t=sizeTier(size); return t? t.text : '#94a3b8'; }
+
+  // ── 泡泡半徑：Square Root Scale，對齊4個級距(<10% / 10-30% / 30-50% / ≥50%) ──
   function bubbleR(pct){ return Math.max(9, Math.min(46, 9+Math.sqrt(Math.max(pct,0)/100)*40)); }
 
-  var SKIP_LABEL = {"基隆市":1,"新竹市":1,"嘉義市":1,"金門縣":1,"澎湖縣":1};
+  var SKIP_LABEL = {"基隆市":1,"新竹市":1,"嘉義市":1};
   var paths = TW.map(function(c,idx){
     var st = countyStatsByName[c.n];
     var fill = sizeColor(st?st.size:0);
@@ -2105,13 +2121,13 @@ function renderMktShare() {
     var st = countyStatsByName[c.n];
     var tc = sizeTextColor(st?st.size:0);
     var nm = c.n.replace(/[縣市]$/,"");
-    return '<text x="'+c.lx+'" y="'+c.ly+'" fill="'+tc+'" font-size="9" opacity="0.55" '
+    return '<text x="'+c.lx+'" y="'+c.ly+'" fill="'+tc+'" font-size="9" opacity="0.6" '
       +'text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" '
-      +'pointer-events="none" font-weight="500">'+nm+"</text>";
+      +'pointer-events="none" font-weight="600">'+nm+"</text>";
   }).join("");
 
-  // ── 泡泡層：每縣市畫出「領先品牌」泡泡；高競爭區加畫「第二品牌」泡泡 ──
-  var bubbleSvg = countyStats.map(function(r){
+  // ── 泡泡層：僅繪製「非北部群」縣市；北部6縣市改在右側特寫卡呈現，避免重疊與誤點 ──
+  var bubbleSvg = mapCountyStats.map(function(r){
     var base=r.base;
     var isLimited = r.tag==='limited';
     var leaderR = isLimited ? Math.min(14, bubbleR(r.leaderPct)) : bubbleR(r.leaderPct);
@@ -2121,60 +2137,106 @@ function renderMktShare() {
     var svg = '<g class="bub" data-county="'+r.county+'" style="cursor:pointer">'
       +'<circle cx="'+base.lx+'" cy="'+base.ly+'" r="'+leaderR+'" fill="'+leaderColor+'" fill-opacity="'+op+'" '
       +'stroke="#ffffff" stroke-width="2.5" '+dash+' filter="url(#bubShadow)" class="bubGlow"/>';
-    if(r.tag==='hot' && r.secondChain){
-      var secR = Math.max(7, bubbleR(r.secondPct)*0.85);
+    if(r.secondChain){
+      var secR = Math.max(7, bubbleR(r.secondPct)*0.8);
       var secColor = (BRAND[r.secondChain]||BRAND.OTH).color;
       var ox = base.lx + leaderR*0.55 + secR*0.5 + 3;
       svg += '<circle cx="'+ox+'" cy="'+base.ly+'" r="'+secR+'" fill="'+secColor+'" fill-opacity="0.85" '
-        +'stroke="#ffffff" stroke-width="2.5" filter="url(#bubShadow)" class="bubGlow"/>';
+        +'stroke="#ffffff" stroke-width="2" filter="url(#bubShadow)" class="bubGlow"/>';
     }
     svg += "</g>";
     return svg;
   }).join("");
 
-  // ── 直接標示：縣市名 + 領先品牌市占%（不倚賴Tooltip）────
-  var dataLabels = countyStats.map(function(r){
+  // ── 直接標示：縣市名＋領先品牌名稱＋市占%＋次要品牌＋競爭標籤（品牌名稱直接顯示，不僅靠顏色）──
+  var dataLabels = mapCountyStats.map(function(r){
     var base=r.base;
     var leaderR = r.tag==='limited' ? Math.min(14,bubbleR(r.leaderPct)) : bubbleR(r.leaderPct);
     var yOff = base.ly + leaderR + 13;
     var nm = r.county.replace(/[縣市]$/,"");
     var tagInfo = TAG_INFO[r.tag];
-    var pctText = r.tag==='limited' ? '資料有限' : r.leaderPct.toFixed(1)+'%';
-    return '<g pointer-events="none">'
-      +'<text x="'+base.lx+'" y="'+yOff+'" text-anchor="middle" font-size="10" font-weight="800" fill="#0f172a" '
+    var leaderB = (BRAND[r.leaderChain]||BRAND.OTH);
+    var pctText = r.tag==='limited' ? (leaderB.label+' 資料有限') : (leaderB.label+' '+r.leaderPct.toFixed(1)+'%');
+    var lines = '<text x="'+base.lx+'" y="'+yOff+'" text-anchor="middle" font-size="10" font-weight="800" fill="#0f172a" '
       +'font-family="sans-serif" stroke="#fff" stroke-width="3" paint-order="stroke">'+nm+'</text>'
-      +'<text x="'+base.lx+'" y="'+(yOff+12)+'" text-anchor="middle" font-size="10.5" font-weight="800" '
-      +'fill="'+((BRAND[r.leaderChain]||BRAND.OTH).color)+'" font-family="sans-serif" stroke="#fff" stroke-width="3" paint-order="stroke">'
-      +pctText+'</text>'
-      +(r.tag!=='limited' ? '<text x="'+base.lx+'" y="'+(yOff+24)+'" text-anchor="middle" font-size="8" font-weight="700" '
-        +'fill="'+tagInfo.color+'" font-family="sans-serif" stroke="#fff" stroke-width="2.5" paint-order="stroke">'+tagInfo.label+'</text>' : '')
-      +"</g>";
+      +'<text x="'+base.lx+'" y="'+(yOff+12)+'" text-anchor="middle" font-size="10" font-weight="800" '
+      +'fill="'+leaderB.color+'" font-family="sans-serif" stroke="#fff" stroke-width="3" paint-order="stroke">'
+      +pctText+'</text>';
+    var nextY = yOff+12;
+    if(r.tag!=='limited' && r.secondChain){
+      var secB=(BRAND[r.secondChain]||BRAND.OTH);
+      nextY += 12;
+      lines += '<text x="'+base.lx+'" y="'+nextY+'" text-anchor="middle" font-size="8.5" font-weight="700" '
+        +'fill="'+secB.color+'" font-family="sans-serif" stroke="#fff" stroke-width="2.5" paint-order="stroke">'
+        +'次: '+secB.label+' '+r.secondPct.toFixed(1)+'%</text>';
+    }
+    if(r.tag==='dominant' || r.tag==='hot'){
+      nextY += 12;
+      lines += '<text x="'+base.lx+'" y="'+nextY+'" text-anchor="middle" font-size="8.5" font-weight="800" '
+        +'fill="'+tagInfo.color+'" font-family="sans-serif" stroke="#fff" stroke-width="2.5" paint-order="stroke">'+tagInfo.label+'</text>';
+    }
+    return '<g pointer-events="none">'+lines+'</g>';
   }).join("");
 
-  // ── 圖例：底圖(市場規模) + 泡泡(品牌色) + 泡泡大小 ────────
-  var sizeLegendGradient = 'linear-gradient(90deg, '+sizeColor(minSize)+', '+sizeColor(maxSize)+')';
-  var mapLegendHtml =
-    '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">'
-    +'<span style="font-size:9.5px;color:#64748b;white-space:nowrap;">底圖＝市場規模(MTD票房)：</span>'
-    +'<span style="width:90px;height:10px;border-radius:5px;background:'+sizeLegendGradient+';border:1px solid #cbd5e1;"></span>'
-    +'<span style="font-size:9px;color:#94a3b8;">小 → 大</span>'
-    +'</div>';
+  // ── 圖例：底圖(4級市場規模) + 品牌色 + 泡泡大小 ────────
+  var sizeLegendHtml = SIZE_TIERS.map(function(t){
+    return '<span style="display:inline-flex;align-items:center;gap:4px;margin-right:8px;margin-bottom:3px;">'
+      +'<span style="width:13px;height:13px;border-radius:3px;background:'+t.color+';border:1px solid #cbd5e1;display:inline-block;"></span>'
+      +'<span style="font-size:9.5px;color:#475569;">'+t.label+'</span></span>';
+  }).join("");
+
   var brandLegend = Object.keys(BRAND).map(function(k){
     var b=BRAND[k];
-    return '<span style="margin-right:9px;font-size:9.5px;color:'+b.color+';white-space:nowrap;">'
-      +'<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+b.color+';opacity:.85;border:1.5px solid #ffffff;box-shadow:0 0 0 1px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.15);margin-right:3px;vertical-align:middle"></span>'
-      +b.label+"</span>";
-  }).join("");
-  var sizeCatLegend = [
-    {r:9,label:'<10%'},{r:16,label:'10-30%'},{r:23,label:'30-50%'},{r:30,label:'≥50%'}
-  ].map(function(s){
-    var d=s.r*2+4;
-    return '<span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px;">'
-      +'<svg width="'+d+'" height="'+d+'" style="flex-shrink:0;filter:drop-shadow(0 1px 2px rgba(0,0,0,.15));"><circle cx="'+(d/2)+'" cy="'+(d/2)+'" r="'+s.r+'" fill="#95A5A6" fill-opacity="0.85" stroke="#ffffff" stroke-width="1.5"/></svg>'
-      +'<span style="font-size:9px;color:#64748b;">'+s.label+'</span></span>';
+    return '<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;">'
+      +'<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+b.color+';opacity:.9;border:1.5px solid #ffffff;box-shadow:0 0 0 1px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.15);flex-shrink:0;"></span>'
+      +'<span style="font-size:10px;color:'+b.color+';font-weight:700;">'+b.label+'</span></div>';
   }).join("");
 
-  // ── 右側戰情面板：KPI + TOP5 排行 ─────────────────────────
+  var sizeCatLegend = [
+    {r:7,label:'<10%'},{r:11,label:'10-30%'},{r:15,label:'30-50%'},{r:19,label:'≥50%'}
+  ].map(function(s){
+    var d=s.r*2+3;
+    return '<span style="display:inline-flex;align-items:center;gap:3px;margin-right:8px;margin-bottom:2px;">'
+      +'<svg width="'+d+'" height="'+d+'" style="flex-shrink:0;"><circle cx="'+(d/2)+'" cy="'+(d/2)+'" r="'+s.r+'" fill="#95A5A6" fill-opacity="0.85" stroke="#ffffff" stroke-width="1.3"/></svg>'
+      +'<span style="font-size:8.5px;color:#64748b;">'+s.label+'</span></span>';
+  }).join("");
+
+  var legendCard =
+    '<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 11px;box-shadow:0 2px 8px rgba(15,23,42,.08);">'
+    +'<div style="font-size:10px;font-weight:800;color:#334155;margin-bottom:6px;">🗺️ 底圖＝市場規模</div>'
+    +'<div style="display:flex;flex-wrap:wrap;margin-bottom:8px;">'+sizeLegendHtml+'</div>'
+    +'<div style="font-size:10px;font-weight:800;color:#334155;margin-bottom:6px;border-top:1px solid #f1f5f9;padding-top:7px;">🎯 泡泡＝品牌市占</div>'
+    +'<div style="display:flex;flex-wrap:wrap;">'+brandLegend+'</div>'
+    +'<div style="display:flex;flex-wrap:wrap;margin-top:4px;border-top:1px solid #f1f5f9;padding-top:6px;">'+sizeCatLegend+'</div>'
+    +'</div>';
+
+  // ── 北部特寫卡：台北/新北/基隆/桃園/新竹(市+縣)，避免主地圖重疊誤點 ──
+  var northCardsHtml = northCountyStats.map(function(r){
+    var leaderB=(BRAND[r.leaderChain]||BRAND.OTH);
+    var tagInfo=TAG_INFO[r.tag];
+    var nm=r.county.replace(/[縣市]$/,"");
+    var dotR = r.tag==='limited' ? 6 : Math.max(6,Math.min(13,6+Math.sqrt(Math.max(r.leaderPct,0)/100)*10));
+    var dotD = dotR*2+4;
+    var pctText = r.tag==='limited' ? '資料有限' : r.leaderPct.toFixed(1)+'%';
+    var secLine = (r.tag!=='limited' && r.secondChain) ? ('<div style="font-size:8.5px;color:'+(BRAND[r.secondChain]||BRAND.OTH).color+';margin-top:1px;">次: '+(BRAND[r.secondChain]||BRAND.OTH).label+' '+r.secondPct.toFixed(1)+'%</div>') : '';
+    var tagLine = (r.tag==='dominant'||r.tag==='hot') ? ('<div style="font-size:8.5px;font-weight:800;color:'+tagInfo.color+';margin-top:1px;">'+tagInfo.label+'</div>') : '';
+    return '<div class="northCard" data-county="'+r.county+'" style="display:flex;align-items:center;gap:7px;padding:6px 7px;border-radius:7px;cursor:pointer;border:1px solid #e2e8f0;margin-bottom:5px;background:#f8fafc;">'
+      +'<svg width="'+dotD+'" height="'+dotD+'" style="flex-shrink:0;filter:drop-shadow(0 1px 2px rgba(0,0,0,.15));">'
+      +'<circle cx="'+(dotD/2)+'" cy="'+(dotD/2)+'" r="'+dotR+'" fill="'+leaderB.color+'" fill-opacity="0.85" stroke="#ffffff" stroke-width="1.6"/></svg>'
+      +'<div style="flex:1;min-width:0;">'
+      +'<div style="font-size:10.5px;font-weight:800;color:#1e293b;">'+nm+'</div>'
+      +'<div style="font-size:9.5px;font-weight:700;color:'+leaderB.color+';">'+leaderB.label+' '+pctText+'</div>'
+      +secLine+tagLine
+      +'</div></div>';
+  }).join("");
+
+  var northCard =
+    '<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 11px;box-shadow:0 2px 8px rgba(15,23,42,.08);max-height:330px;overflow-y:auto;">'
+    +'<div style="font-size:10px;font-weight:800;color:#334155;margin-bottom:7px;">🔍 北部特寫（避免地圖重疊）</div>'
+    +northCardsHtml
+    +'</div>';
+
+  // ── 右側戰情面板：KPI + 策略分析（回答5個管理問題）─────────
   var totalComp = Object.values(comp).reduce(function(a,b){return a+b;},0);
   if(totalComp===0) return;
   var sortedComp = Object.entries(comp).sort(function(a,b){return b[1]-a[1];});
@@ -2182,66 +2244,112 @@ function renderMktShare() {
 
   var byMarketSize = countyStats.slice().sort(function(a,b){return b.size-a.size;});
   var biggestMarket = byMarketSize[0];
-  var byLeaderPct = countyStats.filter(function(r){return r.nBrands>=2;}).sort(function(a,b){return b.leaderPct-a.leaderPct;});
-  var mostDominatedMarket = byLeaderPct[0] || byMarketSize[0];
+
+  // Q1: 秀泰在哪些市場領先？
+  var stLeaderCounties = countyStats.filter(function(r){return r.leaderChain==='ST';}).sort(function(a,b){return b.leaderPct-a.leaderPct;});
+  // Q2: 威秀在哪些市場具有壟斷優勢？(市占≥50%)
+  var wsDominant = countyStats.filter(function(r){return r.leaderChain==='WS' && r.leaderPct>=50;}).sort(function(a,b){return b.leaderPct-a.leaderPct;});
+  // Q3: 國賓/新光/美麗新/in89 在哪些城市具有影響力？(領先，或次要品牌且占比≥15%)
+  var otherBrandKeys = ['GBA','SOKU','MRN','IN89'];
+  var brandInfluence = otherBrandKeys.map(function(bk){
+    var candidates = countyStats.filter(function(r){
+      return r.leaderChain===bk || (r.secondChain===bk && r.secondPct>=15);
+    }).map(function(r){
+      var isLeader = r.leaderChain===bk;
+      return {county:r.county, pct: isLeader?r.leaderPct:r.secondPct, isLeader:isLeader};
+    }).sort(function(a,b){return b.pct-a.pct;});
+    return {brand:BRAND[bk], list:candidates.slice(0,2)};
+  }).filter(function(x){return x.list.length>0;});
+  // Q4: 哪些區域競爭最激烈？(前二名差距≤10%)
+  var hotMarkets = countyStats.filter(function(r){return r.tag==='hot';}).sort(function(a,b){return b.size-a.size;});
+  // Q5: 哪些城市具備拓點機會？(秀泰尚無據點，且市場規模較大)
+  var expansionTargets = countyStats.filter(function(r){
+    return !(countyBrand[r.county] && countyBrand[r.county]['ST']>0);
+  }).sort(function(a,b){return b.size-a.size;}).slice(0,5);
 
   var kpiItems = [
     {label:'全台票房(今日)', value:fmtW(DATA.mkt.bo)+' 萬'},
-    {label:'全台觀影人次(今日)', value:fmt(DATA.mkt.visitors)+' 人'},
     {label:'全台影城數', value:fmt(DATA.mkt.cinemaCount)+' 家'},
     {label:'市場龍頭品牌', value:leaderBrandName+' '+leaderBrandPct.toFixed(1)+'%'},
     {label:'最大市場城市', value:biggestMarket?biggestMarket.county.replace(/[縣市]$/,'')+' '+fmtW(biggestMarket.size)+'萬':'—'},
-    {label:'最高市占率城市', value:mostDominatedMarket?mostDominatedMarket.county.replace(/[縣市]$/,'')+' '+mostDominatedMarket.leaderPct.toFixed(1)+'%':'—'},
   ];
-  var kpiHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">'
+  var kpiHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;">'
     +kpiItems.map(function(k){
-      return '<div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;box-shadow:0 1px 3px rgba(0,0,0,.06);">'
-        +'<div style="font-size:9.5px;color:#64748b;margin-bottom:3px;">'+k.label+'</div>'
-        +'<div style="font-size:14px;font-weight:800;color:#1e293b;">'+k.value+'</div>'
+      return '<div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:7px;padding:6px 8px;box-shadow:0 1px 3px rgba(0,0,0,.06);">'
+        +'<div style="font-size:8.5px;color:#64748b;margin-bottom:2px;">'+k.label+'</div>'
+        +'<div style="font-size:12px;font-weight:800;color:#1e293b;">'+k.value+'</div>'
         +'</div>';
     }).join("")
     +'</div>';
 
-  var top5Size = byMarketSize.slice(0,5).map(function(r,i){
-    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #e5e7eb;">'
-      +'<span style="font-size:10.5px;color:#334155;">'+(i+1)+'. '+r.county.replace(/[縣市]$/,'')+'</span>'
-      +'<span style="font-size:11px;font-weight:700;color:#1e293b;">'+fmtW(r.size)+' 萬</span>'
+  function qBlock(icon,title,bodyHtml){
+    return '<div style="margin-bottom:10px;">'
+      +'<div style="font-size:10.5px;font-weight:800;color:#1e293b;margin-bottom:5px;">'+icon+' '+title+'</div>'
+      +bodyHtml
       +'</div>';
-  }).join("");
-  var top5Share = byLeaderPct.slice(0,5).map(function(r,i){
-    var brand=(BRAND[r.leaderChain]||BRAND.OTH);
-    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #e5e7eb;">'
-      +'<span style="font-size:10.5px;color:#334155;">'+(i+1)+'. '+r.county.replace(/[縣市]$/,'')+'<span style="color:'+brand.color+';font-weight:700;margin-left:4px;">'+brand.label+'</span></span>'
-      +'<span style="font-size:11px;font-weight:700;color:#1e293b;">'+r.leaderPct.toFixed(1)+'%</span>'
-      +'</div>';
-  }).join("");
+  }
+  function rowLine(html,color){
+    return '<div style="font-size:9.5px;color:'+(color||'#334155')+';padding:2px 0;line-height:1.5;">'+html+'</div>';
+  }
+
+  var q1Body = stLeaderCounties.length
+    ? stLeaderCounties.slice(0,4).map(function(r){return rowLine('• '+r.county.replace(/[縣市]$/,'')+' <b>'+r.leaderPct.toFixed(1)+'%</b>');}).join("")
+    : rowLine('目前無縣市由秀泰以品牌市占第一名領先（樣本約55家戲院）','#94a3b8');
+
+  var q2Body = wsDominant.length
+    ? wsDominant.slice(0,4).map(function(r){return rowLine('• '+r.county.replace(/[縣市]$/,'')+' <b style="color:#E53935">'+r.leaderPct.toFixed(1)+'%</b>');}).join("")
+    : rowLine('目前無縣市威秀市占≥50%','#94a3b8');
+
+  var q3Body = brandInfluence.length
+    ? brandInfluence.map(function(x){
+        return rowLine('<b style="color:'+x.brand.color+'">'+x.brand.label+'</b>： '+x.list.map(function(c){return c.county.replace(/[縣市]$/,'')+(c.isLeader?'(領先)':'')+' '+c.pct.toFixed(1)+'%';}).join('、'));
+      }).join("")
+    : rowLine('資料樣本中尚無明顯影響力縣市','#94a3b8');
+
+  var q4Body = hotMarkets.length
+    ? hotMarkets.slice(0,4).map(function(r){
+        var lb=(BRAND[r.leaderChain]||BRAND.OTH), sb=(BRAND[r.secondChain]||BRAND.OTH);
+        return rowLine('• '+r.county.replace(/[縣市]$/,'')+'： '+lb.label+' '+r.leaderPct.toFixed(1)+'% vs '+sb.label+' '+r.secondPct.toFixed(1)+'%');
+      }).join("")
+    : rowLine('目前無縣市呈現前二名差距≤10%的高競爭態勢','#94a3b8');
+
+  var q5Body = expansionTargets.length
+    ? expansionTargets.map(function(r){
+        var lb=(BRAND[r.leaderChain]||BRAND.OTH);
+        return rowLine('• '+r.county.replace(/[縣市]$/,'')+'（'+fmtW(r.size)+'萬，現由'+lb.label+'領先）');
+      }).join("")
+    : rowLine('秀泰已於所有追蹤縣市設有據點','#94a3b8');
+
+  var strategyHtml =
+    qBlock('🏆','秀泰領先市場',q1Body)
+    +qBlock('👑','威秀壟斷市場(市占≥50%)',q2Body)
+    +qBlock('🎯','其他品牌影響力縣市',q3Body)
+    +qBlock('🔥','競爭最激烈區域',q4Body)
+    +qBlock('🚀','拓點機會城市(秀泰尚無據點)',q5Body);
 
   el.innerHTML =
-    '<div style="display:flex;gap:0;min-height:640px;background:#ffffff;border-radius:8px;overflow:hidden">'
-    +'<div style="flex:1;position:relative;min-width:0;padding:8px 4px 8px 8px;background:#f8fafc;">'
-    +'<svg id="twMapSvg" viewBox="0 0 800 900" style="width:100%;height:100%;max-height:600px;display:block">'
+    '<div style="display:flex;gap:0;min-height:820px;background:#ffffff;border-radius:8px;overflow:hidden">'
+    +'<div style="flex:0 0 78%;max-width:78%;position:relative;min-width:0;padding:8px;background:#f8fafc;">'
+    +'<svg id="twMapSvg" viewBox="'+MAPVB.x+' '+MAPVB.y+' '+MAPVB.w+' '+MAPVB.h+'" preserveAspectRatio="xMinYMid meet" style="width:100%;height:100%;max-height:800px;display:block">'
     +'<defs><filter id="bubShadow" x="-60%" y="-60%" width="220%" height="220%">'
     +'<feDropShadow dx="0" dy="1.5" stdDeviation="2.2" flood-color="#1e293b" flood-opacity="0.18"/>'
     +'</filter></defs>'
-    +"<rect width=\"800\" height=\"900\" fill=\"#f8fafc\" />"
+    +"<rect x=\""+MAPVB.x+"\" y=\""+MAPVB.y+"\" width=\""+MAPVB.w+"\" height=\""+MAPVB.h+"\" fill=\"#f8fafc\" />"
     +paths+labels+bubbleSvg+dataLabels
     +"</svg>"
     +'<div id="twTip" style="position:absolute;bottom:8px;left:12px;font-size:11px;color:#64748b;pointer-events:none;min-height:14px"></div>'
-    +'<div style="position:absolute;top:8px;left:12px;right:12px;">'
-    +mapLegendHtml
-    +'<div style="display:flex;flex-wrap:wrap;">'+brandLegend+'</div>'
-    +'<div style="display:flex;flex-wrap:wrap;margin-top:4px;">'+sizeCatLegend+'</div>'
+    +'<div style="position:absolute;top:10px;right:10px;width:230px;display:flex;flex-direction:column;gap:8px;">'
+    +legendCard+northCard
     +'</div>'
     +"</div>"
-    +'<div style="width:300px;padding:14px 14px 14px 12px;border-left:1px solid #e5e7eb;display:flex;flex-direction:column;background:#ffffff;overflow-y:auto;max-height:640px;">'
-    +'<div style="font-size:12px;font-weight:800;color:#1e293b;margin-bottom:10px;">📊 全台戰情總覽</div>'
+    +'<div style="flex:0 0 22%;max-width:22%;padding:14px 14px 14px 12px;border-left:1px solid #e5e7eb;display:flex;flex-direction:column;background:#ffffff;overflow-y:auto;max-height:820px;">'
+    +'<div style="font-size:12px;font-weight:800;color:#1e293b;margin-bottom:10px;">📊 影院市場競爭版圖</div>'
     +kpiHtml
-    +'<div style="font-size:11px;font-weight:700;color:#1e293b;margin-bottom:6px;">🏆 TOP5 市場規模城市</div>'
-    +top5Size
-    +'<div style="font-size:11px;font-weight:700;color:#1e293b;margin:12px 0 6px;">👑 TOP5 品牌市占率城市</div>'
-    +top5Share
-    +'<div style="font-size:9px;color:#94a3b8;margin-top:12px;border-top:1px solid #e5e7eb;padding-top:8px;line-height:1.6;">'
-    +'※ 底圖顏色僅代表市場規模，與品牌顏色無關；泡泡代表各縣市領先品牌之在地市占率(非全國市占)。資料涵蓋秀泰15家自有影城＋全國MTD(7/1-25)排行約40家主要競爭戲院(合計約55家，涵蓋全國約90%票房)。標示「資料有限」之縣市僅追蹤到單一品牌戲院，不代表真實市場獨占。'
+    +'<div style="border-top:1px solid #e5e7eb;padding-top:10px;">'
+    +strategyHtml
+    +'</div>'
+    +'<div style="font-size:9px;color:#94a3b8;margin-top:8px;border-top:1px solid #e5e7eb;padding-top:8px;line-height:1.6;">'
+    +'※ 底圖顏色代表市場規模(4級距，依資料分位數切分)；泡泡代表各縣市領先/次要品牌之在地市占率(非全國市占)。資料涵蓋秀泰15家自有影城＋全國MTD(7/1-25)排行約40家主要競爭戲院(合計約55家，涵蓋全國約90%票房)。標示「資料有限」之縣市僅追蹤到單一品牌戲院，不代表真實市場獨占。北部6縣市(台北/新北/基隆/桃園/新竹市/新竹縣)因地理位置密集，改於「北部特寫」清單呈現以避免地圖重疊與誤點；外島(金門/澎湖)無追蹤戲院資料，暫不納入地圖範圍。台茂與美麗新為同一品牌(美麗新台茂)，故僅以棕色「美麗新」呈現。'
     +'</div>'
     +'</div>'
     +'</div>';
@@ -2252,14 +2360,15 @@ function renderMktShare() {
     var mapWrap = svg ? svg.parentElement : null;
     var ps = el.querySelectorAll(".twc");
     var bubs = el.querySelectorAll(".bub");
+    var northCards = el.querySelectorAll(".northCard");
     var tip = document.getElementById("twTip");
     if(tip) tip.textContent = "🔍 滾輪縮放 · 拖曳移動 · 雙擊重置 · 點擊縣市查看詳情";
 
     var pop = document.createElement("div");
-    pop.style.cssText = "position:absolute;top:10px;right:10px;background:#fff;"
+    pop.style.cssText = "position:absolute;bottom:50px;right:12px;background:#fff;"
       +"border-radius:10px;padding:10px 13px;box-shadow:0 4px 16px rgba(0,0,0,0.13);"
       +"font-size:12px;pointer-events:none;opacity:0;transition:opacity .15s;"
-      +"min-width:160px;max-width:240px;border:1px solid #e2e8f0;z-index:20;";
+      +"min-width:160px;max-width:230px;border:1px solid #e2e8f0;z-index:20;";
     if(mapWrap) mapWrap.appendChild(pop);
 
     function popupForCounty(cn){
@@ -2284,7 +2393,7 @@ function renderMktShare() {
     }
 
     // ── Zoom / pan state ─────────────────────────────────
-    var vb={x:0,y:0,w:800,h:900};
+    var vb={x:MAPVB.x,y:MAPVB.y,w:MAPVB.w,h:MAPVB.h};
     function applyVB(){ if(svg) svg.setAttribute("viewBox",vb.x+" "+vb.y+" "+vb.w+" "+vb.h); }
 
     if(svg){
@@ -2295,9 +2404,9 @@ function renderMktShare() {
         var mx=(e.clientX-rect.left)/rect.width, my=(e.clientY-rect.top)/rect.height;
         var vx=vb.x+mx*vb.w, vy=vb.y+my*vb.h;
         var f=e.deltaY>0?1.18:0.85;
-        var nw=Math.min(800,Math.max(100,vb.w*f)); var nh=nw*900/800;
-        vb.x=Math.max(-100,Math.min(700,vx-mx*nw));
-        vb.y=Math.max(-100,Math.min(800,vy-my*nh));
+        var nw=Math.min(MAPVB.w,Math.max(80,vb.w*f)); var nh=nw*MAPVB.h/MAPVB.w;
+        vb.x=Math.max(MAPVB.x-150,Math.min(MAPVB.x+MAPVB.w-nw+150,vx-mx*nw));
+        vb.y=Math.max(MAPVB.y-150,Math.min(MAPVB.y+MAPVB.h-nh+150,vy-my*nh));
         vb.w=nw; vb.h=nh; applyVB();
       },{passive:false});
       var drag={on:false,sx:0,sy:0,ox:0,oy:0,moved:false};
@@ -2318,7 +2427,7 @@ function renderMktShare() {
         if(drag.on){drag.on=false; if(svg)svg.style.cursor="grab";}
       });
       svg.addEventListener("dblclick",function(){
-        vb={x:0,y:0,w:800,h:900}; applyVB();
+        vb={x:MAPVB.x,y:MAPVB.y,w:MAPVB.w,h:MAPVB.h}; applyVB();
         if(tip) tip.textContent="🔍 滾輪縮放 · 拖曳移動 · 雙擊重置 · 點擊縣市查看詳情";
       });
     }
@@ -2412,6 +2521,21 @@ function renderMktShare() {
       });
       b.addEventListener("mouseleave",function(){ pop.style.opacity='0'; });
       b.addEventListener("click",function(){ jumpToRegion(rgName); });
+    });
+
+    northCards.forEach(function(nc){
+      var cn = nc.getAttribute("data-county");
+      var rgName = COUNTY_RG[cn]||"其他地區";
+      nc.addEventListener("mouseenter",function(){
+        pop.innerHTML = popupForCounty(cn);
+        pop.style.opacity='1';
+        this.style.background='#eef2ff';
+      });
+      nc.addEventListener("mouseleave",function(){
+        pop.style.opacity='0';
+        this.style.background='#f8fafc';
+      });
+      nc.addEventListener("click",function(){ jumpToRegion(rgName); });
     });
   }, 100);
 }
