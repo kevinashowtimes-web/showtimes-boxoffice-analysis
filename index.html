@@ -802,11 +802,11 @@ const DATA = {
   st: {
     bo: 817.5, fb: 151.2, visitors: 25518,
     ystBO: 854.7,
-    mtdBO: 11667.3, mtdLastMonthBO: 11097.5, mtdLastYearBO: 12639.0, // ⚠ mtdLastYearBO仍為7/1-25基準(2025年)，因瀏覽器連線於查詢期間中斷、內部系統需重新登入才能查7/1-26同期，待Kevina重新登入後補實查
-    ytdBO: 97476.3, ytdLastYearBO: 34024.6, // ⚠ 去年同期(2025/1/1-7/25)採9家同店口徑，不含巨蛋/麗寶/仁德/台東/北港/嘉義（2025年尚未開幕，經內部系統實查驗證為0）；本次7/26更新沿用7/25基準未重新查證，與先前版本63593.8萬(14家口徑推估)不同，兩者不可直接比較年增率，請與Kevina確認採用基準
+    mtdBO: 11667.3, mtdLastMonthBO: 11097.5, mtdLastYearBO: 13407.2, // mtdLastYearBO=2025/7/1-26實查（9家同店口徑：文心/站前/樹林/欣欣/基隆/土城/花蓮/夢時代/岡山），已補實查
+    ytdBO: 97476.3, ytdLastYearBO: 34792.9, // ytdLastYearBO=2025/1/1-7/26實查（同9家同店口徑，不含巨蛋/麗寶/仁德/台東/北港/嘉義，2025年尚未開幕），已補實查；與先前版本63593.8萬(14家口徑推估)不同，兩者不可直接比較年增率，請與Kevina確認採用基準
   },
 
-  wison: { bo: 2157.9, visitors: 68391, atp: 315.6, mtdBO: 29524.1, mtdVisitors: 942419, mtdAtp: 313.3 }, // 威秀7/26共22家完整（含MuvieCinemas）；MTD(7/1-26)為18/22家實查加總(2萬9524.1萬，缺桃園桃知道/台南Focus/花蓮新天堂樂園3家小型店，7/25基準合計約546萬<2%，因連線中斷待補實查)
+  wison: { bo: 2157.9, visitors: 68391, atp: 315.6, mtdBO: 30292.0, mtdVisitors: 962604, mtdAtp: 314.7 }, // 威秀7/26共22家完整（含MuvieCinemas）；MTD(7/1-26)22/22家全數實查加總，已補齊桃園桃知道/台南Focus/花蓮新天堂樂園3家小型店
 
   // 院線競爭對手當日票房（來源：台北票房觀測站 / 手動填入）
 
@@ -954,61 +954,59 @@ const DATA = {
     {title:'屍速禁區', dist:'車庫娛樂', releaseDate:'2026-05-27', theaters:40, sessions:59, cumBO:233317108, totalBO:174096, stBO:66101, mktMtdBO:233317108, stMtdBO:3293969, wisonBO:174486, wisonMtdBO:8335719, avgPrice:287.3},
   ],
 
-  // 威秀各家 MTD 2026-07-01～07-19（資料來源：taipeitheater.org.tw）
-  // ⚠ 7/26更新時瀏覽器連線中斷、taipeitheater.org.tw需重新登入才能重查各店MTD明細，本區塊尚未更新至7/26，待Kevina重新登入後補查（不影響上方wison.mtdBO總額，該欄位已用18/22家實查加總更新）
+  // 威秀各家 MTD 2026-07-01～07-26（資料來源：taipeitheater.org.tw，22/22家全數實查）
   wisonMTD: {
     N: [
-      { name:'台北信義威秀', bo:2236.2, visitors:65946, avgP:339.1 },
-      { name:'台北京站威秀', bo:1481.9, visitors:48781, avgP:303.8 },
-      { name:'板橋大遠百威秀', bo:1366.3, visitors:42372, avgP:322.5 },
-      { name:'新竹巨城威秀', bo:1529.0, visitors:49904, avgP:306.4 },
-      { name:'新店裕隆城威秀', bo:1088.9, visitors:34105, avgP:319.3 },
-      { name:'南港LaLaport威秀', bo:900.8, visitors:28992, avgP:310.7 },
-      { name:'林口威秀', bo:971.6, visitors:30943, avgP:314.0 },
-      { name:'桃園統領威秀', bo:694.3, visitors:24278, avgP:286.0 },
-      { name:'台北西門威秀', bo:635.9, visitors:22347, avgP:284.6 },
-      { name:'中和環球威秀', bo:721.9, visitors:25547, avgP:282.6 },
-      { name:'新竹大遠百威秀', bo:518.6, visitors:17833, avgP:290.8 },
-      { name:'桃園桃知道威秀', bo:178.1, visitors:6464, avgP:275.6 },
+      { name:'台北信義威秀', bo:3071.5, visitors:89715, avgP:342.4 },
+      { name:'台北京站威秀', bo:2095.8, visitors:68596, avgP:305.5 },
+      { name:'板橋大遠百威秀', bo:2205.7, visitors:65582, avgP:336.3 },
+      { name:'新竹巨城威秀', bo:2230.7, visitors:71118, avgP:313.7 },
+      { name:'新店裕隆城威秀', bo:1771.6, visitors:53310, avgP:332.3 },
+      { name:'南港LaLaport威秀', bo:1283.8, visitors:41112, avgP:312.3 },
+      { name:'林口威秀', bo:1346.0, visitors:42433, avgP:317.2 },
+      { name:'桃園統領威秀', bo:936.3, visitors:32644, avgP:286.8 },
+      { name:'台北西門威秀', bo:895.0, visitors:31337, avgP:285.6 },
+      { name:'中和環球威秀', bo:979.7, visitors:34467, avgP:284.3 },
+      { name:'新竹大遠百威秀', bo:751.8, visitors:25526, avgP:294.5 },
+      { name:'桃園桃知道威秀', bo:248.7, visitors:8981, avgP:276.9 },
     ],
     C: [
-      { name:'台中大遠百威秀', bo:1173.8, visitors:39227, avgP:299.2 },
-      { name:'台中iFG遠雄廣場威秀', bo:892.2, visitors:29614, avgP:301.3 },
-      { name:'台中老虎城威秀', bo:687.6, visitors:21831, avgP:314.9 },
-      { name:'頭份尚順威秀', bo:471.7, visitors:17016, avgP:277.2 },
+      { name:'台中大遠百威秀', bo:1875.0, visitors:60310, avgP:310.9 },
+      { name:'台中iFG遠雄廣場威秀', bo:1176.4, visitors:39107, avgP:300.8 },
+      { name:'台中老虎城威秀', bo:1024.7, visitors:31701, avgP:323.2 },
+      { name:'頭份尚順威秀', bo:635.3, visitors:22779, avgP:278.9 },
     ],
     S: [
-      { name:'高雄威秀', bo:1909.1, visitors:60816, avgP:313.9 },
-      { name:'台南南紡威秀', bo:1721.2, visitors:59952, avgP:287.1 },
-      { name:'台南大遠百威秀', bo:437.5, visitors:13473, avgP:324.8 },
-      { name:'台南Focus威秀', bo:280.1, visitors:10828, avgP:258.7 },
-      { name:'花蓮新天堂樂園威秀', bo:87.8, visitors:3177, avgP:276.4 },
+      { name:'高雄威秀', bo:2777.3, visitors:86455, avgP:321.2 },
+      { name:'台南南紡威秀', bo:2477.5, visitors:84111, avgP:294.5 },
+      { name:'台南大遠百威秀', bo:595.7, visitors:18440, avgP:323.0 },
+      { name:'台南Focus威秀', bo:365.1, visitors:14054, avgP:259.8 },
+      { name:'花蓮新天堂樂園威秀', bo:154.1, visitors:5299, avgP:290.8 },
     ],
   },
 
-  // 其他院線影城 MTD（本月累計票房萬元）
-  // ⚠ 同上，因連線中斷本區塊尚未更新至7/26，待重新登入taipeitheater.org.tw後補查
+  // 其他院線影城 MTD 2026-07-01～07-26（資料來源：taipeitheater.org.tw，實查更新）
   otherCinemas: [
-    {name:'台北美麗華', region:'台北', chain:'MR', chainL:'美麗華', bo:1123.9, vis:32425},
-    {name:'台北國賓長春', region:'台北', chain:'GBA', chainL:'國賓', bo:393.5, vis:15227},
-    {name:'台北大國賓', region:'台北', chain:'GBA', chainL:'國賓', bo:218.5, vis:7573},
-    {name:'喜樂時代南港', region:'台北', chain:'JY', chainL:'喜樂時代', bo:423.3, vis:16454},
-    {name:'喜樂時代今日', region:'台北', chain:'JY', chainL:'喜樂時代', bo:226.6, vis:9375},
-    {name:'新莊國賓', region:'新北', chain:'GBA', chainL:'國賓', bo:289.2, vis:12715},
-    {name:'淡水國賓', region:'新北', chain:'GBA', chainL:'國賓', bo:206.3, vis:9518},
-    {name:'林口國賓', region:'新北', chain:'GBA', chainL:'國賓', bo:133.4, vis:6361},
-    {name:'喜樂時代永和', region:'新北', chain:'JY', chainL:'喜樂時代', bo:233.4, vis:9890},
-    {name:'美麗新台茂', region:'新北', chain:'MRN', chainL:'美麗新', bo:479.9, vis:15433},
-    {name:'八德國賓', region:'桃園', chain:'GBA', chainL:'國賓', bo:435.7, vis:18538},
-    {name:'in89統領', region:'桃園', chain:'IN89', chainL:'in89', bo:96.4, vis:3842},
-    {name:'台中豐原in89', region:'台中', chain:'IN89', chainL:'in89', bo:182.1, vis:7175},
-    {name:'嘉義in89', region:'台南', chain:'IN89', chainL:'in89', bo:247.8, vis:7999},
-    {name:'高雄草衙道國賓', region:'高雄', chain:'GBA', chainL:'國賓', bo:323.5, vis:14389},
-    {name:'高雄義大國賓', region:'高雄', chain:'GBA', chainL:'國賓', bo:172.2, vis:7885},
-    {name:'屏東國賓', region:'高雄', chain:'GBA', chainL:'國賓', bo:332.3, vis:14871},
-    {name:'高雄in89大立', region:'高雄', chain:'IN89', chainL:'in89', bo:279.2, vis:10245},
-    {name:'高雄in89駁二', region:'高雄', chain:'IN89', chainL:'in89', bo:54.1, vis:2524},
-    {name:'高雄喜樂時代總圖店', region:'高雄', chain:'JY', chainL:'喜樂時代', bo:222.5, vis:10306},
+    {name:'台北美麗華', region:'台北', chain:'MR', chainL:'美麗華', bo:2010.6, vis:54303},
+    {name:'台北國賓長春', region:'台北', chain:'GBA', chainL:'國賓', bo:566.9, vis:21852},
+    {name:'台北大國賓', region:'台北', chain:'GBA', chainL:'國賓', bo:375.9, vis:12349},
+    {name:'喜樂時代南港', region:'台北', chain:'JY', chainL:'喜樂時代', bo:543.6, vis:21025},
+    {name:'喜樂時代今日', region:'台北', chain:'JY', chainL:'喜樂時代', bo:282.3, vis:11613},
+    {name:'新莊國賓', region:'新北', chain:'GBA', chainL:'國賓', bo:393.1, vis:17068},
+    {name:'淡水國賓', region:'新北', chain:'GBA', chainL:'國賓', bo:302.8, vis:13856},
+    {name:'林口國賓', region:'新北', chain:'GBA', chainL:'國賓', bo:192.7, vis:9101},
+    {name:'喜樂時代永和', region:'新北', chain:'JY', chainL:'喜樂時代', bo:309.7, vis:13096},
+    {name:'美麗新台茂', region:'新北', chain:'MRN', chainL:'美麗新', bo:759.9, vis:22942},
+    {name:'八德國賓', region:'桃園', chain:'GBA', chainL:'國賓', bo:578.6, vis:24459},
+    {name:'in89統領', region:'桃園', chain:'IN89', chainL:'in89', bo:127.9, vis:5050},
+    {name:'台中豐原in89', region:'台中', chain:'IN89', chainL:'in89', bo:245.4, vis:9615},
+    {name:'嘉義in89', region:'台南', chain:'IN89', chainL:'in89', bo:416.6, vis:12969},
+    {name:'高雄草衙道國賓', region:'高雄', chain:'GBA', chainL:'國賓', bo:429.3, vis:18967},
+    {name:'高雄義大國賓', region:'高雄', chain:'GBA', chainL:'國賓', bo:234.0, vis:10575},
+    {name:'屏東國賓', region:'高雄', chain:'GBA', chainL:'國賓', bo:437.4, vis:19441},
+    {name:'高雄in89大立', region:'高雄', chain:'IN89', chainL:'in89', bo:386.2, vis:14065},
+    {name:'高雄in89駁二', region:'高雄', chain:'IN89', chainL:'in89', bo:77.0, vis:3563},
+    {name:'高雄喜樂時代總圖店', region:'高雄', chain:'JY', chainL:'喜樂時代', bo:276.9, vis:12762},
   ],
 
   // ── 月份存檔（已結束月份官方數據；每月底系統自動由台北票房觀測站補齊） ──
