@@ -2077,10 +2077,14 @@ function renderMktShare() {
     limited: {label:'資料有限', color:'#475569'}
   };
 
-  // 北部6縣市地理位置緊密、泡泡易重疊誤點 → 移出主地圖泡泡層，改用右側「北部特寫」清單呈現
+  // 北部6縣市、中南部4縣市地理位置緊密、泡泡易重疊誤點 → 移出主地圖泡泡層，改用右側「特寫」清單呈現
   var NORTH_CLUSTER = ['台北市','新北市','基隆市','桃園縣','新竹市','新竹縣'];
-  var mapCountyStats = countyStats.filter(function(r){ return NORTH_CLUSTER.indexOf(r.county)<0; });
+  var SOUTH_CLUSTER = ['雲林縣','嘉義市','台南市','高雄市'];
+  var CROWDED_CLUSTER = NORTH_CLUSTER.concat(SOUTH_CLUSTER);
+  var mapCountyStats = countyStats.filter(function(r){ return CROWDED_CLUSTER.indexOf(r.county)<0; });
   var northCountyStats = countyStats.filter(function(r){ return NORTH_CLUSTER.indexOf(r.county)>=0; })
+    .sort(function(a,b){ return b.size-a.size; });
+  var southCountyStats = countyStats.filter(function(r){ return SOUTH_CLUSTER.indexOf(r.county)>=0; })
     .sort(function(a,b){ return b.size-a.size; });
 
   // ── 底圖：市場規模4級灰藍分級（資料驅動分位數切分，避免黑色與過度淺灰，提升層級對比）─────────
@@ -2210,8 +2214,8 @@ function renderMktShare() {
     +'<div style="display:flex;flex-wrap:wrap;margin-top:4px;border-top:1px solid #f1f5f9;padding-top:6px;">'+sizeCatLegend+'</div>'
     +'</div>';
 
-  // ── 北部特寫卡：台北/新北/基隆/桃園/新竹(市+縣)，避免主地圖重疊誤點 ──
-  var northCardsHtml = northCountyStats.map(function(r){
+  // ── 特寫卡：北部6縣市 + 中南部4縣市，避免主地圖重疊誤點 ──
+  function clusterCardHtml(r){
     var leaderB=(BRAND[r.leaderChain]||BRAND.OTH);
     var tagInfo=TAG_INFO[r.tag];
     var nm=r.county.replace(/[縣市]$/,"");
@@ -2228,12 +2232,16 @@ function renderMktShare() {
       +'<div style="font-size:9.5px;font-weight:700;color:'+leaderB.color+';">'+leaderB.label+' '+pctText+'</div>'
       +secLine+tagLine
       +'</div></div>';
-  }).join("");
+  }
+  var northCardsHtml = northCountyStats.map(clusterCardHtml).join("");
+  var southCardsHtml = southCountyStats.map(clusterCardHtml).join("");
 
   var northCard =
-    '<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 11px;box-shadow:0 2px 8px rgba(15,23,42,.08);max-height:330px;overflow-y:auto;">'
+    '<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 11px;box-shadow:0 2px 8px rgba(15,23,42,.08);max-height:390px;overflow-y:auto;">'
     +'<div style="font-size:10px;font-weight:800;color:#334155;margin-bottom:7px;">🔍 北部特寫（避免地圖重疊）</div>'
     +northCardsHtml
+    +'<div style="font-size:10px;font-weight:800;color:#334155;margin:10px 0 7px;border-top:1px solid #f1f5f9;padding-top:9px;">🔍 中南部特寫（雲林/嘉義/台南/高雄）</div>'
+    +southCardsHtml
     +'</div>';
 
   // ── 右側戰情面板：KPI + 策略分析（回答5個管理問題）─────────
@@ -2349,7 +2357,7 @@ function renderMktShare() {
     +strategyHtml
     +'</div>'
     +'<div style="font-size:9px;color:#94a3b8;margin-top:8px;border-top:1px solid #e5e7eb;padding-top:8px;line-height:1.6;">'
-    +'※ 底圖顏色代表市場規模(4級距，依資料分位數切分)；泡泡代表各縣市領先/次要品牌之在地市占率(非全國市占)。資料涵蓋秀泰15家自有影城＋全國MTD(7/1-25)排行約40家主要競爭戲院(合計約55家，涵蓋全國約90%票房)。標示「資料有限」之縣市僅追蹤到單一品牌戲院，不代表真實市場獨占。北部6縣市(台北/新北/基隆/桃園/新竹市/新竹縣)因地理位置密集，改於「北部特寫」清單呈現以避免地圖重疊與誤點；外島(金門/澎湖)無追蹤戲院資料，暫不納入地圖範圍。台茂與美麗新為同一品牌(美麗新台茂)，故僅以棕色「美麗新」呈現。'
+    +'※ 底圖顏色代表市場規模(4級距，依資料分位數切分)；泡泡代表各縣市領先/次要品牌之在地市占率(非全國市占)。資料涵蓋秀泰15家自有影城＋全國MTD(7/1-25)排行約40家主要競爭戲院(合計約55家，涵蓋全國約90%票房)。標示「資料有限」之縣市僅追蹤到單一品牌戲院，不代表真實市場獨占。北部6縣市(台北/新北/基隆/桃園/新竹市/新竹縣)與中南部4縣市(雲林/嘉義/台南/高雄)因地理位置密集，改於右側「特寫」清單呈現以避免地圖重疊與誤點；外島(金門/澎湖)無追蹤戲院資料，暫不納入地圖範圍。台茂與美麗新為同一品牌(美麗新台茂)，故僅以棕色「美麗新」呈現。'
     +'</div>'
     +'</div>'
     +'</div>';
