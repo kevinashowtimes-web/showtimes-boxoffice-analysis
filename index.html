@@ -1979,7 +1979,8 @@ function renderMktShare() {
   ];
 
   // 主地圖裁切座標範圍（排除外島後，緊貼台灣本島實際邊界，放大地圖有效面積）
-  var MAPVB = {x:352, y:25, w:460, h:855};
+  var MAPVB = {x:367, y:23, w:427, h:854};
+  var MAP_H = 1060; // 放大地圖高度(px)，較前一版800px提升約33%
 
   // ── 影城層級資料 ──────────────────────────────────────────
   var ST_COUNTY = {
@@ -2065,8 +2066,9 @@ function renderMktShare() {
     var secondPct = sortedChains[1] ? sortedChains[1][1]/size*100 : 0;
     var nBrands = sortedChains.length;
     var gap = leaderPct - secondPct;
-    var topBrands = sortedChains.map(function(e){return {chain:e[0], pct:e[1]/size*100};})
-      .filter(function(x){return x.pct>=5;}).slice(0,4);
+    var topBrandsAll = sortedChains.map(function(e){return {chain:e[0], pct:e[1]/size*100};});
+    var minShow = Math.min(3, topBrandsAll.length);
+    var topBrands = topBrandsAll.filter(function(x,i){return x.pct>=5 || i<minShow;}).slice(0,4);
     var stFirst = leaderChain==='ST';
     var tag = nBrands<2 ? 'limited' : (leaderPct>=50 ? 'dominant' : (gap<=10 && secondPct>=15 ? 'hot' : 'leading'));
     return {county:cn, size:size, leaderChain:leaderChain, leaderPct:leaderPct, secondChain:secondChain, secondPct:secondPct,
@@ -2205,6 +2207,37 @@ function renderMktShare() {
     return '<g pointer-events="none">'+lines+'</g>';
   }).join("");
 
+  // ── 北部/南部群聚縣市：全台總覽用精簡「市場標籤chip」(取代舊有的第二張放大地圖) ──
+  // 手動微調dx,dy避免緊鄰縣市重疊；chip沿用 class="bub" 以複用既有hover/click邏輯(Zoom+浮動卡片)
+  var CHIP_OFFSET = {
+    '台北市':{dx:-20,dy:-18}, '基隆市':{dx:36,dy:-10}, '新北市':{dx:38,dy:18},
+    '桃園縣':{dx:-50,dy:8},  '新竹市':{dx:-56,dy:-2}, '新竹縣':{dx:6,dy:38},
+    '雲林縣':{dx:-44,dy:-8},'嘉義市':{dx:40,dy:-6},   '台南市':{dx:-40,dy:16}, '高雄市':{dx:36,dy:24}
+  };
+  var chipSvg = CROWDED_CLUSTER.map(function(cn){
+    var r = countyStatsByName[cn];
+    var base = twByName[cn];
+    if(!r || !base) return '';
+    var off = CHIP_OFFSET[cn] || {dx:0,dy:-16};
+    var cx = base.lx, cy = base.ly;
+    var tx = cx+off.dx, ty = cy+off.dy;
+    var isLimited = r.tag==='limited';
+    var leaderColor = (BRAND[r.leaderChain]||BRAND.OTH).color;
+    var nm = cn.replace(/[縣市]$/,"");
+    var tgs = activeTags(r);
+    var tagChar = tgs.length ? tgs[0].label.split(' ')[0] : '';
+    var w=56, h=isLimited?20:27;
+    var rectX = tx-w/2, rectY = ty-h/2;
+    var needLead = Math.abs(off.dx)>3 || Math.abs(off.dy)>3;
+    var lead = needLead ? '<line x1="'+cx+'" y1="'+cy+'" x2="'+tx+'" y2="'+ty+'" stroke="#94a3b8" stroke-width="0.8" stroke-dasharray="1.5,1.5"/>' : '';
+    var dot = '<circle cx="'+cx+'" cy="'+cy+'" r="3.2" fill="'+leaderColor+'" stroke="#fff" stroke-width="1"/>';
+    var rect = '<rect x="'+rectX+'" y="'+rectY+'" width="'+w+'" height="'+h+'" rx="5" fill="#ffffff" fill-opacity="0.96" stroke="'+leaderColor+'" stroke-width="1.3"/>';
+    var line1 = '<text x="'+tx+'" y="'+(rectY+9.5)+'" text-anchor="middle" font-size="7.6" font-weight="800" fill="#0f172a" font-family="sans-serif">'+nm+(tagChar?(' '+tagChar):'')+'</text>';
+    var line2 = isLimited ? '' :
+      '<text x="'+tx+'" y="'+(rectY+19.5)+'" text-anchor="middle" font-size="7" font-weight="700" fill="'+leaderColor+'" font-family="sans-serif">'+(BRAND[r.leaderChain]||BRAND.OTH).label+' '+r.leaderPct.toFixed(0)+'%</text>';
+    return '<g class="bub" data-county="'+cn+'" style="cursor:pointer">'+lead+dot+rect+line1+line2+'</g>';
+  }).join("");
+
   // ── 圖例：底圖(4級市場規模) + 品牌色 + 泡泡大小 ────────
   var sizeLegendHtml = SIZE_TIERS.map(function(t){
     return '<span style="display:inline-flex;align-items:center;gap:4px;margin-right:8px;margin-bottom:3px;">'
@@ -2317,30 +2350,30 @@ function renderMktShare() {
     +'<div style="font-size:9.5px;color:#8E44AD;background:#f5f0fa;border:1px solid #e9d8fd;border-radius:7px;padding:7px 9px;margin-top:2px;">💡 點擊地圖任一縣市，可Zoom查看該縣市影城層級競爭排行</div>';
 
   el.innerHTML =
-    '<div style="display:flex;gap:0;min-height:820px;background:#ffffff;border-radius:8px;overflow:hidden">'
-    +'<div style="flex:0 0 78%;max-width:78%;position:relative;min-width:0;padding:8px;background:#f8fafc;">'
-    +'<svg id="twMapSvg" viewBox="'+MAPVB.x+' '+MAPVB.y+' '+MAPVB.w+' '+MAPVB.h+'" preserveAspectRatio="xMinYMid meet" style="width:100%;height:100%;max-height:800px;display:block">'
+    '<div style="display:flex;gap:14px;align-items:flex-start;background:#ffffff;border-radius:8px;overflow:visible;flex-wrap:wrap;">'
+    +'<div id="mapWrapOuter" style="position:relative;flex:0 0 auto;padding:8px;background:#f8fafc;border-radius:8px;">'
+    +'<svg id="twMapSvg" viewBox="'+MAPVB.x+' '+MAPVB.y+' '+MAPVB.w+' '+MAPVB.h+'" preserveAspectRatio="xMidYMid meet" style="height:'+MAP_H+'px;width:auto;max-width:100%;aspect-ratio:'+MAPVB.w+'/'+MAPVB.h+';display:block">'
     +'<defs><filter id="bubShadow" x="-60%" y="-60%" width="220%" height="220%">'
     +'<feDropShadow dx="0" dy="1.5" stdDeviation="2.2" flood-color="#1e293b" flood-opacity="0.18"/>'
     +'</filter></defs>'
     +"<rect x=\""+MAPVB.x+"\" y=\""+MAPVB.y+"\" width=\""+MAPVB.w+"\" height=\""+MAPVB.h+"\" fill=\"#f8fafc\" />"
     +paths+labels
-    +'<g id="overviewLayer">'+bubbleSvg+dataLabels+'</g>'
+    +'<g id="overviewLayer">'+bubbleSvg+dataLabels+chipSvg+'</g>'
     +'<g id="pinLayer"></g>'
     +"</svg>"
     +'<div id="twTip" style="position:absolute;bottom:8px;left:12px;font-size:11px;color:#64748b;pointer-events:none;min-height:14px"></div>'
     +'<button id="mktBackBtn" style="display:none;position:absolute;top:10px;left:10px;font-size:11.5px;font-weight:700;color:#fff;background:#8E44AD;border:none;border-radius:7px;padding:7px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);">← 返回全台地圖</button>'
     +'<div style="position:absolute;top:10px;right:10px;width:220px;">'+legendCard+'</div>'
+    +'<div id="cityFloatCard" style="display:none;position:absolute;width:270px;z-index:35;background:#ffffff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 26px rgba(15,23,42,.2);padding:12px 14px;max-height:'+(MAP_H-40)+'px;overflow-y:auto;"></div>'
     +"</div>"
-    +'<div style="flex:0 0 22%;max-width:22%;padding:14px 14px 14px 12px;border-left:1px solid #e5e7eb;display:flex;flex-direction:column;background:#ffffff;overflow-y:auto;max-height:820px;">'
+    +'<div style="flex:1 1 360px;min-width:300px;padding:14px 14px 14px 4px;display:flex;flex-direction:column;background:#ffffff;">'
     +'<div style="font-size:12px;font-weight:800;color:#1e293b;margin-bottom:10px;">📊 秀泰競爭情報中心</div>'
     +'<div id="mktDefaultPanel">'
     +kpiHtml
     +'<div style="border-top:1px solid #e5e7eb;padding-top:10px;">'+strategyHtml+'</div>'
     +'</div>'
-    +'<div id="mktCityPanel" style="display:none;"></div>'
     +'<div style="font-size:9px;color:#94a3b8;margin-top:8px;border-top:1px solid #e5e7eb;padding-top:8px;line-height:1.6;">'
-    +'※ 底圖顏色代表市場規模(4級距，依資料分位數切分)；全台總覽時泡泡與標籤僅顯示6個資料充足且不擁擠的縣市(顯示所有市占≥5%品牌)，其餘縣市點擊後Zoom放大即可查看完整影城競爭排行。資料涵蓋秀泰15家自有影城＋全國MTD(7/1-25)排行約40家主要競爭戲院(合計約55家，涵蓋全國約90%票房)。標示「資料有限」之縣市僅追蹤到單一品牌戲院，不代表真實市場獨占。外島(金門/澎湖)無追蹤戲院資料，暫不納入地圖範圍。台茂與美麗新為同一品牌(美麗新台茂)，故僅以棕色「美麗新」呈現。'
+    +'※ 底圖顏色代表市場規模(4級距，依資料分位數切分)；全台總覽時泡泡顯示9個開闊縣市之品牌市占，北部(台北/新北/桃園/新竹)與南部(雲林/嘉義/台南/高雄)群聚縣市則以精簡標籤呈現縣市/龍頭品牌/市占；點擊任一縣市可Zoom查看完整影城競爭排行，並於地圖旁彈出該城市競爭戰況卡。資料涵蓋秀泰15家自有影城＋全國MTD(7/1-25)排行約40家主要競爭戲院(合計約55家，涵蓋全國約90%票房)。標示「資料有限」之縣市僅追蹤到單一品牌戲院，不代表真實市場獨占。外島(金門/澎湖)無追蹤戲院資料，暫不納入地圖範圍。台茂與美麗新為同一品牌(美麗新台茂)，故僅以棕色「美麗新」呈現。'
     +'</div>'
     +'</div>'
     +'</div>';
@@ -2353,8 +2386,7 @@ function renderMktShare() {
     var bubs = el.querySelectorAll(".bub");
     var tip = document.getElementById("twTip");
     var backBtn = document.getElementById("mktBackBtn");
-    var defaultPanel = document.getElementById("mktDefaultPanel");
-    var cityPanelEl = document.getElementById("mktCityPanel");
+    var cityFloatCard = document.getElementById("cityFloatCard");
     var overviewLayer = document.getElementById("overviewLayer");
     var pinLayer = document.getElementById("pinLayer");
     if(tip) tip.textContent = "🔍 滾輪縮放 · 拖曳移動 · 點擊縣市可Zoom查看影城競爭 · 雙擊重置";
@@ -2481,8 +2513,8 @@ function renderMktShare() {
     }
 
     function highlightCinemaRow(name){
-      if(!cityPanelEl) return;
-      var rows = cityPanelEl.querySelectorAll(".cinRow");
+      if(!cityFloatCard) return;
+      var rows = cityFloatCard.querySelectorAll(".cinRow");
       rows.forEach(function(r){
         if(r.getAttribute("data-name")===name){
           r.style.background='#fef3c7';
@@ -2544,15 +2576,56 @@ function renderMktShare() {
         +tagHtml;
     }
 
+    function positionCityCard(cn){
+      if(!cityFloatCard || !mapWrap) return;
+      var base = twByName[cn];
+      if(!base) return;
+      var wrapRect = mapWrap.getBoundingClientRect();
+      var px, py;
+      if(svg && svg.createSVGPoint && svg.getScreenCTM){
+        try{
+          var pt = svg.createSVGPoint();
+          pt.x = base.lx; pt.y = base.ly;
+          var ctm = svg.getScreenCTM();
+          if(ctm){
+            var sp = pt.matrixTransform(ctm);
+            px = sp.x - wrapRect.left; py = sp.y - wrapRect.top;
+          }
+        }catch(e){}
+      }
+      if(px==null || py==null){ px = wrapRect.width/2; py = wrapRect.height/2; }
+      var fx=(base.lx-MAPVB.x)/MAPVB.w, fy=(base.ly-MAPVB.y)/MAPVB.h;
+      var cw = 270, gap=14, margin=8;
+      cityFloatCard.style.width = cw+"px";
+      cityFloatCard.style.left = "-9999px"; cityFloatCard.style.top="0px";
+      var ch = cityFloatCard.offsetHeight || 280;
+      var left, top;
+      if(fx>0.58){ left = px - cw - gap; }
+      else if(fx<0.42){ left = px + gap; }
+      else { left = px - cw/2; }
+      if(fx>=0.42 && fx<=0.58){
+        top = py - ch - gap;
+        if(top < margin) top = py + gap;
+      } else {
+        top = py - ch/2;
+      }
+      var maxLeft = wrapRect.width - cw - margin;
+      var maxTop = wrapRect.height - ch - margin;
+      left = Math.max(margin, Math.min(maxLeft, left));
+      top = Math.max(margin, Math.min(maxTop, top));
+      cityFloatCard.style.left = left+"px";
+      cityFloatCard.style.top = top+"px";
+    }
+
     function selectCounty(cn){
       var target = zoomBBoxFor(cn);
       if(overviewLayer) overviewLayer.style.display='none';
       animateVB(target, function(){ renderPins(cn, target); });
-      if(defaultPanel) defaultPanel.style.display='none';
-      if(cityPanelEl){
-        cityPanelEl.innerHTML = renderCityPanelHtml(cn);
-        cityPanelEl.style.display='block';
-        cityPanelEl.querySelectorAll(".cinRow").forEach(function(r){
+      if(cityFloatCard){
+        cityFloatCard.innerHTML = renderCityPanelHtml(cn);
+        cityFloatCard.style.display='block';
+        positionCityCard(cn);
+        cityFloatCard.querySelectorAll(".cinRow").forEach(function(r){
           r.addEventListener("click", function(){ highlightPinByName(r.getAttribute("data-name")); });
         });
       }
@@ -2564,8 +2637,7 @@ function renderMktShare() {
       animateVB({x:MAPVB.x,y:MAPVB.y,w:MAPVB.w,h:MAPVB.h});
       if(pinLayer) pinLayer.innerHTML='';
       if(overviewLayer) overviewLayer.style.display='';
-      if(defaultPanel) defaultPanel.style.display='';
-      if(cityPanelEl){ cityPanelEl.style.display='none'; cityPanelEl.innerHTML=''; }
+      if(cityFloatCard){ cityFloatCard.style.display='none'; cityFloatCard.innerHTML=''; }
       if(backBtn) backBtn.style.display='none';
       if(tip) tip.textContent="🔍 滾輪縮放 · 拖曳移動 · 點擊縣市可Zoom查看影城競爭 · 雙擊重置";
     }
