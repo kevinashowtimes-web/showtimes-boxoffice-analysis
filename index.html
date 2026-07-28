@@ -1943,7 +1943,7 @@ function renderMktShare() {
   var el = document.getElementById('mktShareCompact');
   if (!el) return;
 
-  // 品牌固定色彩（2026-07-29 依營運長規格新增 in89；美麗新台茂＝同一品牌，採棕色"美麗新"）
+  // 品牌固定色彩（美麗新台茂＝同一品牌，採棕色"美麗新"）
   var BRAND = {
     WS:  {label:'威秀',   color:'#E53935'},
     GBA: {label:'國賓',   color:'#1E88E5'},
@@ -1981,7 +1981,7 @@ function renderMktShare() {
   // 主地圖裁切座標範圍（排除外島後，緊貼台灣本島實際邊界，放大地圖有效面積）
   var MAPVB = {x:352, y:25, w:460, h:855};
 
-  // County → region tab mapping for click interaction（沿用既有標籤頁分區，供點擊跳轉用）
+  // County → region tab mapping（沿用既有標籤頁分區）
   var COUNTY_RG = {
     "台北市":"台北","新北市":"新北","基隆市":"新北",
     "桃園縣":"桃園","新竹市":"桃園","新竹縣":"桃園","苗栗縣":"桃園","宜蘭縣":"桃園",
@@ -1991,9 +1991,7 @@ function renderMktShare() {
     "花蓮縣":"其他地區","台東縣":"其他地區","澎湖縣":"其他地區","金門縣":"其他地區"
   };
 
-  // ── 泡泡地圖資料 ──────────────────────────────────────────
-  // 秀泰15家：取自 DATA.cinemas 精確MTD(7/1-25)數據
-  // 競爭品牌：全國戲院MTD(7/1-25)累積排行（來源：60.251.126.13 全國排行頁，查詢於7/25），BO已換算為萬元
+  // ── 影城層級資料 ──────────────────────────────────────────
   var ST_COUNTY = {
     '秀泰巨蛋':'台北市','秀泰欣欣':'台北市','秀泰土城':'新北市','秀泰樹林':'新北市','秀泰基隆':'基隆市',
     '秀泰文心':'台中市','秀泰站前':'台中市','秀泰麗寶':'台中市','秀泰北港':'雲林縣','秀泰嘉義':'嘉義市',
@@ -2050,23 +2048,44 @@ function renderMktShare() {
   var validBubbles = cinemaBubbles.filter(function(c){return c.bo>0;});
   var twByName = {}; TW.forEach(function(t){twByName[t.n]=t;});
 
+  // 影城排行（依縣市分組，供 Drill-down 使用）
+  var cinemasByCounty = {};
+  validBubbles.forEach(function(c){
+    cinemasByCounty[c.county] = cinemasByCounty[c.county]||[];
+    cinemasByCounty[c.county].push(c);
+  });
+  Object.keys(cinemasByCounty).forEach(function(cn){
+    cinemasByCounty[cn].sort(function(a,b){return b.bo-a.bo;});
+  });
+
   // ── 依縣市彙總「品牌別市占」──────────────────────────────
   var countyBrand = {};
   validBubbles.forEach(function(c){
     countyBrand[c.county] = countyBrand[c.county] || {};
     countyBrand[c.county][c.chain] = (countyBrand[c.county][c.chain]||0) + c.bo;
   });
-  var countyStats = Object.keys(countyBrand).map(function(cn){
-    var chains = countyBrand[cn];
+
+  // 共用統計建構器：供「單一縣市」與「合併節點(如北部特寫的新竹)」共用同一套邏輯
+  function statsFromChains(cn, chains, base){
     var size = Object.values(chains).reduce(function(a,b){return a+b;},0);
+    if(size<=0) return {county:cn, size:0, leaderChain:null, leaderPct:0, secondChain:null, secondPct:0,
+      nBrands:0, tag:'limited', stFirst:false, topBrands:[], base:base};
     var sortedChains = Object.entries(chains).sort(function(a,b){return b[1]-a[1];});
     var leaderChain = sortedChains[0][0], leaderPct = sortedChains[0][1]/size*100;
     var secondChain = sortedChains[1] ? sortedChains[1][0] : null;
     var secondPct = sortedChains[1] ? sortedChains[1][1]/size*100 : 0;
     var nBrands = sortedChains.length;
     var gap = leaderPct - secondPct;
+    var topBrands = sortedChains.map(function(e){return {chain:e[0], pct:e[1]/size*100};})
+      .filter(function(x){return x.pct>=5;}).slice(0,4);
+    var stFirst = leaderChain==='ST';
     var tag = nBrands<2 ? 'limited' : (leaderPct>=50 ? 'dominant' : (gap<=10 && secondPct>=15 ? 'hot' : 'leading'));
-    return {county:cn, size:size, leaderChain:leaderChain, leaderPct:leaderPct, secondChain:secondChain, secondPct:secondPct, nBrands:nBrands, tag:tag, base:twByName[cn]};
+    return {county:cn, size:size, leaderChain:leaderChain, leaderPct:leaderPct, secondChain:secondChain, secondPct:secondPct,
+      nBrands:nBrands, tag:tag, stFirst:stFirst, topBrands:topBrands, base:base};
+  }
+
+  var countyStats = Object.keys(countyBrand).map(function(cn){
+    return statsFromChains(cn, countyBrand[cn], twByName[cn]);
   }).filter(function(r){return r.base;});
   var countyStatsByName = {}; countyStats.forEach(function(r){countyStatsByName[r.county]=r;});
 
@@ -2076,16 +2095,48 @@ function renderMktShare() {
     leading: {label:'領先未主導', color:'#64748b'},
     limited: {label:'資料有限', color:'#475569'}
   };
+  var ST_TAG = {label:'⭐ 秀泰優勢市場', color:'#8E44AD'};
+  function activeTags(r){
+    var arr=[];
+    if(r.stFirst) arr.push(ST_TAG);
+    if(r.tag==='dominant') arr.push(TAG_INFO.dominant);
+    else if(r.tag==='hot') arr.push(TAG_INFO.hot);
+    return arr;
+  }
 
-  // 北部6縣市、中南部4縣市地理位置緊密、泡泡易重疊誤點 → 移出主地圖泡泡層，改用右側「特寫」清單呈現
+  // 北部6縣市、中南部4縣市地理位置緊密、泡泡易重疊誤點 → 移出主地圖泡泡層
+  // 北部改用「真正的放大地圖」(非文字卡)；中南部維持特寫卡並升級TOP品牌顯示
   var NORTH_CLUSTER = ['台北市','新北市','基隆市','桃園縣','新竹市','新竹縣'];
   var SOUTH_CLUSTER = ['雲林縣','嘉義市','台南市','高雄市'];
   var CROWDED_CLUSTER = NORTH_CLUSTER.concat(SOUTH_CLUSTER);
   var mapCountyStats = countyStats.filter(function(r){ return CROWDED_CLUSTER.indexOf(r.county)<0; });
-  var northCountyStats = countyStats.filter(function(r){ return NORTH_CLUSTER.indexOf(r.county)>=0; })
-    .sort(function(a,b){ return b.size-a.size; });
   var southCountyStats = countyStats.filter(function(r){ return SOUTH_CLUSTER.indexOf(r.county)>=0; })
     .sort(function(a,b){ return b.size-a.size; });
+
+  // ── 北部放大地圖：固定示意版面（非地理精確，避免6縣市泡泡互相重疊）──
+  var northNodeDefs = [
+    {label:'台北', counties:['台北市']},
+    {label:'基隆', counties:['基隆市']},
+    {label:'新北', counties:['新北市']},
+    {label:'桃園', counties:['桃園縣']},
+    {label:'新竹', counties:['新竹市','新竹縣']}
+  ];
+  var NORTH_POS = {'台北':{x:132,y:56},'基隆':{x:207,y:40},'新北':{x:178,y:118},'桃園':{x:66,y:118},'新竹':{x:50,y:186}};
+  var northNodes = northNodeDefs.map(function(d){
+    var chains={};
+    d.counties.forEach(function(cn){
+      var cb = countyBrand[cn]||{};
+      Object.keys(cb).forEach(function(k){ chains[k]=(chains[k]||0)+cb[k]; });
+    });
+    var pos = NORTH_POS[d.label];
+    var st = statsFromChains(d.label, chains, {lx:pos.x, ly:pos.y});
+    st.countiesList = d.counties;
+    var cinCount = 0;
+    d.counties.forEach(function(cn){ cinCount += (cinemasByCounty[cn]||[]).length; });
+    st.cinemaCount = cinCount;
+    return st;
+  });
+  var northNodesByLabel = {}; northNodes.forEach(function(n){ northNodesByLabel[n.county]=n; });
 
   // ── 底圖：市場規模4級灰藍分級（資料驅動分位數切分，避免黑色與過度淺灰，提升層級對比）─────────
   var sizeValsAll = countyStats.map(function(r){return r.size;}).filter(function(v){return v>0;}).sort(function(a,b){return a-b;});
@@ -2109,8 +2160,9 @@ function renderMktShare() {
   function sizeColor(size){ var t=sizeTier(size); return t? t.color : '#f1f5f9'; }
   function sizeTextColor(size){ var t=sizeTier(size); return t? t.text : '#94a3b8'; }
 
-  // ── 泡泡半徑：Square Root Scale，對齊4個級距(<10% / 10-30% / 30-50% / ≥50%) ──
+  // ── 泡泡半徑：Square Root Scale ──
   function bubbleR(pct){ return Math.max(9, Math.min(46, 9+Math.sqrt(Math.max(pct,0)/100)*40)); }
+  function miniR(pct){ return Math.max(7, Math.min(26, 7+Math.sqrt(Math.max(pct,0)/100)*19)); }
 
   var SKIP_LABEL = {"基隆市":1,"新竹市":1,"嘉義市":1};
   var paths = TW.map(function(c,idx){
@@ -2130,7 +2182,7 @@ function renderMktShare() {
       +'pointer-events="none" font-weight="600">'+nm+"</text>";
   }).join("");
 
-  // ── 泡泡層：僅繪製「非北部群」縣市；北部6縣市改在右側特寫卡呈現，避免重疊與誤點 ──
+  // ── 泡泡層：僅繪製「非北部/中南部群」縣市（6個：台中/苗栗/宜蘭/花蓮/台東/屏東）──
   var bubbleSvg = mapCountyStats.map(function(r){
     var base=r.base;
     var isLimited = r.tag==='limited';
@@ -2152,33 +2204,78 @@ function renderMktShare() {
     return svg;
   }).join("");
 
-  // ── 直接標示：縣市名＋領先品牌名稱＋市占%＋次要品牌＋競爭標籤（品牌名稱直接顯示，不僅靠顏色）──
+  // ── 直接標示：縣市名＋TOP品牌(≥5%皆顯示，最多4個)＋競爭標籤（品牌名稱直接顯示，不僅靠顏色）──
   var dataLabels = mapCountyStats.map(function(r){
     var base=r.base;
     var leaderR = r.tag==='limited' ? Math.min(14,bubbleR(r.leaderPct)) : bubbleR(r.leaderPct);
     var yOff = base.ly + leaderR + 13;
     var nm = r.county.replace(/[縣市]$/,"");
-    var tagInfo = TAG_INFO[r.tag];
-    var leaderB = (BRAND[r.leaderChain]||BRAND.OTH);
-    var pctText = r.tag==='limited' ? (leaderB.label+' 資料有限') : (leaderB.label+' '+r.leaderPct.toFixed(1)+'%');
     var lines = '<text x="'+base.lx+'" y="'+yOff+'" text-anchor="middle" font-size="10" font-weight="800" fill="#0f172a" '
-      +'font-family="sans-serif" stroke="#fff" stroke-width="3" paint-order="stroke">'+nm+'</text>'
-      +'<text x="'+base.lx+'" y="'+(yOff+12)+'" text-anchor="middle" font-size="10" font-weight="800" '
-      +'fill="'+leaderB.color+'" font-family="sans-serif" stroke="#fff" stroke-width="3" paint-order="stroke">'
-      +pctText+'</text>';
-    var nextY = yOff+12;
-    if(r.tag!=='limited' && r.secondChain){
-      var secB=(BRAND[r.secondChain]||BRAND.OTH);
+      +'font-family="sans-serif" stroke="#fff" stroke-width="3" paint-order="stroke">'+nm+'</text>';
+    var nextY = yOff;
+    if(r.tag==='limited'){
       nextY += 12;
-      lines += '<text x="'+base.lx+'" y="'+nextY+'" text-anchor="middle" font-size="8.5" font-weight="700" '
-        +'fill="'+secB.color+'" font-family="sans-serif" stroke="#fff" stroke-width="2.5" paint-order="stroke">'
-        +'次: '+secB.label+' '+r.secondPct.toFixed(1)+'%</text>';
+      lines += '<text x="'+base.lx+'" y="'+nextY+'" text-anchor="middle" font-size="9.5" font-weight="800" '
+        +'fill="'+(BRAND[r.leaderChain]||BRAND.OTH).color+'" font-family="sans-serif" stroke="#fff" stroke-width="3" paint-order="stroke">'
+        +(BRAND[r.leaderChain]||BRAND.OTH).label+' 資料有限</text>';
+    } else {
+      r.topBrands.forEach(function(tb,i){
+        var b=(BRAND[tb.chain]||BRAND.OTH);
+        nextY += (i===0?12:11);
+        lines += '<text x="'+base.lx+'" y="'+nextY+'" text-anchor="middle" font-size="'+(i===0?10:8.5)+'" font-weight="'+(i===0?800:700)+'" '
+          +'fill="'+b.color+'" font-family="sans-serif" stroke="#fff" stroke-width="2.5" paint-order="stroke">'
+          +b.label+' '+tb.pct.toFixed(1)+'%</text>';
+      });
+      var tgs = activeTags(r);
+      if(tgs.length){
+        nextY += 12;
+        lines += '<text x="'+base.lx+'" y="'+nextY+'" text-anchor="middle" font-size="8.5" font-weight="800" '
+          +'fill="'+tgs[0].color+'" font-family="sans-serif" stroke="#fff" stroke-width="2.5" paint-order="stroke">'
+          +tgs.map(function(t){return t.label;}).join(' · ')+'</text>';
+      }
     }
-    if(r.tag==='dominant' || r.tag==='hot'){
-      nextY += 12;
-      lines += '<text x="'+base.lx+'" y="'+nextY+'" text-anchor="middle" font-size="8.5" font-weight="800" '
-        +'fill="'+tagInfo.color+'" font-family="sans-serif" stroke="#fff" stroke-width="2.5" paint-order="stroke">'+tagInfo.label+'</text>';
+    return '<g pointer-events="none">'+lines+'</g>';
+  }).join("");
+
+  // ── 北部放大地圖 SVG（獨立座標系，5節點示意版面，避免與主地圖重疊） ──
+  var NORTH_MINI_VB = {w:240, h:250};
+  var northMiniBubbles = northNodes.map(function(n){
+    var isLimited = n.tag==='limited';
+    var r = n.size>0 ? (isLimited?Math.min(11,miniR(n.leaderPct)):miniR(n.leaderPct)) : 9;
+    var color = n.leaderChain ? (BRAND[n.leaderChain]||BRAND.OTH).color : '#cbd5e1';
+    var dash = isLimited ? 'stroke-dasharray="3,2"' : '';
+    var op = n.size>0 ? (isLimited?'0.55':'0.88') : '0.5';
+    return '<g class="northNode" data-node="'+n.county+'" style="cursor:pointer">'
+      +'<circle cx="'+n.base.lx+'" cy="'+n.base.ly+'" r="'+r+'" fill="'+color+'" fill-opacity="'+op+'" '
+      +'stroke="#ffffff" stroke-width="2.2" '+dash+' filter="url(#miniShadow)"/></g>';
+  }).join("");
+  var northMiniLabels = northNodes.map(function(n){
+    var isLimited = n.tag==='limited';
+    var r = n.size>0 ? (isLimited?Math.min(11,miniR(n.leaderPct)):miniR(n.leaderPct)) : 9;
+    var yTop = n.base.ly - r - 6;
+    var yB = n.base.ly + r + 11;
+    var lines = '<text x="'+n.base.lx+'" y="'+yTop+'" text-anchor="middle" font-size="11" font-weight="800" fill="#0f172a" '
+      +'stroke="#fff" stroke-width="3" paint-order="stroke" font-family="sans-serif">'+n.county+'</text>';
+    if(n.size<=0){
+      lines += '<text x="'+n.base.lx+'" y="'+yB+'" text-anchor="middle" font-size="8.5" fill="#94a3b8" '
+        +'stroke="#fff" stroke-width="2.2" paint-order="stroke" font-family="sans-serif">資料有限</text>';
+      return '<g pointer-events="none">'+lines+'</g>';
     }
+    var leaderB=(BRAND[n.leaderChain]||BRAND.OTH);
+    lines += '<text x="'+n.base.lx+'" y="'+yB+'" text-anchor="middle" font-size="9.5" font-weight="800" fill="'+leaderB.color+'" '
+      +'stroke="#fff" stroke-width="2.5" paint-order="stroke" font-family="sans-serif">'+leaderB.label+' '+n.leaderPct.toFixed(1)+'%</text>';
+    yB += 10;
+    if(n.secondChain){
+      var secB=(BRAND[n.secondChain]||BRAND.OTH);
+      lines += '<text x="'+n.base.lx+'" y="'+yB+'" text-anchor="middle" font-size="8" font-weight="700" fill="'+secB.color+'" '
+        +'stroke="#fff" stroke-width="2.2" paint-order="stroke" font-family="sans-serif">'+secB.label+' '+n.secondPct.toFixed(1)+'%</text>';
+      yB += 9.5;
+    }
+    var tgs = activeTags(n);
+    var tail = tgs.length ? tgs.map(function(t){return t.label;}).join(' ') : '';
+    var countText = n.cinemaCount+'家戲院';
+    lines += '<text x="'+n.base.lx+'" y="'+yB+'" text-anchor="middle" font-size="7.3" font-weight="800" fill="'+(tgs.length?tgs[0].color:'#94a3b8')+'" '
+      +'stroke="#fff" stroke-width="2" paint-order="stroke" font-family="sans-serif">'+(tail?tail+' · ':'')+countText+'</text>';
     return '<g pointer-events="none">'+lines+'</g>';
   }).join("");
 
@@ -2209,42 +2306,58 @@ function renderMktShare() {
     '<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 11px;box-shadow:0 2px 8px rgba(15,23,42,.08);">'
     +'<div style="font-size:10px;font-weight:800;color:#334155;margin-bottom:6px;">🗺️ 底圖＝市場規模</div>'
     +'<div style="display:flex;flex-wrap:wrap;margin-bottom:8px;">'+sizeLegendHtml+'</div>'
-    +'<div style="font-size:10px;font-weight:800;color:#334155;margin-bottom:6px;border-top:1px solid #f1f5f9;padding-top:7px;">🎯 泡泡＝品牌市占</div>'
+    +'<div style="font-size:10px;font-weight:800;color:#334155;margin-bottom:6px;border-top:1px solid #f1f5f9;padding-top:7px;">🎯 泡泡＝品牌市占（顯示所有≥5%品牌）</div>'
     +'<div style="display:flex;flex-wrap:wrap;">'+brandLegend+'</div>'
     +'<div style="display:flex;flex-wrap:wrap;margin-top:4px;border-top:1px solid #f1f5f9;padding-top:6px;">'+sizeCatLegend+'</div>'
+    +'<div style="font-size:8.5px;color:#94a3b8;margin-top:6px;border-top:1px solid #f1f5f9;padding-top:6px;line-height:1.6;">⭐秀泰第一名　👑市占≥50%　🔥前二名差距≤10%</div>'
     +'</div>';
 
-  // ── 特寫卡：北部6縣市 + 中南部4縣市，避免主地圖重疊誤點 ──
+  // ── 北部放大地圖卡（真正的示意地圖，非文字清單）──
+  var northMapCard =
+    '<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 11px 6px;box-shadow:0 2px 8px rgba(15,23,42,.08);">'
+    +'<div style="font-size:10px;font-weight:800;color:#334155;margin-bottom:6px;">🔍 北部放大地圖（台北/新北/基隆/桃園/新竹）</div>'
+    +'<svg viewBox="0 0 '+NORTH_MINI_VB.w+' '+NORTH_MINI_VB.h+'" style="width:100%;height:auto;display:block;background:#f8fafc;border-radius:6px;">'
+    +'<defs><filter id="miniShadow" x="-60%" y="-60%" width="220%" height="220%">'
+    +'<feDropShadow dx="0" dy="1" stdDeviation="1.6" flood-color="#1e293b" flood-opacity="0.16"/></filter></defs>'
+    +northMiniBubbles+northMiniLabels
+    +'</svg>'
+    +'<div style="font-size:8px;color:#94a3b8;margin-top:4px;">※ 示意版面，非精確地理位置；點擊節點可展開影城競爭排行</div>'
+    +'</div>';
+
+  // ── 中南部特寫卡：升級為TOP品牌(≥5%)顯示 + 點擊展開影城排行 ──
   function clusterCardHtml(r){
-    var leaderB=(BRAND[r.leaderChain]||BRAND.OTH);
-    var tagInfo=TAG_INFO[r.tag];
     var nm=r.county.replace(/[縣市]$/,"");
-    var dotR = r.tag==='limited' ? 6 : Math.max(6,Math.min(13,6+Math.sqrt(Math.max(r.leaderPct,0)/100)*10));
+    var isLimited = r.tag==='limited';
+    var dotR = isLimited ? 6 : Math.max(6,Math.min(13,6+Math.sqrt(Math.max(r.leaderPct,0)/100)*10));
     var dotD = dotR*2+4;
-    var pctText = r.tag==='limited' ? '資料有限' : r.leaderPct.toFixed(1)+'%';
-    var secLine = (r.tag!=='limited' && r.secondChain) ? ('<div style="font-size:8.5px;color:'+(BRAND[r.secondChain]||BRAND.OTH).color+';margin-top:1px;">次: '+(BRAND[r.secondChain]||BRAND.OTH).label+' '+r.secondPct.toFixed(1)+'%</div>') : '';
-    var tagLine = (r.tag==='dominant'||r.tag==='hot') ? ('<div style="font-size:8.5px;font-weight:800;color:'+tagInfo.color+';margin-top:1px;">'+tagInfo.label+'</div>') : '';
-    return '<div class="northCard" data-county="'+r.county+'" style="display:flex;align-items:center;gap:7px;padding:6px 7px;border-radius:7px;cursor:pointer;border:1px solid #e2e8f0;margin-bottom:5px;background:#f8fafc;">'
-      +'<svg width="'+dotD+'" height="'+dotD+'" style="flex-shrink:0;filter:drop-shadow(0 1px 2px rgba(0,0,0,.15));">'
-      +'<circle cx="'+(dotD/2)+'" cy="'+(dotD/2)+'" r="'+dotR+'" fill="'+leaderB.color+'" fill-opacity="0.85" stroke="#ffffff" stroke-width="1.6"/></svg>'
+    var leaderColor = isLimited ? '#94a3b8' : (BRAND[r.leaderChain]||BRAND.OTH).color;
+    var body;
+    if(isLimited){
+      body = '<div style="font-size:9.5px;font-weight:700;color:'+(BRAND[r.leaderChain]||BRAND.OTH).color+';">'+(BRAND[r.leaderChain]||BRAND.OTH).label+' 資料有限</div>';
+    } else {
+      body = r.topBrands.map(function(tb,i){
+        var b=(BRAND[tb.chain]||BRAND.OTH);
+        return '<div style="font-size:'+(i===0?9.5:8.5)+'px;font-weight:'+(i===0?700:600)+';color:'+b.color+';margin-top:'+(i===0?0:1)+'px;">'+(i+1)+'. '+b.label+' '+tb.pct.toFixed(1)+'%</div>';
+      }).join("");
+      var tgs = activeTags(r);
+      if(tgs.length) body += '<div style="font-size:8.5px;font-weight:800;color:'+tgs[0].color+';margin-top:2px;">'+tgs.map(function(t){return t.label;}).join(' · ')+'</div>';
+    }
+    return '<div class="cntCard" data-county="'+r.county+'" style="display:flex;align-items:flex-start;gap:7px;padding:7px 8px;border-radius:7px;cursor:pointer;border:1px solid #e2e8f0;margin-bottom:5px;background:#f8fafc;">'
+      +'<svg width="'+dotD+'" height="'+dotD+'" style="flex-shrink:0;margin-top:2px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.15));">'
+      +'<circle cx="'+(dotD/2)+'" cy="'+(dotD/2)+'" r="'+dotR+'" fill="'+leaderColor+'" fill-opacity="0.85" stroke="#ffffff" stroke-width="1.6"/></svg>'
       +'<div style="flex:1;min-width:0;">'
       +'<div style="font-size:10.5px;font-weight:800;color:#1e293b;">'+nm+'</div>'
-      +'<div style="font-size:9.5px;font-weight:700;color:'+leaderB.color+';">'+leaderB.label+' '+pctText+'</div>'
-      +secLine+tagLine
+      +body
       +'</div></div>';
   }
-  var northCardsHtml = northCountyStats.map(clusterCardHtml).join("");
   var southCardsHtml = southCountyStats.map(clusterCardHtml).join("");
-
-  var northCard =
-    '<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 11px;box-shadow:0 2px 8px rgba(15,23,42,.08);max-height:390px;overflow-y:auto;">'
-    +'<div style="font-size:10px;font-weight:800;color:#334155;margin-bottom:7px;">🔍 北部特寫（避免地圖重疊）</div>'
-    +northCardsHtml
-    +'<div style="font-size:10px;font-weight:800;color:#334155;margin:10px 0 7px;border-top:1px solid #f1f5f9;padding-top:9px;">🔍 中南部特寫（雲林/嘉義/台南/高雄）</div>'
+  var southCard =
+    '<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 11px;box-shadow:0 2px 8px rgba(15,23,42,.08);max-height:360px;overflow-y:auto;">'
+    +'<div style="font-size:10px;font-weight:800;color:#334155;margin-bottom:7px;">🔍 中南部特寫（雲林/嘉義/台南/高雄，避免地圖重疊）</div>'
     +southCardsHtml
     +'</div>';
 
-  // ── 右側戰情面板：KPI + 策略分析（回答5個管理問題）─────────
+  // ── 右側戰情面板：KPI + 策略分析（回答管理問題）─────────
   var totalComp = Object.values(comp).reduce(function(a,b){return a+b;},0);
   if(totalComp===0) return;
   var sortedComp = Object.entries(comp).sort(function(a,b){return b[1]-a[1];});
@@ -2253,20 +2366,20 @@ function renderMktShare() {
   var byMarketSize = countyStats.slice().sort(function(a,b){return b.size-a.size;});
   var biggestMarket = byMarketSize[0];
 
-  // Q1: 秀泰在哪些市場領先？
-  var stLeaderCounties = countyStats.filter(function(r){return r.leaderChain==='ST';}).sort(function(a,b){return b.leaderPct-a.leaderPct;});
+  // Q1: 秀泰在哪些市場領先？(⭐)
+  var stLeaderCounties = countyStats.filter(function(r){return r.stFirst;}).sort(function(a,b){return b.leaderPct-a.leaderPct;});
   // Q2: 威秀在哪些市場具有壟斷優勢？(市占≥50%)
   var wsDominant = countyStats.filter(function(r){return r.leaderChain==='WS' && r.leaderPct>=50;}).sort(function(a,b){return b.leaderPct-a.leaderPct;});
-  // Q3: 國賓/新光/美麗新/in89 在哪些城市具有影響力？(領先，或次要品牌且占比≥15%)
-  var otherBrandKeys = ['GBA','SOKU','MRN','IN89'];
+  // Q3: 國賓/新光/台茂(美麗新)/in89/喜樂 在哪些城市具有影響力？(出現在該縣市TOP品牌中，占比≥5%)
+  var otherBrandKeys = ['GBA','SOKU','MRN','IN89','JY'];
   var brandInfluence = otherBrandKeys.map(function(bk){
-    var candidates = countyStats.filter(function(r){
-      return r.leaderChain===bk || (r.secondChain===bk && r.secondPct>=15);
-    }).map(function(r){
-      var isLeader = r.leaderChain===bk;
-      return {county:r.county, pct: isLeader?r.leaderPct:r.secondPct, isLeader:isLeader};
-    }).sort(function(a,b){return b.pct-a.pct;});
-    return {brand:BRAND[bk], list:candidates.slice(0,2)};
+    var candidates = [];
+    countyStats.forEach(function(r){
+      var hit = r.topBrands.filter(function(tb){return tb.chain===bk;})[0];
+      if(hit) candidates.push({county:r.county, pct:hit.pct, isLeader:r.leaderChain===bk});
+    });
+    candidates.sort(function(a,b){return b.pct-a.pct;});
+    return {brand:BRAND[bk], list:candidates.slice(0,3)};
   }).filter(function(x){return x.list.length>0;});
   // Q4: 哪些區域競爭最激烈？(前二名差距≤10%)
   var hotMarkets = countyStats.filter(function(r){return r.tag==='hot';}).sort(function(a,b){return b.size-a.size;});
@@ -2280,6 +2393,7 @@ function renderMktShare() {
     {label:'全台影城數', value:fmt(DATA.mkt.cinemaCount)+' 家'},
     {label:'市場龍頭品牌', value:leaderBrandName+' '+leaderBrandPct.toFixed(1)+'%'},
     {label:'最大市場城市', value:biggestMarket?biggestMarket.county.replace(/[縣市]$/,'')+' '+fmtW(biggestMarket.size)+'萬':'—'},
+    {label:'秀泰優勢市場數', value:stLeaderCounties.length+' 個縣市'},
   ];
   var kpiHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;">'
     +kpiItems.map(function(k){
@@ -2301,11 +2415,11 @@ function renderMktShare() {
   }
 
   var q1Body = stLeaderCounties.length
-    ? stLeaderCounties.slice(0,4).map(function(r){return rowLine('• '+r.county.replace(/[縣市]$/,'')+' <b>'+r.leaderPct.toFixed(1)+'%</b>');}).join("")
+    ? stLeaderCounties.slice(0,5).map(function(r){return rowLine('• '+r.county.replace(/[縣市]$/,'')+' <b>'+r.leaderPct.toFixed(1)+'%</b>');}).join("")
     : rowLine('目前無縣市由秀泰以品牌市占第一名領先（樣本約55家戲院）','#94a3b8');
 
   var q2Body = wsDominant.length
-    ? wsDominant.slice(0,4).map(function(r){return rowLine('• '+r.county.replace(/[縣市]$/,'')+' <b style="color:#E53935">'+r.leaderPct.toFixed(1)+'%</b>');}).join("")
+    ? wsDominant.slice(0,5).map(function(r){return rowLine('• '+r.county.replace(/[縣市]$/,'')+' <b style="color:#E53935">'+r.leaderPct.toFixed(1)+'%</b>');}).join("")
     : rowLine('目前無縣市威秀市占≥50%','#94a3b8');
 
   var q3Body = brandInfluence.length
@@ -2315,7 +2429,7 @@ function renderMktShare() {
     : rowLine('資料樣本中尚無明顯影響力縣市','#94a3b8');
 
   var q4Body = hotMarkets.length
-    ? hotMarkets.slice(0,4).map(function(r){
+    ? hotMarkets.slice(0,5).map(function(r){
         var lb=(BRAND[r.leaderChain]||BRAND.OTH), sb=(BRAND[r.secondChain]||BRAND.OTH);
         return rowLine('• '+r.county.replace(/[縣市]$/,'')+'： '+lb.label+' '+r.leaderPct.toFixed(1)+'% vs '+sb.label+' '+r.secondPct.toFixed(1)+'%');
       }).join("")
@@ -2329,11 +2443,12 @@ function renderMktShare() {
     : rowLine('秀泰已於所有追蹤縣市設有據點','#94a3b8');
 
   var strategyHtml =
-    qBlock('🏆','秀泰領先市場',q1Body)
+    qBlock('⭐','秀泰領先市場',q1Body)
     +qBlock('👑','威秀壟斷市場(市占≥50%)',q2Body)
-    +qBlock('🎯','其他品牌影響力縣市',q3Body)
+    +qBlock('🎯','國賓/新光/台茂/美麗新/in89/喜樂影響力縣市',q3Body)
     +qBlock('🔥','競爭最激烈區域',q4Body)
-    +qBlock('🚀','拓點機會城市(秀泰尚無據點)',q5Body);
+    +qBlock('🚀','拓點機會城市(秀泰尚無據點)',q5Body)
+    +'<div style="font-size:9.5px;color:#8E44AD;background:#f5f0fa;border:1px solid #e9d8fd;border-radius:7px;padding:7px 9px;margin-top:2px;">💡 點擊地圖／放大地圖／特寫卡任一縣市，可展開該縣市影城層級競爭排行</div>';
 
   el.innerHTML =
     '<div style="display:flex;gap:0;min-height:820px;background:#ffffff;border-radius:8px;overflow:hidden">'
@@ -2346,18 +2461,18 @@ function renderMktShare() {
     +paths+labels+bubbleSvg+dataLabels
     +"</svg>"
     +'<div id="twTip" style="position:absolute;bottom:8px;left:12px;font-size:11px;color:#64748b;pointer-events:none;min-height:14px"></div>'
-    +'<div style="position:absolute;top:10px;right:10px;width:230px;display:flex;flex-direction:column;gap:8px;">'
-    +legendCard+northCard
+    +'<div style="position:absolute;top:10px;right:10px;width:240px;display:flex;flex-direction:column;gap:8px;">'
+    +legendCard+northMapCard+southCard
     +'</div>'
     +"</div>"
     +'<div style="flex:0 0 22%;max-width:22%;padding:14px 14px 14px 12px;border-left:1px solid #e5e7eb;display:flex;flex-direction:column;background:#ffffff;overflow-y:auto;max-height:820px;">'
-    +'<div style="font-size:12px;font-weight:800;color:#1e293b;margin-bottom:10px;">📊 影院市場競爭版圖</div>'
+    +'<div style="font-size:12px;font-weight:800;color:#1e293b;margin-bottom:10px;">📊 秀泰競爭情報中心</div>'
     +kpiHtml
     +'<div style="border-top:1px solid #e5e7eb;padding-top:10px;">'
     +strategyHtml
     +'</div>'
     +'<div style="font-size:9px;color:#94a3b8;margin-top:8px;border-top:1px solid #e5e7eb;padding-top:8px;line-height:1.6;">'
-    +'※ 底圖顏色代表市場規模(4級距，依資料分位數切分)；泡泡代表各縣市領先/次要品牌之在地市占率(非全國市占)。資料涵蓋秀泰15家自有影城＋全國MTD(7/1-25)排行約40家主要競爭戲院(合計約55家，涵蓋全國約90%票房)。標示「資料有限」之縣市僅追蹤到單一品牌戲院，不代表真實市場獨占。北部6縣市(台北/新北/基隆/桃園/新竹市/新竹縣)與中南部4縣市(雲林/嘉義/台南/高雄)因地理位置密集，改於右側「特寫」清單呈現以避免地圖重疊與誤點；外島(金門/澎湖)無追蹤戲院資料，暫不納入地圖範圍。台茂與美麗新為同一品牌(美麗新台茂)，故僅以棕色「美麗新」呈現。'
+    +'※ 底圖顏色代表市場規模(4級距，依資料分位數切分)；泡泡與標籤顯示該縣市所有市占≥5%品牌(最多4個)。資料涵蓋秀泰15家自有影城＋全國MTD(7/1-25)排行約40家主要競爭戲院(合計約55家，涵蓋全國約90%票房)。標示「資料有限」之縣市僅追蹤到單一品牌戲院，不代表真實市場獨占。北部6縣市(台北/新北/基隆/桃園/新竹市/新竹縣)因地理位置密集，改用左側固定「北部放大地圖」呈現；中南部4縣市(雲林/嘉義/台南/高雄)改用特寫卡呈現；外島(金門/澎湖)無追蹤戲院資料，暫不納入地圖範圍。台茂與美麗新為同一品牌(美麗新台茂)，故僅以棕色「美麗新」呈現。'
     +'</div>'
     +'</div>'
     +'</div>';
@@ -2368,35 +2483,35 @@ function renderMktShare() {
     var mapWrap = svg ? svg.parentElement : null;
     var ps = el.querySelectorAll(".twc");
     var bubs = el.querySelectorAll(".bub");
-    var northCards = el.querySelectorAll(".northCard");
+    var cntCards = el.querySelectorAll(".cntCard");
+    var northNodeEls = el.querySelectorAll(".northNode");
     var tip = document.getElementById("twTip");
-    if(tip) tip.textContent = "🔍 滾輪縮放 · 拖曳移動 · 雙擊重置 · 點擊縣市查看詳情";
+    if(tip) tip.textContent = "🔍 滾輪縮放 · 拖曳移動 · 雙擊重置 · 點擊縣市查看影城排行";
 
     var pop = document.createElement("div");
     pop.style.cssText = "position:absolute;bottom:50px;right:12px;background:#fff;"
       +"border-radius:10px;padding:10px 13px;box-shadow:0 4px 16px rgba(0,0,0,0.13);"
       +"font-size:12px;pointer-events:none;opacity:0;transition:opacity .15s;"
-      +"min-width:160px;max-width:230px;border:1px solid #e2e8f0;z-index:20;";
+      +"min-width:170px;max-width:250px;border:1px solid #e2e8f0;z-index:20;";
     if(mapWrap) mapWrap.appendChild(pop);
 
-    function popupForCounty(cn){
-      var st = countyStatsByName[cn];
-      if(!st){
-        return '<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:4px">'+cn+'</div>'
+    function popupForStats(displayName, st){
+      if(!st || st.size<=0){
+        return '<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:4px">'+displayName+'</div>'
           +'<div style="font-size:11px;color:#94a3b8;">本圖尚無追蹤戲院資料</div>';
       }
-      var leaderB=(BRAND[st.leaderChain]||BRAND.OTH);
-      var tagInfo=TAG_INFO[st.tag];
-      var h = '<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:4px">'+cn+'</div>'
-        +'<div style="font-size:11px;color:#334155;line-height:1.8">'
-        +'市場規模：'+fmtW(st.size)+' 萬(MTD)<br>'
-        +'領先品牌：<span style="color:'+leaderB.color+';font-weight:700">'+leaderB.label+' '+st.leaderPct.toFixed(1)+'%</span>';
-      if(st.secondChain){
-        var secB=(BRAND[st.secondChain]||BRAND.OTH);
-        h += '<br>次要品牌：<span style="color:'+secB.color+';font-weight:700">'+secB.label+' '+st.secondPct.toFixed(1)+'%</span>';
+      var h = '<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:4px">'+displayName+'</div>'
+        +'<div style="font-size:11px;color:#334155;line-height:1.75">'
+        +'市場規模：'+fmtW(st.size)+' 萬(MTD)<br>';
+      h += st.topBrands.map(function(tb,i){
+        var b=(BRAND[tb.chain]||BRAND.OTH);
+        return (i+1)+'. <span style="color:'+b.color+';font-weight:700">'+b.label+' '+tb.pct.toFixed(1)+'%</span>';
+      }).join('<br>');
+      var tgs = activeTags(st);
+      if(tgs.length){
+        h += '<br>' + tgs.map(function(t){return '<span style="color:'+t.color+';font-weight:700">'+t.label+'</span>';}).join(' ');
       }
-      h += '<br>競爭態勢：<span style="color:'+tagInfo.color+';font-weight:700">'+tagInfo.label+'</span>'
-        +'</div><div style="font-size:9.5px;color:#94a3b8;margin-top:5px;border-top:1px solid #f1f5f9;padding-top:4px">點擊查看地區詳情 →</div>';
+      h += '</div><div style="font-size:9.5px;color:#94a3b8;margin-top:5px;border-top:1px solid #f1f5f9;padding-top:4px">點擊查看影城競爭排行 →</div>';
       return h;
     }
 
@@ -2436,106 +2551,91 @@ function renderMktShare() {
       });
       svg.addEventListener("dblclick",function(){
         vb={x:MAPVB.x,y:MAPVB.y,w:MAPVB.w,h:MAPVB.h}; applyVB();
-        if(tip) tip.textContent="🔍 滾輪縮放 · 拖曳移動 · 雙擊重置 · 點擊縣市查看詳情";
+        if(tip) tip.textContent="🔍 滾輪縮放 · 拖曳移動 · 雙擊重置 · 點擊縣市查看影城排行";
       });
     }
 
-    // ── Region cinema data panel ─────────────────────────
-    var ST_REGION={
-      '台北':['秀泰巨蛋','秀泰欣欣'],
-      '新北':['秀泰土城','秀泰樹林','秀泰基隆'],
-      '桃園':[],
-      '台中':['秀泰文心','秀泰站前','秀泰麗寶','秀泰北港'],
-      '台南':['秀泰仁德','秀泰嘉義'],
-      '高雄':['秀泰夢時代','秀泰岡山'],
-      '其他地區':['秀泰台東','秀泰花蓮']
-    };
-    var det=document.createElement('div');
-    det.id='twRegDet';
-    det.style.cssText='display:none;padding:14px 16px;border-top:1px solid #e2e8f0;background:#f8faff;';
-    el.appendChild(det);
+    // ── Drill-down：縣市 → 影城層級競爭排行 ─────────────────
+    var drill=document.createElement('div');
+    drill.id='cinemaDrill';
+    drill.style.cssText='display:none;padding:14px 16px;border-top:1px solid #e2e8f0;background:#f8faff;';
+    el.appendChild(drill);
 
-    function showRegionDetail(rgName){
-      var stNames=ST_REGION[rgName]||[];
-      var stData=(DATA.cinemas||[]).filter(function(c){return stNames.indexOf(c.name)>=0;});
-      var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
-        +'<span style="font-size:13px;font-weight:700;color:#1e293b">📍 '+rgName+' 地區・秀泰影城今日數據</span>'
-        +'<button onclick="document.getElementById(\'twRegDet\').style.display=\'none\'"'
-        +' style="font-size:12px;color:#94a3b8;background:none;border:none;cursor:pointer;padding:2px 8px">✕</button>'
-        +'</div>';
-      if(stData.length>0){
-        h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;">';
-        stData.forEach(function(c){
-          var chg=c.ystBO>0?((c.bo-c.ystBO)/c.ystBO*100):null;
-          var cc=chg===null?'#94a3b8':chg>=0?'#16a34a':'#dc2626';
-          var arrow=chg===null?'':chg>=0?'▲':'▼';
-          h+='<div style="background:#fff;border-radius:8px;padding:10px 12px;border:1px solid #e2e8f0;border-left:3px solid #8E44AD">'
-            +'<div style="font-size:11px;font-weight:600;color:#8E44AD;margin-bottom:5px">'+c.name+'</div>'
-            +'<div style="font-size:20px;font-weight:700;color:#1e293b">'+c.bo.toFixed(1)+'<span style="font-size:11px;font-weight:400;color:#64748b"> 萬</span></div>'
-            +'<div style="font-size:10px;color:#475569;margin-top:2px">'+(c.visitors||0).toLocaleString()+' 人　ATP '+(c.avgPrice||0).toFixed(0)+' 元</div>'
-            +(chg!==null?'<div style="font-size:10px;color:'+cc+';margin-top:3px">'+arrow+' '+(chg>=0?'+':'')+chg.toFixed(1)+'% vs昨日</div>':'')
-            +'</div>';
-        });
-        h+='</div>';
-      } else {
-        h+='<div style="color:#94a3b8;font-size:12px;text-align:center;padding:12px">此區域目前無秀泰影城資料</div>';
-      }
-      det.innerHTML=h; det.style.display='block';
-      det.scrollIntoView({behavior:'smooth',block:'nearest'});
+    function cinemaListForCounties(countyList){
+      var list=[];
+      countyList.forEach(function(cn){ (cinemasByCounty[cn]||[]).forEach(function(c){ list.push(c); }); });
+      list.sort(function(a,b){return b.bo-a.bo;});
+      return list;
     }
 
-    function jumpToRegion(rgName){
-      showRegionDetail(rgName);
-      var rgSec=document.getElementById("regionalSection");
-      if(rgSec){
-        var tabs=rgSec.querySelectorAll("[data-tab]");
-        if(!tabs.length) tabs=rgSec.querySelectorAll("button, .tab-btn, [class*=tab]");
-        tabs.forEach(function(t){
-          if(t.textContent.trim()===rgName||t.getAttribute("data-tab")===rgName) t.click();
-        });
-        rgSec.scrollIntoView({behavior:"smooth",block:"start"});
+    function renderCinemaDrillHtml(displayName, countyList){
+      var list = cinemaListForCounties(countyList);
+      var total = list.reduce(function(s,c){return s+c.bo;},0);
+      var head = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
+        +'<span style="font-size:13.5px;font-weight:800;color:#1e293b;">🎬 '+displayName+' 影城競爭排行（MTD 7/1-25）</span>'
+        +'<button onclick="document.getElementById(\'cinemaDrill\').style.display=\'none\'"'
+        +' style="font-size:12px;color:#94a3b8;background:none;border:none;cursor:pointer;padding:2px 8px">✕</button>'
+        +'</div>';
+      if(list.length===0){
+        return head+'<div style="color:#94a3b8;font-size:12px;text-align:center;padding:12px">此縣市目前無追蹤戲院資料</div>';
       }
-      if(tip) tip.textContent="▶ 已跳至「"+rgName+"」地區詳情";
+      var rows = list.map(function(c,i){
+        var b=(BRAND[c.chain]||BRAND.OTH);
+        var pct = total>0 ? (c.bo/total*100) : 0;
+        return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:7px;background:'+(i%2===0?'#ffffff':'#f8fafc')+';border-left:3px solid '+b.color+';margin-bottom:4px;">'
+          +'<span style="font-size:11px;font-weight:800;color:#94a3b8;width:16px;flex-shrink:0;">'+(i+1)+'</span>'
+          +'<span style="flex:1;min-width:0;"><span style="font-size:11.5px;font-weight:700;color:#1e293b;">'+c.name+'</span>'
+          +'<span style="font-size:9.5px;font-weight:700;color:'+b.color+';margin-left:6px;">'+b.label+'</span></span>'
+          +'<span style="font-size:11px;font-weight:700;color:#1e293b;text-align:right;min-width:64px;">'+c.bo.toFixed(1)+' 萬</span>'
+          +'<span style="font-size:9.5px;color:#64748b;text-align:right;min-width:44px;">'+pct.toFixed(1)+'%</span>'
+          +'</div>';
+      }).join("");
+      return head
+        +'<div style="font-size:10px;color:#64748b;margin-bottom:8px;">合計市場規模：'+fmtW(total)+' 萬 · 共 '+list.length+' 家戲院</div>'
+        +'<div style="max-height:360px;overflow-y:auto;">'+rows+'</div>';
+    }
+
+    function showCinemaDrill(displayName, countyList){
+      drill.innerHTML = renderCinemaDrillHtml(displayName, countyList);
+      drill.style.display='block';
+      drill.scrollIntoView({behavior:'smooth',block:'nearest'});
     }
 
     ps.forEach(function(p){
       var idx=parseInt(p.getAttribute("data-c"));
       var c=TW[idx];
-      var rgName=COUNTY_RG[c.n]||"其他地區";
       p.addEventListener("mouseenter",function(){
         if(drag.on) return;
         this.setAttribute("stroke","#38bdf8"); this.setAttribute("stroke-width","2.2");
-        pop.innerHTML = popupForCounty(c.n);
+        pop.innerHTML = popupForStats(c.n, countyStatsByName[c.n]);
         pop.style.opacity='1';
         if(tip) tip.textContent="";
       });
       p.addEventListener("mouseleave",function(){
         this.setAttribute("stroke","#ffffff"); this.setAttribute("stroke-width","1.2");
         pop.style.opacity='0';
-        if(tip) tip.textContent="🔍 滾輪縮放 · 拖曳移動 · 雙擊重置 · 點擊縣市查看詳情";
+        if(tip) tip.textContent="🔍 滾輪縮放 · 拖曳移動 · 雙擊重置 · 點擊縣市查看影城排行";
       });
       p.addEventListener("click",function(){
         if(drag.moved) return;
-        jumpToRegion(rgName);
+        showCinemaDrill(c.n, [c.n]);
       });
     });
 
     bubs.forEach(function(b){
       var cn = b.getAttribute("data-county");
-      var rgName = COUNTY_RG[cn]||"其他地區";
       b.addEventListener("mouseenter",function(){
-        pop.innerHTML = popupForCounty(cn);
+        pop.innerHTML = popupForStats(cn, countyStatsByName[cn]);
         pop.style.opacity='1';
       });
       b.addEventListener("mouseleave",function(){ pop.style.opacity='0'; });
-      b.addEventListener("click",function(){ jumpToRegion(rgName); });
+      b.addEventListener("click",function(){ showCinemaDrill(cn, [cn]); });
     });
 
-    northCards.forEach(function(nc){
+    cntCards.forEach(function(nc){
       var cn = nc.getAttribute("data-county");
-      var rgName = COUNTY_RG[cn]||"其他地區";
       nc.addEventListener("mouseenter",function(){
-        pop.innerHTML = popupForCounty(cn);
+        pop.innerHTML = popupForStats(cn, countyStatsByName[cn]);
         pop.style.opacity='1';
         this.style.background='#eef2ff';
       });
@@ -2543,7 +2643,18 @@ function renderMktShare() {
         pop.style.opacity='0';
         this.style.background='#f8fafc';
       });
-      nc.addEventListener("click",function(){ jumpToRegion(rgName); });
+      nc.addEventListener("click",function(){ showCinemaDrill(cn, [cn]); });
+    });
+
+    northNodeEls.forEach(function(nd){
+      var label = nd.getAttribute("data-node");
+      var st = northNodesByLabel[label];
+      nd.addEventListener("mouseenter",function(){
+        pop.innerHTML = popupForStats(label, st);
+        pop.style.opacity='1';
+      });
+      nd.addEventListener("mouseleave",function(){ pop.style.opacity='0'; });
+      nd.addEventListener("click",function(){ showCinemaDrill(label, st.countiesList); });
     });
   }, 100);
 }
