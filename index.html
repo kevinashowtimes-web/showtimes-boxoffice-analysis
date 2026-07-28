@@ -2074,20 +2074,20 @@ function renderMktShare() {
     limited: {label:'資料有限', color:'#475569'}
   };
 
-  // ── 底圖：市場規模灰藍漸層（與品牌顏色完全脫鉤）─────────
+  // ── 底圖：市場規模淺灰藍漸層（商業分析儀表板風格；與品牌顏色完全脫鉤，避免深灰/黑色）─────────
   var sizeVals = countyStats.map(function(r){return r.size;});
   var minSize = sizeVals.length ? Math.min.apply(null,sizeVals) : 0;
   var maxSize = sizeVals.length ? Math.max.apply(null,sizeVals) : 1;
   function sizeColor(size){
-    if(size==null || size<=0) return '#eef1f6';
+    if(size==null || size<=0) return '#f1f5f9';
     var span = Math.sqrt(maxSize)-Math.sqrt(minSize);
     var t = span>0 ? (Math.sqrt(size)-Math.sqrt(minSize))/span : 1;
     t = Math.max(0,Math.min(1,t));
-    var c1=[232,236,241], c2=[30,41,59];
+    var c1=[241,245,249], c2=[148,163,184];
     var rgb=c1.map(function(v,i){return Math.round(v+(c2[i]-v)*t);});
     return 'rgb('+rgb[0]+','+rgb[1]+','+rgb[2]+')';
   }
-  function sizeTextColor(size){ return (size && maxSize>0 && size/maxSize>0.35) ? '#f1f5f9' : '#334155'; }
+  function sizeTextColor(){ return '#334155'; }
 
   // ── 泡泡半徑：Square Root Scale，對齊使用者指定的4個級距 ──
   function bubbleR(pct){ return Math.max(9, Math.min(46, 9+Math.sqrt(Math.max(pct,0)/100)*40)); }
@@ -2120,13 +2120,13 @@ function renderMktShare() {
     var op = isLimited ? '0.55' : '0.85';
     var svg = '<g class="bub" data-county="'+r.county+'" style="cursor:pointer">'
       +'<circle cx="'+base.lx+'" cy="'+base.ly+'" r="'+leaderR+'" fill="'+leaderColor+'" fill-opacity="'+op+'" '
-      +'stroke="#0d1b2a" stroke-width="2" '+dash+' filter="url(#bubShadow)" class="bubGlow"/>';
+      +'stroke="#ffffff" stroke-width="2.5" '+dash+' filter="url(#bubShadow)" class="bubGlow"/>';
     if(r.tag==='hot' && r.secondChain){
       var secR = Math.max(7, bubbleR(r.secondPct)*0.85);
       var secColor = (BRAND[r.secondChain]||BRAND.OTH).color;
       var ox = base.lx + leaderR*0.55 + secR*0.5 + 3;
       svg += '<circle cx="'+ox+'" cy="'+base.ly+'" r="'+secR+'" fill="'+secColor+'" fill-opacity="0.85" '
-        +'stroke="#0d1b2a" stroke-width="2" filter="url(#bubShadow)" class="bubGlow"/>';
+        +'stroke="#ffffff" stroke-width="2.5" filter="url(#bubShadow)" class="bubGlow"/>';
     }
     svg += "</g>";
     return svg;
@@ -2155,14 +2155,14 @@ function renderMktShare() {
   var sizeLegendGradient = 'linear-gradient(90deg, '+sizeColor(minSize)+', '+sizeColor(maxSize)+')';
   var mapLegendHtml =
     '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">'
-    +'<span style="font-size:9.5px;color:#94a3b8;white-space:nowrap;">底圖＝市場規模(MTD票房)：</span>'
-    +'<span style="width:90px;height:10px;border-radius:5px;background:'+sizeLegendGradient+';border:1px solid #334155;"></span>'
-    +'<span style="font-size:9px;color:#64748b;">小 → 大</span>'
+    +'<span style="font-size:9.5px;color:#64748b;white-space:nowrap;">底圖＝市場規模(MTD票房)：</span>'
+    +'<span style="width:90px;height:10px;border-radius:5px;background:'+sizeLegendGradient+';border:1px solid #cbd5e1;"></span>'
+    +'<span style="font-size:9px;color:#94a3b8;">小 → 大</span>'
     +'</div>';
   var brandLegend = Object.keys(BRAND).map(function(k){
     var b=BRAND[k];
     return '<span style="margin-right:9px;font-size:9.5px;color:'+b.color+';white-space:nowrap;">'
-      +'<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+b.color+';opacity:.85;border:1.5px solid #0d1b2a;margin-right:3px;vertical-align:middle"></span>'
+      +'<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+b.color+';opacity:.85;border:1.5px solid #ffffff;box-shadow:0 0 0 1px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.15);margin-right:3px;vertical-align:middle"></span>'
       +b.label+"</span>";
   }).join("");
   var sizeCatLegend = [
@@ -2170,8 +2170,8 @@ function renderMktShare() {
   ].map(function(s){
     var d=s.r*2+4;
     return '<span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px;">'
-      +'<svg width="'+d+'" height="'+d+'" style="flex-shrink:0;"><circle cx="'+(d/2)+'" cy="'+(d/2)+'" r="'+s.r+'" fill="#95A5A6" fill-opacity="0.7" stroke="#0d1b2a" stroke-width="1.5"/></svg>'
-      +'<span style="font-size:9px;color:#94a3b8;">'+s.label+'</span></span>';
+      +'<svg width="'+d+'" height="'+d+'" style="flex-shrink:0;filter:drop-shadow(0 1px 2px rgba(0,0,0,.15));"><circle cx="'+(d/2)+'" cy="'+(d/2)+'" r="'+s.r+'" fill="#95A5A6" fill-opacity="0.85" stroke="#ffffff" stroke-width="1.5"/></svg>'
+      +'<span style="font-size:9px;color:#64748b;">'+s.label+'</span></span>';
   }).join("");
 
   // ── 右側戰情面板：KPI + TOP5 排行 ─────────────────────────
@@ -2195,52 +2195,52 @@ function renderMktShare() {
   ];
   var kpiHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">'
     +kpiItems.map(function(k){
-      return '<div style="background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:8px 10px;">'
-        +'<div style="font-size:9.5px;color:#94a3b8;margin-bottom:3px;">'+k.label+'</div>'
-        +'<div style="font-size:14px;font-weight:800;color:#e2e8f0;">'+k.value+'</div>'
+      return '<div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;box-shadow:0 1px 3px rgba(0,0,0,.06);">'
+        +'<div style="font-size:9.5px;color:#64748b;margin-bottom:3px;">'+k.label+'</div>'
+        +'<div style="font-size:14px;font-weight:800;color:#1e293b;">'+k.value+'</div>'
         +'</div>';
     }).join("")
     +'</div>';
 
   var top5Size = byMarketSize.slice(0,5).map(function(r,i){
-    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #1e293b;">'
-      +'<span style="font-size:10.5px;color:#cbd5e1;">'+(i+1)+'. '+r.county.replace(/[縣市]$/,'')+'</span>'
-      +'<span style="font-size:11px;font-weight:700;color:#e2e8f0;">'+fmtW(r.size)+' 萬</span>'
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #e5e7eb;">'
+      +'<span style="font-size:10.5px;color:#334155;">'+(i+1)+'. '+r.county.replace(/[縣市]$/,'')+'</span>'
+      +'<span style="font-size:11px;font-weight:700;color:#1e293b;">'+fmtW(r.size)+' 萬</span>'
       +'</div>';
   }).join("");
   var top5Share = byLeaderPct.slice(0,5).map(function(r,i){
     var brand=(BRAND[r.leaderChain]||BRAND.OTH);
-    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #1e293b;">'
-      +'<span style="font-size:10.5px;color:#cbd5e1;">'+(i+1)+'. '+r.county.replace(/[縣市]$/,'')+'<span style="color:'+brand.color+';font-weight:700;margin-left:4px;">'+brand.label+'</span></span>'
-      +'<span style="font-size:11px;font-weight:700;color:#e2e8f0;">'+r.leaderPct.toFixed(1)+'%</span>'
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #e5e7eb;">'
+      +'<span style="font-size:10.5px;color:#334155;">'+(i+1)+'. '+r.county.replace(/[縣市]$/,'')+'<span style="color:'+brand.color+';font-weight:700;margin-left:4px;">'+brand.label+'</span></span>'
+      +'<span style="font-size:11px;font-weight:700;color:#1e293b;">'+r.leaderPct.toFixed(1)+'%</span>'
       +'</div>';
   }).join("");
 
   el.innerHTML =
-    '<div style="display:flex;gap:0;min-height:640px;background:transparent;border-radius:8px;overflow:hidden">'
-    +'<div style="flex:1;position:relative;min-width:0;padding:8px 4px 8px 8px;">'
+    '<div style="display:flex;gap:0;min-height:640px;background:#ffffff;border-radius:8px;overflow:hidden">'
+    +'<div style="flex:1;position:relative;min-width:0;padding:8px 4px 8px 8px;background:#f8fafc;">'
     +'<svg id="twMapSvg" viewBox="0 0 800 900" style="width:100%;height:100%;max-height:600px;display:block">'
     +'<defs><filter id="bubShadow" x="-60%" y="-60%" width="220%" height="220%">'
-    +'<feDropShadow dx="0" dy="1.5" stdDeviation="2.2" flood-color="#000" flood-opacity="0.45"/>'
+    +'<feDropShadow dx="0" dy="1.5" stdDeviation="2.2" flood-color="#1e293b" flood-opacity="0.18"/>'
     +'</filter></defs>'
-    +"<rect width=\"800\" height=\"900\" fill=\"#0b1220\" />"
+    +"<rect width=\"800\" height=\"900\" fill=\"#f8fafc\" />"
     +paths+labels+bubbleSvg+dataLabels
     +"</svg>"
-    +'<div id="twTip" style="position:absolute;bottom:8px;left:12px;font-size:11px;color:#94a3b8;pointer-events:none;min-height:14px"></div>'
+    +'<div id="twTip" style="position:absolute;bottom:8px;left:12px;font-size:11px;color:#64748b;pointer-events:none;min-height:14px"></div>'
     +'<div style="position:absolute;top:8px;left:12px;right:12px;">'
     +mapLegendHtml
     +'<div style="display:flex;flex-wrap:wrap;">'+brandLegend+'</div>'
     +'<div style="display:flex;flex-wrap:wrap;margin-top:4px;">'+sizeCatLegend+'</div>'
     +'</div>'
     +"</div>"
-    +'<div style="width:300px;padding:14px 14px 14px 12px;border-left:1px solid #1e293b;display:flex;flex-direction:column;background:#0b1220;overflow-y:auto;max-height:640px;">'
-    +'<div style="font-size:12px;font-weight:800;color:#e2e8f0;margin-bottom:10px;">📊 全台戰情總覽</div>'
+    +'<div style="width:300px;padding:14px 14px 14px 12px;border-left:1px solid #e5e7eb;display:flex;flex-direction:column;background:#ffffff;overflow-y:auto;max-height:640px;">'
+    +'<div style="font-size:12px;font-weight:800;color:#1e293b;margin-bottom:10px;">📊 全台戰情總覽</div>'
     +kpiHtml
-    +'<div style="font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:6px;">🏆 TOP5 市場規模城市</div>'
+    +'<div style="font-size:11px;font-weight:700;color:#1e293b;margin-bottom:6px;">🏆 TOP5 市場規模城市</div>'
     +top5Size
-    +'<div style="font-size:11px;font-weight:700;color:#e2e8f0;margin:12px 0 6px;">👑 TOP5 品牌市占率城市</div>'
+    +'<div style="font-size:11px;font-weight:700;color:#1e293b;margin:12px 0 6px;">👑 TOP5 品牌市占率城市</div>'
     +top5Share
-    +'<div style="font-size:9px;color:#64748b;margin-top:12px;border-top:1px solid #1e293b;padding-top:8px;line-height:1.6;">'
+    +'<div style="font-size:9px;color:#94a3b8;margin-top:12px;border-top:1px solid #e5e7eb;padding-top:8px;line-height:1.6;">'
     +'※ 底圖顏色僅代表市場規模，與品牌顏色無關；泡泡代表各縣市領先品牌之在地市占率(非全國市占)。資料涵蓋秀泰15家自有影城＋全國MTD(7/1-25)排行約40家主要競爭戲院(合計約55家，涵蓋全國約90%票房)。標示「資料有限」之縣市僅追蹤到單一品牌戲院，不代表真實市場獨占。'
     +'</div>'
     +'</div>'
