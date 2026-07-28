@@ -1943,6 +1943,18 @@ function renderMktShare() {
   var el = document.getElementById('mktShareCompact');
   if (!el) return;
 
+  // 8類品牌配色（泡泡地圖專用；2026-07-28依營運長確認：威秀=紅、秀泰=紫）
+  var BRAND = {
+    ST:  {label:'秀泰',       color:'#7c3aed'},
+    WS:  {label:'威秀',       color:'#dc2626'},
+    GBA: {label:'國賓',       color:'#2563eb'},
+    SOKU:{label:'新光',       color:'#f97316'},
+    MRN: {label:'美麗新台茂', color:'#ec4899'},
+    JY:  {label:'喜樂時代',   color:'#eab308'},
+    BRZ: {label:'微風',       color:'#92400e'},
+    OTH: {label:'其他',       color:'#94a3b8'},
+  };
+
   var TW = [
     {n:"台北市",d:"M691.8,68.8 L696.5,72.6 L695.4,78.2 L701.4,87.9 L699.0,91.5 L705.6,98.2 L703.1,103.3 L709.2,111.6 L699.0,117.0 L700.1,127.9 L692.2,126.8 L685.4,120.9 L683.9,114.1 L678.6,116.3 L677.3,110.8 L681.4,102.0 L677.5,95.4 L671.6,93.2 L673.0,87.5 L680.3,78.4 L691.8,68.8Z",lx:687,ly:98,ch:"威秀"},
     {n:"新北市",d:"M676.0,195.8 L669.8,187.9 L665.0,175.1 L669.8,169.1 L662.1,156.7 L654.7,158.0 L649.0,155.0 L650.5,147.7 L645.3,143.2 L645.4,124.4 L654.9,123.1 L662.0,113.5 L657.7,104.1 L649.4,101.8 L636.6,90.6 L653.4,86.0 L662.4,78.8 L662.4,73.8 L669.4,60.3 L682.0,49.6 L687.1,47.5 L696.5,48.5 L705.6,55.5 L707.2,62.6 L715.6,70.5 L719.2,68.3 L721.6,76.9 L706.1,84.7 L712.0,96.9 L729.0,106.0 L733.7,103.7 L730.9,92.5 L739.7,91.0 L740.6,86.4 L748.9,88.4 L764.0,89.9 L763.6,96.0 L765.9,103.2 L765.7,109.1 L770.6,113.3 L780.7,114.9 L781.3,116.1 L778.2,119.1 L763.2,123.3 L749.3,127.9 L750.7,136.2 L736.8,144.5 L731.8,152.5 L726.7,152.6 L717.8,161.1 L705.6,164.1 L698.8,170.9 L699.3,183.2 L686.4,192.5 L676.0,195.8Z M685.4,121.6 L693.4,126.9 L700.3,124.2 L700.7,114.1 L712.9,112.6 L703.9,108.5 L704.4,95.4 L699.2,91.4 L700.8,87.2 L696.1,79.4 L696.7,72.9 L692.6,69.6 L681.1,78.1 L671.6,93.2 L680.7,99.5 L678.4,116.1 L683.6,113.8 L685.4,121.6Z",lx:718,ly:155,ch:"威秀"},
@@ -1985,36 +1997,200 @@ function renderMktShare() {
     "花蓮縣":"其他地區","台東縣":"其他地區","澎湖縣":"其他地區","金門縣":"其他地區"
   };
 
-  // Cinema dots: [x, y, chain, name]
-  var DOTS = [
-    [694,92,"秀泰","秀泰日新"],
-    [680,75,"秀泰","秀泰天母"],
-    [657,195,"秀泰","秀泰板橋"],
-    [670,178,"秀泰","秀泰中和"],
-    [622,145,"秀泰","秀泰桃園"],
-    [570,173,"秀泰","秀泰新竹"],
-    [553,298,"秀泰","秀泰台中"],
-    [470,372,"秀泰","秀泰彰化"],
-    [469,479,"秀泰","秀泰嘉義"],
-    [452,563,"秀泰","秀泰台南"],
-    [490,595,"秀泰","秀泰高雄"],
-    [512,710,"秀泰","秀泰屏東"],
-    [656,452,"秀泰","秀泰花蓮"],
-    [693,96,"秀泰","秀泰巨蛋"],
-    [620,660,"秀泰","秀泰台東"],
-    [700,88,"威秀","威秀信義"],
-    [684,102,"威秀","威秀西門"],
-    [652,196,"威秀","威秀板橋"],
-    [566,170,"威秀","威秀新竹"],
-    [623,150,"威秀","威秀中壢"],
-    [542,288,"威秀","威秀台中"],
-    [453,548,"威秀","威秀台南"],
-    [493,588,"威秀","威秀高雄"],
-    [692,88,"國賓","國賓長春"],
-    [685,107,"國賓","國賓西門"],
-    [492,596,"國賓","國賓高雄"],
-    [700,80,"美麗華","美麗華大直"]
+  // 四大地理分區（北/中/南/東，供區塊⑤地區差異分析使用；與上方COUNTY_RG的頁籤分區各自獨立）
+  var COUNTY_MACRO = {
+    "台北市":"北","新北市":"北","基隆市":"北","桃園縣":"北","新竹市":"北","新竹縣":"北","宜蘭縣":"北",
+    "苗栗縣":"中","台中市":"中","彰化縣":"中","南投縣":"中","雲林縣":"中",
+    "嘉義市":"南","嘉義縣":"南","台南市":"南","高雄市":"南","屏東縣":"南",
+    "花蓮縣":"東","台東縣":"東","澎湖縣":"東","金門縣":"東"
+  };
+
+  // ── 泡泡地圖資料 ──────────────────────────────────────────
+  // 秀泰15家：取自 DATA.cinemas 精確MTD(7/1-25)數據，廳數/座位數取自HALL_DB(官方2026-06-12建檔)
+  // 競爭品牌：全國戲院MTD(7/1-25)累積排行（來源：60.251.126.13 全國排行頁，查詢於7/25），BO已換算為萬元
+  // 競爭品牌戲院之廳數/座位數非秀泰內部建檔範圍，Tooltip顯示「—」，不以估算值填補
+  var ST_COUNTY = {
+    '秀泰巨蛋':'台北市','秀泰欣欣':'台北市','秀泰土城':'新北市','秀泰樹林':'新北市','秀泰基隆':'基隆市',
+    '秀泰文心':'台中市','秀泰站前':'台中市','秀泰麗寶':'台中市','秀泰北港':'雲林縣','秀泰嘉義':'嘉義市',
+    '秀泰仁德':'台南市','秀泰夢時代':'高雄市','秀泰岡山':'高雄市','秀泰台東':'台東縣','秀泰花蓮':'花蓮縣'
+  };
+  var COMP_CINEMAS = [
+    {name:'台北信義威秀',county:'台北市',chain:'WS',bo:2884.16,vis:84393},
+    {name:'高雄威秀',county:'高雄市',chain:'WS',bo:2598.27,vis:81097},
+    {name:'台南南紡威秀',county:'台南市',chain:'WS',bo:2303.06,vis:78309},
+    {name:'板橋大遠百威秀',county:'新北市',chain:'WS',bo:2019.60,vis:60306},
+    {name:'新竹巨城威秀',county:'新竹市',chain:'WS',bo:2077.80,vis:66407},
+    {name:'台北京站威秀',county:'台北市',chain:'WS',bo:1957.65,vis:64209},
+    {name:'台北美麗華',county:'台北市',chain:'OTH',bo:1839.48,vis:49965},
+    {name:'台中大遠百威秀',county:'台中市',chain:'WS',bo:1734.88,vis:55964},
+    {name:'新店裕隆城威秀',county:'新北市',chain:'WS',bo:1616.28,vis:48924},
+    {name:'MuvieCinemas',county:'台北市',chain:'WS',bo:1269.43,vis:32397},
+    {name:'林口威秀',county:'新北市',chain:'WS',bo:1251.82,vis:39550},
+    {name:'南港LaLaport威秀',county:'台北市',chain:'WS',bo:1192.81,vis:38206},
+    {name:'台中iFG遠雄廣場威秀',county:'台中市',chain:'WS',bo:1102.02,vis:36721},
+    {name:'中和環球威秀',county:'新北市',chain:'WS',bo:911.78,vis:32163},
+    {name:'桃園新光',county:'桃園縣',chain:'SOKU',bo:908.51,vis:25865},
+    {name:'台中老虎城威秀',county:'台中市',chain:'WS',bo:945.52,vis:29358},
+    {name:'桃園統領威秀',county:'桃園縣',chain:'WS',bo:878.42,vis:30667},
+    {name:'台中新光',county:'台中市',chain:'SOKU',bo:887.68,vis:25291},
+    {name:'台北西門威秀',county:'台北市',chain:'WS',bo:832.68,vis:29183},
+    {name:'竹北百老匯',county:'新竹縣',chain:'OTH',bo:835.98,vis:30437},
+    {name:'中壢星橋',county:'桃園縣',chain:'OTH',bo:764.06,vis:27949},
+    {name:'新竹大遠百威秀',county:'新竹市',chain:'WS',bo:695.26,vis:23692},
+    {name:'美麗新台茂',county:'新北市',chain:'MRN',bo:692.66,vis:21113},
+    {name:'頭份尚順威秀',county:'苗栗縣',chain:'WS',bo:593.25,vis:21326},
+    {name:'台北國賓長春',county:'台北市',chain:'GBA',bo:522.81,vis:20165},
+    {name:'八德國賓',county:'桃園縣',chain:'GBA',bo:539.16,vis:22840},
+    {name:'台南大遠百威秀',county:'台南市',chain:'WS',bo:560.20,vis:17338},
+    {name:'台南新光',county:'台南市',chain:'SOKU',bo:534.50,vis:19246},
+    {name:'喜樂時代南港',county:'台北市',chain:'JY',bo:514.19,vis:19936},
+    {name:'台北天母新光',county:'台北市',chain:'SOKU',bo:473.05,vis:15696},
+    {name:'宜蘭新月',county:'宜蘭縣',chain:'OTH',bo:425.98,vis:18226},
+    {name:'屏東國賓',county:'屏東縣',chain:'GBA',bo:409.21,vis:18220},
+    {name:'高雄草衙道國賓',county:'高雄市',chain:'GBA',bo:399.31,vis:17670},
+    {name:'新莊國賓',county:'新北市',chain:'GBA',bo:362.52,vis:15763},
+    {name:'高雄in89大立',county:'高雄市',chain:'OTH',bo:357.74,vis:13059},
+    {name:'台北大國賓',county:'台北市',chain:'GBA',bo:325.50,vis:10881},
+    {name:'台南Focus威秀',county:'台南市',chain:'WS',bo:343.50,vis:13245},
+    {name:'嘉義in89',county:'嘉義市',chain:'OTH',bo:303.32,vis:9609},
+    {name:'淡水國賓',county:'新北市',chain:'GBA',bo:277.55,vis:12739},
+    // 微風(台北)：全國MTD排行未列入(規模過小)，秀泰內部亦無其MTD實查數據，暫不納入泡泡圖，避免以片段/單日數字混充月累積
   ];
+
+  var cinemaBubbles = (DATA.cinemas||[]).map(function(c){
+    return {name:c.name, county:ST_COUNTY[c.name]||'台北市', chain:'ST', bo:c.mtdBO, vis:c.mtdVisitors, screens:c.halls, seats:c.totalSeats};
+  }).concat(COMP_CINEMAS.map(function(c){
+    return {name:c.name, county:c.county, chain:c.chain, bo:c.bo, vis:c.vis, screens:null, seats:null};
+  }));
+
+  var mtdTotal = DATA.mtdMktTotal || cinemaBubbles.reduce(function(a,c){return a+(c.bo||0);},0);
+  var validBubbles = cinemaBubbles.filter(function(c){return c.bo>0;});
+
+  // 依縣市分組座標：以TW county的lx,ly為中心，黃金角螺旋微調避免同縣市內重疊
+  var byCounty = {};
+  validBubbles.forEach(function(c){ (byCounty[c.county]=byCounty[c.county]||[]).push(c); });
+  var twByName = {}; TW.forEach(function(t){twByName[t.n]=t;});
+  Object.keys(byCounty).forEach(function(cn){
+    var arr=byCounty[cn]; var base=twByName[cn];
+    if(!base) return;
+    var n=arr.length;
+    arr.forEach(function(c,i){
+      if(n===1){ c.x=base.lx; c.y=base.ly; return; }
+      var ang = i*137.508*Math.PI/180;
+      var rad = 9 + Math.sqrt(i)*7;
+      c.x = base.lx + Math.cos(ang)*rad;
+      c.y = base.ly + Math.sin(ang)*rad;
+    });
+  });
+
+  // 縣市內排名（供Tooltip「地區排名」使用；僅涵蓋本圖列入之戲院，非全國完整普查）
+  Object.keys(byCounty).forEach(function(cn){
+    byCounty[cn].sort(function(a,b){return b.bo-a.bo;}).forEach(function(c,i){ c.rank=i+1; c.rankTotal=byCounty[cn].length; });
+  });
+
+  // 泡泡半徑：市占%開根號漸進縮放，避免極端值失真
+  function bubbleR(pct){ return Math.max(3, Math.min(26, 3+Math.sqrt(Math.max(pct,0))*7)); }
+  validBubbles.forEach(function(c){ c.pct = mtdTotal>0 ? (c.bo/mtdTotal*100) : 0; c.r = bubbleR(c.pct); });
+
+  // 縣市加總（供縮小檢視時的「群聚泡泡」使用）
+  var countyAgg = {};
+  Object.keys(byCounty).forEach(function(cn){
+    var arr=byCounty[cn]; var boSum=arr.reduce(function(a,c){return a+c.bo;},0);
+    var byChain={}; arr.forEach(function(c){byChain[c.chain]=(byChain[c.chain]||0)+c.bo;});
+    var domChain=Object.entries(byChain).sort(function(a,b){return b[1]-a[1];})[0][0];
+    countyAgg[cn]={bo:boSum, count:arr.length, pct:mtdTotal>0?boSum/mtdTotal*100:0, domChain:domChain};
+  });
+
+  var CLUSTER_VB_THRESHOLD = 480; // viewBox寬度≥此值(縮小檢視)顯示縣市群聚泡泡；<此值(放大檢視)展開個別戲院泡泡
+
+  function bubbleLayerSvg(vbw){
+    if(vbw >= CLUSTER_VB_THRESHOLD){
+      return Object.keys(countyAgg).map(function(cn){
+        var a=countyAgg[cn]; var base=twByName[cn]; if(!base) return '';
+        var col = (BRAND[a.domChain]||BRAND.OTH).color;
+        var r = bubbleR(a.pct);
+        return '<circle class="bubC" data-county="'+cn+'" cx="'+base.lx+'" cy="'+base.ly+'" r="'+r+'" '
+          +'fill="'+col+'" fill-opacity="0.7" stroke="#0d1b2a" stroke-width="1" style="cursor:pointer"/>'
+          +'<text x="'+base.lx+'" y="'+(base.ly+r+10)+'" text-anchor="middle" font-size="8.5" fill="#e2e8f0" '
+          +'pointer-events="none" font-family="sans-serif">'+a.count+'家</text>';
+      }).join("");
+    }
+    return validBubbles.map(function(c,i){
+      var col=(BRAND[c.chain]||BRAND.OTH).color;
+      return '<circle class="bubI" data-i="'+i+'" cx="'+c.x+'" cy="'+c.y+'" r="'+c.r+'" '
+        +'fill="'+col+'" fill-opacity="0.7" stroke="#0d1b2a" stroke-width="1" style="cursor:pointer"/>';
+    }).join("");
+  }
+
+  var brandLegend = Object.keys(BRAND).map(function(k){
+    var b=BRAND[k];
+    return '<span style="margin-right:9px;font-size:9.5px;color:'+b.color+'">'
+      +'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+b.color+';opacity:.85;margin-right:3px;vertical-align:middle"></span>'
+      +b.label+"</span>";
+  }).join("");
+
+  // ── 四大地理分區（北/中/南/東）差異分析 ─────────────────
+  var macroAgg = {'北':{bo:0,vis:0,count:0},'中':{bo:0,vis:0,count:0},'南':{bo:0,vis:0,count:0},'東':{bo:0,vis:0,count:0}};
+  Object.keys(countyAgg).forEach(function(cn){
+    var mg = COUNTY_MACRO[cn]; if(!mg) return;
+    macroAgg[mg].bo += countyAgg[cn].bo;
+    macroAgg[mg].count += countyAgg[cn].count;
+  });
+  validBubbles.forEach(function(c){
+    var mg = COUNTY_MACRO[c.county]; if(!mg) return;
+    macroAgg[mg].vis = (macroAgg[mg].vis||0) + (c.vis||0);
+  });
+  var macroTotalBO = Object.values(macroAgg).reduce(function(a,m){return a+m.bo;},0);
+  var MACRO_LBL = {'北':'北部','中':'中部','南':'南部','東':'東部＋離島'};
+  var macroCards = ['北','中','南','東'].map(function(mg){
+    var m=macroAgg[mg]; var pct = macroTotalBO>0?(m.bo/macroTotalBO*100):0;
+    return '<div style="flex:1;min-width:110px;background:#0f172a;border-radius:8px;padding:9px 11px;border:1px solid #1e293b">'
+      +'<div style="font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:5px">'+MACRO_LBL[mg]+'</div>'
+      +'<div style="font-size:15px;font-weight:800;color:#c084fc">'+fmtW(m.bo)+'<span style="font-size:9px;font-weight:400;color:#64748b">萬</span></div>'
+      +'<div style="font-size:9.5px;color:#94a3b8;margin-top:2px">'+fmt(m.vis)+' 人次｜市占 '+pct.toFixed(1)+'%｜'+m.count+'家</div>'
+      +'</div>';
+  }).join("");
+
+  // ── 分析洞察（依本圖列入之約55家主要戲院實際數據計算，非全國完整普查）─────
+  var countyEntries = Object.entries(countyAgg);
+  var topShareCounty = countyEntries.slice().sort(function(a,b){return b[1].pct-a[1].pct;})[0];
+  var topDensityCounty = countyEntries.slice().sort(function(a,b){return b[1].count-a[1].count;})[0];
+  // 成長最快：以秀泰各分區「今日 vs 7日前(w7BO)」實際成長率為代表指標（僅秀泰自有據點，非全品牌）
+  var stGrowthByMacro = {};
+  (DATA.cinemas||[]).forEach(function(c){
+    var county = ST_COUNTY[c.name]; var mg = COUNTY_MACRO[county]; if(!mg) return;
+    stGrowthByMacro[mg] = stGrowthByMacro[mg]||{bo:0,w7:0};
+    stGrowthByMacro[mg].bo += c.bo; stGrowthByMacro[mg].w7 += (c.w7BO||0);
+  });
+  var growthEntries = Object.keys(stGrowthByMacro).map(function(mg){
+    var g=stGrowthByMacro[mg]; var rate = g.w7>0?((g.bo-g.w7)/g.w7*100):0;
+    return [mg, rate];
+  }).sort(function(a,b){return b[1]-a[1];});
+  var fastestGrowth = growthEntries[0];
+  // 潛力待開發市場：秀泰於該分區市占（該分區秀泰bo / 該分區總bo）明顯偏低者
+  var stShareByMacro = {};
+  Object.keys(macroAgg).forEach(function(mg){
+    var stBo = (stGrowthByMacro[mg]||{}).bo || 0;
+    stShareByMacro[mg] = macroAgg[mg].bo>0 ? stBo/macroAgg[mg].bo*100 : 0;
+  });
+  var underdeveloped = Object.entries(stShareByMacro).filter(function(e){return macroAgg[e[0]].bo>0;})
+    .sort(function(a,b){return a[1]-b[1];})[0];
+
+  var insightsHtml =
+    '<div style="font-size:11px;color:#e2e8f0;line-height:2;">'
+    +'<div>📈 <b style="color:#c084fc">市占最高地區：</b>'+topShareCounty[0]+'（'+topShareCounty[1].pct.toFixed(1)+'%）</div>'
+    +'<div>🏙 <b style="color:#c084fc">影城密度最高：</b>'+topDensityCounty[0]+'（'+topDensityCounty[1].count+'家，僅計本圖列入戲院）</div>'
+    +'<div>🚀 <b style="color:#c084fc">秀泰成長最快分區：</b>'+MACRO_LBL[fastestGrowth[0]]+'（較7日前 '+(fastestGrowth[1]>=0?'+':'')+fastestGrowth[1].toFixed(1)+'%，僅秀泰自有據點）</div>'
+    +'<div>💡 <b style="color:#c084fc">待開發潛力市場：</b>'+MACRO_LBL[underdeveloped[0]]+'（秀泰市占僅'+underdeveloped[1].toFixed(1)+'%，仍有成長空間）</div>'
+    +'</div>';
+
+  var sizeLegend =
+    '<div style="display:flex;align-items:center;gap:14px;margin-bottom:10px;flex-wrap:wrap;">'
+    +'<span style="font-size:10px;color:#94a3b8;">泡泡大小＝市占率：</span>'
+    +'<span style="display:flex;align-items:center;gap:4px;"><svg width="12" height="12"><circle cx="6" cy="6" r="4" fill="#94a3b8" fill-opacity="0.7"/></svg><span style="font-size:9.5px;color:#94a3b8;">&lt;1%</span></span>'
+    +'<span style="display:flex;align-items:center;gap:4px;"><svg width="20" height="20"><circle cx="10" cy="10" r="9" fill="#94a3b8" fill-opacity="0.7"/></svg><span style="font-size:9.5px;color:#94a3b8;">1–3%</span></span>'
+    +'<span style="display:flex;align-items:center;gap:4px;"><svg width="28" height="28"><circle cx="14" cy="14" r="13" fill="#94a3b8" fill-opacity="0.7"/></svg><span style="font-size:9.5px;color:#94a3b8;">&gt;3%</span></span>'
+    +'</div>';
 
   var total = Object.values(comp).reduce(function(a,b){return a+b;},0);
   if(total===0) return;
@@ -2035,12 +2211,6 @@ function renderMktShare() {
     return '<text x="'+c.lx+'" y="'+c.ly+'" fill="'+col.f+'" font-size="9.5" '
       +'text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" '
       +'pointer-events="none" font-weight="500">'+nm+"</text>";
-  }).join("");
-
-  // Cinema dots grouped by chain
-  var dotSvg = DOTS.map(function(d){
-    var col = CC[d[2]] || CC["其他"];
-    return '<circle cx="'+d[0]+'" cy="'+d[1]+'" r="4" fill="'+col.dot+'" stroke="#0d1b2a" stroke-width="1.2" opacity="0.92"><title>'+d[3]+"</title></circle>";
   }).join("");
 
   // Market share bars
@@ -2065,25 +2235,17 @@ function renderMktShare() {
       +"</div></div>";
   }).join("");
 
-  // Legend: chain colors
-  var chainLegend = ["秀泰","威秀","國賓","美麗華","其他"].map(function(nm){
-    var col = CC[nm];
-    return '<span style="margin-right:8px;font-size:10px;color:'+col.s+'">'
-      +'<span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:'+col.s+';margin-right:2px;vertical-align:middle"></span>'
-      +nm+"</span>";
-  }).join("");
-
   el.innerHTML =
     '<div style="display:flex;gap:0;min-height:600px;background:transparent;border-radius:8px;overflow:hidden">'
     +'<div style="flex:1;position:relative;min-width:0;padding:8px 4px 32px 8px">'
     +'<svg id="twMapSvg" viewBox="0 0 800 900" style="width:100%;height:100%;max-height:600px;display:block">'
     +"<rect width=\"800\" height=\"900\" fill=\"transparent\" />"
     +paths+labels
-    +"<g>"+dotSvg+"</g>"
+    +'<g id="bubbleLayer">'+bubbleLayerSvg(800)+"</g>"
     +"</svg>"
     +'<div id="twTip" style="position:absolute;bottom:12px;left:12px;font-size:11px;color:#94a3b8;pointer-events:none;min-height:14px"></div>'
     +'<div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:10px;color:#475569;white-space:nowrap">'
-    +chainLegend+"</div>"
+    +brandLegend+"</div>"
     +"</div>"
     +'<div style="width:168px;padding:12px 12px 12px 10px;border-left:1px solid #e2e8f0;display:flex;flex-direction:column;background:transparent">'
     +'<div style="font-size:11px;color:#475569;margin-bottom:4px">市場占有率</div>'
@@ -2091,7 +2253,17 @@ function renderMktShare() {
     +'<div style="font-size:10px;color:#475569;margin-bottom:10px">秀泰市占 | 全台'+totalWan+"萬</div>"
     +bars
     +"</div>"
-    +"</div>";
+    +"</div>"
+    +'<div style="padding:12px 16px;border-top:1px solid #e2e8f0;background:#0b1220;">'
+    +'<div style="font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:8px">🫧 泡泡地圖：泡泡大小＝市占率(開根號漸進縮放)，透明度70%；縮小檢視顯示「縣市群聚」，放大自動展開「個別戲院」</div>'
+    +sizeLegend
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">'+macroCards+'</div>'
+    +'<div style="font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:6px">📊 分析洞察</div>'
+    +insightsHtml
+    +'<div style="font-size:9.5px;color:#64748b;margin-top:10px;border-top:1px solid #1e293b;padding-top:8px">'
+    +'※ 泡泡地圖涵蓋秀泰15家自有影城＋全國MTD(7/1-25)排行前段共約55家主要戲院(涵蓋全國約90%以上票房)，未逐一列入長尾小型戲院；競爭品牌戲院之廳數／座位數非秀泰內部建檔範圍，Tooltip顯示「—」；微風(台北)因缺乏MTD實查數據，本期暫未納入泡泡圖。'
+    +'</div>'
+    +'</div>';
 
   // Hover + Click events
   setTimeout(function(){
@@ -2106,12 +2278,61 @@ function renderMktShare() {
     pop.style.cssText = "position:absolute;top:10px;right:10px;background:#fff;"
       +"border-radius:10px;padding:10px 13px;box-shadow:0 4px 16px rgba(0,0,0,0.13);"
       +"font-size:12px;pointer-events:none;opacity:0;transition:opacity .15s;"
-      +"min-width:120px;border:1px solid #e2e8f0;z-index:20;";
+      +"min-width:150px;max-width:230px;border:1px solid #e2e8f0;z-index:20;";
     if(mapWrap) mapWrap.appendChild(pop);
+
+    // ── Bubble hover events (individual + county cluster) ──
+    function bindBubbleEvents(){
+      var layer = document.getElementById("bubbleLayer");
+      if(!layer) return;
+      layer.querySelectorAll(".bubC").forEach(function(node){
+        var cn = node.getAttribute("data-county");
+        var a = countyAgg[cn];
+        if(!a) return;
+        node.addEventListener("mouseenter",function(){
+          pop.innerHTML = '<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:5px">'+cn+'（群聚）</div>'
+            +'<div style="font-size:11px;color:#334155;line-height:1.8">'
+            +'戲院數：'+a.count+' 家<br>'
+            +'合計票房(MTD)：'+fmtW(a.bo)+' 萬<br>'
+            +'市占率：'+a.pct.toFixed(2)+'%<br>'
+            +'主力品牌：'+(BRAND[a.domChain]||BRAND.OTH).label
+            +'</div><div style="font-size:9.5px;color:#94a3b8;margin-top:5px;border-top:1px solid #f1f5f9;padding-top:4px">放大地圖可展開個別戲院</div>';
+          pop.style.opacity='1';
+        });
+        node.addEventListener("mouseleave",function(){ pop.style.opacity='0'; });
+      });
+      layer.querySelectorAll(".bubI").forEach(function(node){
+        var i = parseInt(node.getAttribute("data-i"));
+        var c = validBubbles[i];
+        if(!c) return;
+        node.addEventListener("mouseenter",function(){
+          var brand=(BRAND[c.chain]||BRAND.OTH);
+          pop.innerHTML = '<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:4px">'+c.name+'</div>'
+            +'<div style="display:inline-block;background:'+brand.color+'22;color:'+brand.color+';border-radius:4px;padding:2px 7px;font-size:10px;font-weight:600;margin-bottom:6px">'+brand.label+'</div>'
+            +'<div style="font-size:11px;color:#334155;line-height:1.8">'
+            +'所在地區：'+c.county+'<br>'
+            +'市占率：'+c.pct.toFixed(2)+'%<br>'
+            +'票房(MTD)：'+fmtW(c.bo)+' 萬<br>'
+            +'來客數(MTD)：'+fmt(c.vis)+' 人<br>'
+            +'廳數：'+(c.screens!=null?c.screens+' 廳':'—')+'　座位數：'+(c.seats!=null?fmt(c.seats):'—')+'<br>'
+            +'地區排名：'+c.rank+' / '+c.rankTotal+'（本圖列入戲院內）'
+            +'</div>';
+          pop.style.opacity='1';
+        });
+        node.addEventListener("mouseleave",function(){ pop.style.opacity='0'; });
+      });
+    }
+    bindBubbleEvents();
 
     // ── Zoom / pan state ─────────────────────────────────
     var vb={x:0,y:0,w:800,h:900};
     function applyVB(){ if(svg) svg.setAttribute("viewBox",vb.x+" "+vb.y+" "+vb.w+" "+vb.h); }
+    function refreshBubbles(){
+      var layer = document.getElementById("bubbleLayer");
+      if(!layer) return;
+      layer.innerHTML = bubbleLayerSvg(vb.w);
+      bindBubbleEvents();
+    }
 
     if(svg){
       svg.style.cursor="grab";
@@ -2125,6 +2346,7 @@ function renderMktShare() {
         vb.x=Math.max(-100,Math.min(700,vx-mx*nw));
         vb.y=Math.max(-100,Math.min(800,vy-my*nh));
         vb.w=nw; vb.h=nh; applyVB();
+        refreshBubbles();
       },{passive:false});
       var drag={on:false,sx:0,sy:0,ox:0,oy:0,moved:false};
       svg.addEventListener("mousedown",function(e){
@@ -2145,6 +2367,7 @@ function renderMktShare() {
       });
       svg.addEventListener("dblclick",function(){
         vb={x:0,y:0,w:800,h:900}; applyVB();
+        refreshBubbles();
         if(tip) tip.textContent="🔍 滾輪縮放 · 拖曳移動 · 雙擊重置";
       });
     }
