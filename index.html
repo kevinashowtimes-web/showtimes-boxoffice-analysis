@@ -795,73 +795,73 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 //  DATA
 // ════════════════════════════════════
 const DATA = {
-  date: '2026-07-26', weekday: '日',
-  lastUpdate: '2026-07-26 更新（週日）秀泰817.5萬/25,518人；全台100家4988場次4379.5萬；威秀22家2157.9萬含MuvieCinemas（市占49.3%）；秀泰市占18.7%',
-  mkt: { bo: 4379.5, visitors: 141586, atp: 309.3, lastWeekBO: 4134.5, cinemaCount: 100 }, // 7/26全台100家4988場次4379.4638萬；lastWeekBO=7/19（上週日）4134.5334萬；秀泰市占18.67%；威秀22家市占49.28%
+  date: '2026-07-29', weekday: '三',
+  lastUpdate: '2026-07-29 更新（週三）秀泰937.0萬/27,102人；全台100家4738場次4645.0萬（《蜘蛛人：重生日》上映首日，市佔74.0%）；威秀22家2241.5萬含MuvieCinemas；秀泰市占20.17%',
+  mkt: { bo: 4645.0, visitors: 150477, atp: 308.7, lastWeekBO: 1784.6, cinemaCount: 100 }, // 7/29全台100家4738場次4644.9987萬；lastWeekBO=7/22（上週三）1784.6萬；秀泰市占20.17%
 
   st: {
-    bo: 817.5, fb: 151.2, visitors: 25518,
-    ystBO: 854.7,
-    mtdBO: 11667.3, mtdLastMonthBO: 11097.5, mtdLastYearBO: 13407.2, // mtdLastYearBO=2025/7/1-26實查（9家同店口徑：文心/站前/樹林/欣欣/基隆/土城/花蓮/夢時代/岡山），已補實查
-    ytdBO: 97476.3, ytdLastYearBO: 34792.9, // ytdLastYearBO=2025/1/1-7/26實查（同9家同店口徑，不含巨蛋/麗寶/仁德/台東/北港/嘉義，2025年尚未開幕），已補實查；與先前版本63593.8萬(14家口徑推估)不同，兩者不可直接比較年增率，請與Kevina確認採用基準
+    bo: 937.0, fb: 200.2, visitors: 27102,
+    ystBO: 338.0,
+    mtdBO: 13245.4, mtdLastMonthBO: 13312.3, mtdLastYearBO: 14619.6, // mtdLastYearBO=2025/7/1-29實查（內部系統合計，非同店口徑）
+    ytdBO: 99054.4, ytdLastYearBO: 36005.3, // ytdLastYearBO=2025/1/1-29實查（內部系統合計，非同店口徑）；與7/26版本使用之9家同店口徑(34792.9萬)基準不同，如需逐店可比YoY請與Kevina確認採用基準
   },
 
-  wison: { bo: 2157.9, visitors: 68391, atp: 315.6, mtdBO: 30292.0, mtdVisitors: 962604, mtdAtp: 314.7 }, // 威秀7/26共22家完整（含MuvieCinemas）；MTD(7/1-26)22/22家全數實查加總，已補齊桃園桃知道/台南Focus/花蓮新天堂樂園3家小型店
+  wison: { bo: 2241.5, visitors: 71001, atp: 315.7, mtdBO: 34472.6, mtdVisitors: 1091448, mtdAtp: 315.8 }, // 威秀7/29共22家完整（含MuvieCinemas）；MTD(7/1-29)22/22家全數實查加總（taipeitheater.org.tw逐店查證）
 
   // 院線競爭對手當日票房（來源：台北票房觀測站 / 手動填入）
 
 
   // 全台排行榜（資料來源：taipeitheater.org.tw）
   // region: N=北, C=中, S=南; st=true 表示秀泰
-  // 全台影城 2026-07-26 YTD累計排行（來源：taipeitheater.org.tw；秀泰欄位採內部系統實查數字）
+  // 全台影城 2026-07-29 YTD累計排行（來源：taipeitheater.org.tw；秀泰欄位採內部系統實查數字）
   ytdRanking: [
-    { rank:1,  name:'台北信義威秀', region:'N', st:false, bo:23339.4,  visitors:692761, mktPct:4.82 },
-    { rank:2,  name:'高雄威秀', region:'S', st:false, bo:21591.6,  visitors:696441, mktPct:4.46 },
-    { rank:3,  name:'台南南紡威秀', region:'S', st:false, bo:19068.8,  visitors:659222, mktPct:3.94 },
-    { rank:4,  name:'台北京站威秀', region:'N', st:false, bo:17316.1,  visitors:564860, mktPct:3.58 },
-    { rank:5,  name:'板橋大遠百威秀', region:'N', st:false, bo:16499.4,  visitors:507391, mktPct:3.41 },
-    { rank:6,  name:'新竹巨城威秀', region:'N', st:false, bo:15475.9,  visitors:500179, mktPct:3.2 },
-    { rank:7,  name:'台中文心秀泰', region:'C', st:true, bo:15299.3,  visitors:492456, mktPct:3.16 },
-    { rank:8,  name:'台中大遠百威秀', region:'C', st:false, bo:14992.4,  visitors:497493, mktPct:3.1 },
-    { rank:9,  name:'台北大巨蛋秀泰', region:'N', st:true, bo:14266.6,  visitors:301430, mktPct:2.95 },
-    { rank:10,  name:'新店裕隆城威秀', region:'N', st:false, bo:12387.0,  visitors:391738, mktPct:2.56 },
-    { rank:11,  name:'台北美麗華', region:'N', st:false, bo:12289.4,  visitors:348445, mktPct:2.54 },
-    { rank:12,  name:'台中站前秀泰', region:'C', st:true, bo:12124.7,  visitors:396434, mktPct:2.51 },
-    { rank:13,  name:'高雄夢時代秀泰', region:'S', st:true, bo:11888.9,  visitors:396361, mktPct:2.46 },
-    { rank:14,  name:'台中iFG遠雄廣場威秀', region:'C', st:false, bo:10997.2,  visitors:375873, mktPct:2.27 },
-    { rank:15,  name:'MuvieCinemas', region:'N', st:false, bo:10630.5,  visitors:283845, mktPct:2.2 },
-    { rank:16,  name:'南港LaLaport威秀', region:'N', st:false, bo:10146.6,  visitors:327409, mktPct:2.1 },
-    { rank:17,  name:'台中老虎城威秀', region:'C', st:false, bo:9278.3,  visitors:293074, mktPct:1.92 },
-    { rank:18,  name:'林口威秀', region:'N', st:false, bo:9182.1,  visitors:291010, mktPct:1.9 },
-    { rank:19,  name:'桃園統領威秀', region:'N', st:false, bo:8525.8,  visitors:295881, mktPct:1.76 },
-    { rank:20,  name:'中和環球威秀', region:'N', st:false, bo:8215.7,  visitors:289072, mktPct:1.7 },
+    { rank:1,  name:'台北信義威秀', region:'N', st:false, bo:23728.7,  visitors:703825, mktPct:4.82 },
+    { rank:2,  name:'高雄威秀', region:'S', st:false, bo:21992.1,  visitors:708400, mktPct:4.47 },
+    { rank:3,  name:'台南南紡威秀', region:'S', st:false, bo:19390.9,  visitors:669808, mktPct:3.94 },
+    { rank:4,  name:'台北京站威秀', region:'N', st:false, bo:17582.2,  visitors:573605, mktPct:3.57 },
+    { rank:5,  name:'板橋大遠百威秀', region:'N', st:false, bo:16871.5,  visitors:517936, mktPct:3.43 },
+    { rank:6,  name:'新竹巨城威秀', region:'N', st:false, bo:15768.0,  visitors:509059, mktPct:3.2 },
+    { rank:7,  name:'台中文心秀泰', region:'C', st:true, bo:15699.5,  visitors:501013, mktPct:3.19 },
+    { rank:8,  name:'台中大遠百威秀', region:'C', st:false, bo:15313.9,  visitors:507476, mktPct:3.11 },
+    { rank:9,  name:'台北大巨蛋秀泰', region:'N', st:true, bo:14904.7,  visitors:313143, mktPct:3.03 },
+    { rank:10,  name:'台北美麗華', region:'N', st:false, bo:12679.2,  visitors:358158, mktPct:2.58 },
+    { rank:11,  name:'新店裕隆城威秀', region:'N', st:false, bo:12661.2,  visitors:399613, mktPct:2.57 },
+    { rank:12,  name:'台中站前秀泰', region:'C', st:true, bo:12426.0,  visitors:404502, mktPct:2.52 },
+    { rank:13,  name:'高雄夢時代秀泰', region:'S', st:true, bo:12300.5,  visitors:404740, mktPct:2.5 },
+    { rank:14,  name:'台中iFG遠雄廣場威秀', region:'C', st:false, bo:11124.6,  visitors:380310, mktPct:2.26 },
+    { rank:15,  name:'MuvieCinemas', region:'N', st:false, bo:10867.6,  visitors:289820, mktPct:2.21 },
+    { rank:16,  name:'南港LaLaport威秀', region:'N', st:false, bo:10281.7,  visitors:331803, mktPct:2.09 },
+    { rank:17,  name:'台中老虎城威秀', region:'C', st:false, bo:9441.5,  visitors:297951, mktPct:1.92 },
+    { rank:18,  name:'林口威秀', region:'N', st:false, bo:9358.1,  visitors:296203, mktPct:1.9 },
+    { rank:19,  name:'桃園統領威秀', region:'N', st:false, bo:8625.3,  visitors:299388, mktPct:1.75 },
+    { rank:20,  name:'中和環球威秀', region:'N', st:false, bo:8331.1,  visitors:293190, mktPct:1.69 },
   ],
-  ytdMktTotal: 484054.0, ytdMktAdm: 16644767, ytdMktAtp: 290.8, // 全台全年累計（萬元，2026-01-01~07-26，104家；taipeitheater實查總表：總戲院104家/總場次1,031,965場/總票房4,840,540,273元/總人次16,644,767人/平均票價290.8元）
+  ytdMktTotal: 492287.1, ytdMktAdm: 16907277, ytdMktAtp: 291.2, // 全台全年累計（萬元，2026-01-01~07-29，104家；taipeitheater實查總表：總戲院104家/總場次1,046,203場/總票房4,922,870,730元/總人次16,907,277人/平均票價291.2元）
 
-  // 月累計排行 MTD 2026-07-01～07-26（資料來源：taipeitheater.org.tw；秀泰欄位採內部系統實查數字）
+  // 月累計排行 MTD 2026-07-01～07-29（資料來源：taipeitheater.org.tw；秀泰欄位採內部系統實查數字）
   mtdRanking: [
-    { rank:1,  name:'台北信義威秀', region:'N', st:false, bo:3071.5,  visitors:89715, mktPct:5.12 },
-    { rank:2,  name:'高雄威秀', region:'S', st:false, bo:2777.3,  visitors:86455, mktPct:4.63 },
-    { rank:3,  name:'台南南紡威秀', region:'S', st:false, bo:2477.5,  visitors:84111, mktPct:4.13 },
-    { rank:4,  name:'新竹巨城威秀', region:'N', st:false, bo:2230.7,  visitors:71118, mktPct:3.72 },
-    { rank:5,  name:'板橋大遠百威秀', region:'N', st:false, bo:2205.7,  visitors:65582, mktPct:3.68 },
-    { rank:6,  name:'台北大巨蛋秀泰', region:'N', st:true, bo:2108.7,  visitors:43265, mktPct:3.51 },
-    { rank:7,  name:'台北京站威秀', region:'N', st:false, bo:2095.8,  visitors:68596, mktPct:3.49 },
-    { rank:8,  name:'台北美麗華', region:'N', st:false, bo:2010.6,  visitors:54303, mktPct:3.35 },
-    { rank:9,  name:'台中大遠百威秀', region:'C', st:false, bo:1875.0,  visitors:60310, mktPct:3.12 },
-    { rank:10,  name:'新店裕隆城威秀', region:'N', st:false, bo:1771.6,  visitors:53310, mktPct:2.95 },
-    { rank:11,  name:'台中文心秀泰', region:'C', st:true, bo:1650.3,  visitors:54206, mktPct:2.75 },
-    { rank:12,  name:'高雄夢時代秀泰', region:'S', st:true, bo:1523.2,  visitors:51949, mktPct:2.54 },
-    { rank:13,  name:'MuvieCinemas', region:'N', st:false, bo:1394.4,  visitors:35527, mktPct:2.32 },
-    { rank:14,  name:'台中站前秀泰', region:'C', st:true, bo:1384.5,  visitors:45250, mktPct:2.31 },
-    { rank:15,  name:'林口威秀', region:'N', st:false, bo:1346.0,  visitors:42433, mktPct:2.24 },
-    { rank:16,  name:'南港LaLaport威秀', region:'N', st:false, bo:1283.8,  visitors:41112, mktPct:2.14 },
-    { rank:17,  name:'台中iFG遠雄廣場威秀', region:'C', st:false, bo:1176.4,  visitors:39107, mktPct:1.96 },
-    { rank:18,  name:'台中老虎城威秀', region:'C', st:false, bo:1024.7,  visitors:31701, mktPct:1.71 },
-    { rank:19,  name:'桃園新光', region:'N', st:false, bo:1013.1,  visitors:28575, mktPct:1.69 },
-    { rank:20,  name:'中和環球威秀', region:'N', st:false, bo:979.7,  visitors:34467, mktPct:1.63 },
+    { rank:1,  name:'台北信義威秀', region:'N', st:false, bo:3460.8,  visitors:100779, mktPct:5.07 },
+    { rank:2,  name:'高雄威秀', region:'S', st:false, bo:3177.8,  visitors:98414, mktPct:4.66 },
+    { rank:3,  name:'台南南紡威秀', region:'S', st:false, bo:2799.6,  visitors:94697, mktPct:4.1 },
+    { rank:4,  name:'板橋大遠百威秀', region:'N', st:false, bo:2577.8,  visitors:76127, mktPct:3.78 },
+    { rank:5,  name:'新竹巨城威秀', region:'N', st:false, bo:2522.8,  visitors:79998, mktPct:3.7 },
+    { rank:6,  name:'台北大巨蛋秀泰', region:'N', st:true, bo:2511.8,  visitors:51229, mktPct:3.68 },
+    { rank:7,  name:'台北美麗華', region:'N', st:false, bo:2400.4,  visitors:64016, mktPct:3.52 },
+    { rank:8,  name:'台北京站威秀', region:'N', st:false, bo:2361.9,  visitors:77341, mktPct:3.46 },
+    { rank:9,  name:'台中大遠百威秀', region:'C', st:false, bo:2196.5,  visitors:70293, mktPct:3.22 },
+    { rank:10,  name:'新店裕隆城威秀', region:'N', st:false, bo:2045.8,  visitors:61185, mktPct:3.0 },
+    { rank:11,  name:'台中文心秀泰', region:'C', st:true, bo:1890.3,  visitors:61305, mktPct:2.77 },
+    { rank:12,  name:'高雄夢時代秀泰', region:'S', st:true, bo:1723.6,  visitors:58018, mktPct:2.53 },
+    { rank:13,  name:'MuvieCinemas', region:'N', st:false, bo:1631.5,  visitors:41502, mktPct:2.39 },
+    { rank:14,  name:'台中站前秀泰', region:'C', st:true, bo:1588.9,  visitors:51503, mktPct:2.33 },
+    { rank:15,  name:'林口威秀', region:'N', st:false, bo:1522.0,  visitors:47626, mktPct:2.23 },
+    { rank:16,  name:'南港LaLaport威秀', region:'N', st:false, bo:1419.0,  visitors:45506, mktPct:2.08 },
+    { rank:17,  name:'台中iFG遠雄廣場威秀', region:'C', st:false, bo:1303.8,  visitors:43544, mktPct:1.91 },
+    { rank:18,  name:'桃園新光', region:'N', st:false, bo:1232.1,  visitors:34300, mktPct:1.81 },
+    { rank:19,  name:'台中老虎城威秀', region:'C', st:false, bo:1187.9,  visitors:36578, mktPct:1.74 },
+    { rank:20,  name:'台中新光', region:'C', st:false, bo:1118.8,  visitors:31626, mktPct:1.64 },
   ],
-  mtdMktTotal: 60014.5, mtdMktAdm: 2018889, mtdMktAtp: 297.3,
+  mtdMktTotal: 68247.5, mtdMktAdm: 2281399, mtdMktAtp: 299.1,
 
   // 上半年累計排行 2026-01-01 ~ 2026-06-30（資料來源：taipeitheater.org.tw）
   // 上半年累計排行 2026-01-01 ~ 2026-06-30（資料來源：taipeitheater.org.tw）
@@ -914,99 +914,99 @@ const DATA = {
   ],
   annMktTotal: 469147.3,  // 年度全台累計（萬元，2026-01-01~07-21）
 
-  competitors: { '秀泰':817.5, '威秀':2157.9, '國賓':287.9, '美麗華':171.1, 'in89':105.7, '新光':269.3, '美麗新台茂':67.3, '喜樂':79.6, '其他':423.3 },
+  competitors: { '秀泰':937.0, '威秀':2241.5, '國賓':261.5, '美麗華':177.2, 'in89':100.3, '新光':292.6, '美麗新台茂':58.8, '喜樂':68.0, '其他':508.1 }, // ⚠ taipeitheater當日「秀泰」桶原始加總985.9952萬，與內部系統實查936.9572萬有落差（推估為台北大巨蛋當日回報延遲），秀泰欄位一律採內部系統937.0萬為準，差額49.038萬併入「其他」以維持加總精確=mkt.bo
 
   cinemas: [
-    // lmtdBO/lmtdFB（上月同期比較基準）已更新為6/1-26實查口徑（與7/1-26口徑天數對齊）
-    { name:'秀泰巨蛋',  bo:153.6, fb:19.5, visitors:3338, shows:64,  avgPrice:460.2, seats:120, halls:14, totalSeats:1683, w7BO:125.1, w7FB:18.7, ystBO:172.8, ytdBO:14535.7, ytdVisitors:305577, mtdBO:2142.8, mtdVisitors:43663, mtdFB:434.2, lmtdBO:1750.5, lmtdFB:407.8 },
-    { name:'秀泰欣欣',  bo:55.2, fb:9.0, visitors:1878, shows:77,  avgPrice:294.1, seats:106, halls:14, totalSeats:1488, w7BO:70.2, w7FB:14.6, ystBO:68.5, ytdBO:7988.6, ytdVisitors:263985, mtdBO:858.9, mtdVisitors:29254, mtdFB:172.2, lmtdBO:958.8, lmtdFB:172.9 },
-    { name:'秀泰土城',  bo:31.6, fb:6.1, visitors:1102, shows:58,  avgPrice:286.8, seats:97, halls:11, totalSeats:1063, w7BO:29.4, w7FB:5.3, ystBO:26.5, ytdBO:3599.9, ytdVisitors:129878, mtdBO:439.1, mtdVisitors:15904, mtdFB:96.3, lmtdBO:391.0, lmtdFB:84.9 },
-    { name:'秀泰樹林',  bo:57.6, fb:12.0, visitors:1904, shows:64,  avgPrice:302.6, seats:127, halls:12, totalSeats:1524, w7BO:55.5, w7FB:10.7, ystBO:52.0, ytdBO:6358.4, ytdVisitors:215261, mtdBO:762.2, mtdVisitors:25847, mtdFB:196.5, lmtdBO:714.1, lmtdFB:185.5 },
-    { name:'秀泰基隆',  bo:21.1, fb:3.3, visitors:771, shows:42,  avgPrice:273.1, seats:127, halls:8, totalSeats:1013, w7BO:25.4, w7FB:3.8, ystBO:23.9, ytdBO:3253.7, ytdVisitors:122091, mtdBO:360.0, mtdVisitors:13571, mtdFB:67.4, lmtdBO:327.2, lmtdFB:63.7 },
-    { name:'秀泰文心',  bo:111.7, fb:21.8, visitors:3529, shows:85,  avgPrice:316.6, seats:131, halls:16, totalSeats:2098, w7BO:126.4, w7FB:21.6, ystBO:122.1, ytdBO:15477.1, ytdVisitors:494161, mtdBO:1667.9, mtdVisitors:54453, mtdFB:355.5, lmtdBO:1724.3, lmtdFB:360.7 },
-    { name:'秀泰站前',  bo:106.3, fb:17.2, visitors:3323, shows:100,  avgPrice:320.0, seats:157, halls:17, totalSeats:2670, w7BO:114.9, w7FB:20.7, ystBO:106.4, ytdBO:12221.5, ytdVisitors:398402, mtdBO:1384.5, mtdVisitors:45403, mtdFB:308.7, lmtdBO:1360.1, lmtdFB:290.7 },
-    { name:'秀泰麗寶',  bo:25.5, fb:5.6, visitors:848, shows:47,  avgPrice:300.3, seats:79, halls:10, totalSeats:793, w7BO:28.5, w7FB:7.0, ystBO:32.0, ytdBO:3008.5, ytdVisitors:102259, mtdBO:387.0, mtdVisitors:13251, mtdFB:94.2, lmtdBO:270.4, lmtdFB:70.8 },
-    { name:'秀泰北港',  bo:6.3, fb:1.6, visitors:228, shows:15,  avgPrice:275.1, seats:69, halls:4, totalSeats:276, w7BO:6.2, w7FB:1.3, ystBO:6.0, ytdBO:971.0, ytdVisitors:36650, mtdBO:99.1, mtdVisitors:3772, mtdFB:21.5, lmtdBO:78.6, lmtdFB:16.2 },
-    { name:'秀泰嘉義',  bo:50.4, fb:11.2, visitors:1762, shows:58,  avgPrice:286.2, seats:124, halls:11, totalSeats:1360, w7BO:45.0, w7FB:8.8, ystBO:47.6, ytdBO:5904.3, ytdVisitors:207665, mtdBO:643.3, mtdVisitors:23340, mtdFB:154.9, lmtdBO:624.5, lmtdFB:135.1 },
-    { name:'秀泰仁德',  bo:10.7, fb:1.6, visitors:391, shows:22,  avgPrice:274.2, seats:76, halls:5, totalSeats:379, w7BO:8.7, w7FB:1.4, ystBO:8.7, ytdBO:287.9, ytdVisitors:10540, mtdBO:99.8, mtdVisitors:3763, mtdFB:19.4, lmtdBO:74.5, lmtdFB:13.5 },
-    { name:'秀泰夢時代',  bo:97.8, fb:21.6, visitors:3273, shows:75,  avgPrice:298.8, seats:145, halls:13, totalSeats:1886, w7BO:105.1, w7FB:23.7, ystBO:95.2, ytdBO:12123.4, ytdVisitors:398935, mtdBO:1546.4, mtdVisitors:52213, mtdFB:364.7, lmtdBO:1500.1, lmtdFB:350.1 },
-    { name:'秀泰岡山',  bo:61.8, fb:13.5, visitors:2142, shows:69,  avgPrice:288.7, seats:108, halls:13, totalSeats:1400, w7BO:51.0, w7FB:11.1, ystBO:64.0, ytdBO:7267.1, ytdVisitors:246875, mtdBO:818.6, mtdVisitors:28963, mtdFB:206.7, lmtdBO:846.5, lmtdFB:193.2 },
-    { name:'秀泰台東',  bo:16.4, fb:4.7, visitors:607, shows:34,  avgPrice:270.7, seats:109, halls:8, totalSeats:870, w7BO:13.1, w7FB:3.3, ystBO:15.7, ytdBO:2242.5, ytdVisitors:85440, mtdBO:250.8, mtdVisitors:9548, mtdFB:79.4, lmtdBO:225.9, lmtdFB:63.1 },
-    { name:'秀泰花蓮',  bo:11.4, fb:2.5, visitors:422, shows:44,  avgPrice:270.4, seats:120, halls:9, totalSeats:1083, w7BO:12.6, w7FB:2.9, ystBO:13.4, ytdBO:2236.8, ytdVisitors:84008, mtdBO:206.8, mtdVisitors:7841, mtdFB:48.9, lmtdBO:251.0, lmtdFB:58.0 },
+    // lmtdBO/lmtdFB（上月同期比較基準）已更新為6/1-29實查口徑（與7/1-29口徑天數對齊）；w7BO/w7FB=7/22（上週三）
+    { name:'秀泰巨蛋',  bo:192.2, fb:40.9, visitors:3710, shows:63,  avgPrice:518.2, seats:120, halls:14, totalSeats:1683, w7BO:67.1, w7FB:46.7, ystBO:112.4, ytdBO:14904.7, ytdVisitors:313143, mtdBO:2511.8, mtdVisitors:51229, mtdFB:517.0, lmtdBO:2097.6, lmtdFB:468.0 },
+    { name:'秀泰欣欣',  bo:82.3, fb:16.0, visitors:2536, shows:34,  avgPrice:324.6, seats:106, halls:14, totalSeats:1488, w7BO:21.5, w7FB:4.0, ystBO:19.2, ytdBO:8109.7, ytdVisitors:267853, mtdBO:979.9, mtdVisitors:33122, mtdFB:198.5, lmtdBO:1115.6, lmtdFB:202.1 },
+    { name:'秀泰土城',  bo:31.6, fb:6.1, visitors:1113, shows:22,  avgPrice:283.8, seats:97, halls:11, totalSeats:1063, w7BO:7.7, w7FB:1.9, ystBO:8.7, ytdBO:3648.3, ytdVisitors:131611, mtdBO:487.5, mtdVisitors:17637, mtdFB:106.5, lmtdBO:480.3, lmtdFB:103.4 },
+    { name:'秀泰樹林',  bo:60.5, fb:15.7, visitors:1911, shows:31,  avgPrice:316.3, seats:127, halls:12, totalSeats:1524, w7BO:15.5, w7FB:4.6, ystBO:16.3, ytdBO:6452.5, ytdVisitors:218314, mtdBO:856.3, mtdVisitors:28900, mtdFB:223.4, lmtdBO:864.4, lmtdFB:223.8 },
+    { name:'秀泰基隆',  bo:25.4, fb:4.2, visitors:934, shows:25,  avgPrice:272.4, seats:127, halls:8, totalSeats:1013, w7BO:6.9, w7FB:1.4, ystBO:7.9, ytdBO:3299.6, ytdVisitors:123806, mtdBO:406.0, mtdVisitors:15286, mtdFB:76.3, lmtdBO:402.7, lmtdFB:76.4 },
+    { name:'秀泰文心',  bo:131.8, fb:26.8, visitors:3929, shows:49,  avgPrice:335.6, seats:131, halls:16, totalSeats:2098, w7BO:37.6, w7FB:10.7, ystBO:41.1, ytdBO:15699.5, ytdVisitors:501013, mtdBO:1890.3, mtdVisitors:61305, mtdFB:408.1, lmtdBO:2067.4, lmtdFB:416.5 },
+    { name:'秀泰站前',  bo:127.6, fb:24.8, visitors:3686, shows:41,  avgPrice:346.2, seats:157, halls:17, totalSeats:2670, w7BO:43.2, w7FB:9.5, ystBO:38.1, ytdBO:12426.0, ytdVisitors:404502, mtdBO:1588.9, mtdVisitors:51503, mtdFB:351.7, lmtdBO:1635.2, lmtdFB:352.0 },
+    { name:'秀泰麗寶',  bo:21.9, fb:4.9, visitors:725, shows:17,  avgPrice:302.5, seats:79, halls:10, totalSeats:793, w7BO:8.1, w7FB:1.6, ystBO:7.8, ytdBO:3044.8, ytdVisitors:103461, mtdBO:423.3, mtdVisitors:14453, mtdFB:102.9, lmtdBO:347.1, lmtdFB:88.7 },
+    { name:'秀泰北港',  bo:6.5, fb:1.0, visitors:232, shows:18,  avgPrice:281.3, seats:69, halls:4, totalSeats:276, w7BO:2.5, w7FB:0.3, ystBO:1.8, ytdBO:980.7, ytdVisitors:37004, mtdBO:108.8, mtdVisitors:4126, mtdFB:23.3, lmtdBO:99.8, lmtdFB:21.3 },
+    { name:'秀泰嘉義',  bo:47.3, fb:9.0, visitors:1579, shows:29,  avgPrice:299.7, seats:124, halls:11, totalSeats:1360, w7BO:19.3, w7FB:3.4, ystBO:16.9, ytdBO:5985.2, ytdVisitors:210470, mtdBO:724.2, mtdVisitors:26145, mtdFB:172.7, lmtdBO:746.6, lmtdFB:162.4 },
+    { name:'秀泰仁德',  bo:5.7, fb:0.9, visitors:209, shows:10,  avgPrice:273.3, seats:76, halls:5, totalSeats:379, w7BO:1.5, w7FB:0.2, ystBO:0.9, ytdBO:295.6, ytdVisitors:10824, mtdBO:107.6, mtdVisitors:4047, mtdFB:20.4, lmtdBO:95.5, lmtdFB:15.9 },
+    { name:'秀泰夢時代',  bo:102.3, fb:23.6, visitors:3225, shows:45,  avgPrice:317.3, seats:145, halls:13, totalSeats:1886, w7BO:38.9, w7FB:7.8, ystBO:37.8, ytdBO:12300.5, ytdVisitors:404740, mtdBO:1723.6, mtdVisitors:58018, mtdFB:405.8, lmtdBO:1790.4, lmtdFB:416.2 },
+    { name:'秀泰岡山',  bo:64.5, fb:17.3, visitors:1971, shows:31,  avgPrice:327.4, seats:108, halls:13, totalSeats:1400, w7BO:16.4, w7FB:4.0, ystBO:17.1, ytdBO:7366.4, ytdVisitors:250008, mtdBO:917.9, mtdVisitors:32096, mtdFB:232.9, lmtdBO:1001.2, lmtdFB:231.5 },
+    { name:'秀泰台東',  bo:18.5, fb:4.7, visitors:661, shows:21,  avgPrice:279.7, seats:109, halls:8, totalSeats:870, w7BO:9.1, w7FB:2.0, ystBO:7.4, ytdBO:2275.0, ytdVisitors:86626, mtdBO:283.3, mtdVisitors:10734, mtdFB:88.4, lmtdBO:274.5, lmtdFB:76.6 },
+    { name:'秀泰花蓮',  bo:18.6, fb:4.2, visitors:681, shows:17,  avgPrice:273.0, seats:120, halls:9, totalSeats:1083, w7BO:5.4, w7FB:1.2, ystBO:4.4, ytdBO:2266.0, ytdVisitors:85080, mtdBO:235.9, mtdVisitors:8913, mtdFB:55.5, lmtdBO:293.8, lmtdFB:69.7 },
   ],
 
   movies: [
-    // 資料來源：taipeitheater.org.tw + 內部系統 2026-07-26；cumBO=全台累積（元）；stBO/wisonBO=各院線當日（元）
-    // releaseDate = 首映日，days 由 JS 動態計算（不需手動更新）；stBO/stMtdBO本次改採內部系統「歷史電影統計」逐片實查加總（各格式版本合計），較先前版本更精確；wisonBO/wisonMtdBO仍為估算值（採當日/當月全台威秀對秀泰整體倍率反推，非逐片實查）
-    // ⚠ 催眠麥克風已於7/26全台無場次下檔，本次移除
-    {title:'奧德賽', dist:'UIP', releaseDate:'2026-07-17', theaters:93, sessions:1074, cumBO:145137346, totalBO:21052644, stBO:3464560, mktMtdBO:145137346, stMtdBO:20828731, wisonBO:9145551, wisonMtdBO:52703850, avgPrice:346.9},
-    {title:'名偵探柯南 高速公路的墮天使', dist:'普威爾', releaseDate:'2026-06-29', theaters:86, sessions:509, cumBO:190841816, totalBO:4466857, stBO:1023786, mktMtdBO:190841816, stMtdBO:25281438, wisonBO:2702588, wisonMtdBO:63977207, avgPrice:310.2},
-    {title:'劇場版 吉伊卡哇 人魚島的秘密', dist:'羚邦', releaseDate:'2026-07-25', theaters:87, sessions:247, cumBO:8016598, totalBO:3864265, stBO:548195, mktMtdBO:8016598, stMtdBO:1692870, wisonBO:1447182, wisonMtdBO:4283712, avgPrice:279.3}, // ⚠ stMtdBO=限定搶先場1,144,675+7/26當日548,195，7/25正式上映日單場資料未及重新查證
-    {title:'玩具總動員5', dist:'迪士尼', releaseDate:'2026-06-21', theaters:88, sessions:532, cumBO:265724940, totalBO:3421679, stBO:725301, mktMtdBO:265724940, stMtdBO:20157789, wisonBO:1914674, wisonMtdBO:51011301, avgPrice:272.4},
-    {title:'小小兵&大怪獸', dist:'UIP', releaseDate:'2026-07-04', theaters:89, sessions:493, cumBO:93418192, totalBO:2830243, stBO:679463, mktMtdBO:93418192, stMtdBO:18027157, wisonBO:1793681, wisonMtdBO:45619524, avgPrice:277.4},
-    {title:'電影哆啦A夢：新．大雄的海底鬼岩城', dist:'車庫娛樂', releaseDate:'2026-07-13', theaters:83, sessions:342, cumBO:28031432, totalBO:2024865, stBO:406934, mktMtdBO:28031432, stMtdBO:5558820, wisonBO:1074254, wisonMtdBO:14067150, avgPrice:265.4},
-    {title:'海洋奇緣 (真人版)', dist:'迪士尼', releaseDate:'2026-07-13', theaters:89, sessions:400, cumBO:34480751, totalBO:1668799, stBO:509424, mktMtdBO:34480751, stMtdBO:7923383, wisonBO:1344672, wisonMtdBO:20050913, avgPrice:277.3},
-    {title:'你的名字。《十周年重映》', dist:'車庫娛樂', releaseDate:'2026-07-24', theaters:63, sessions:162, cumBO:3526774, totalBO:1116539, stBO:147027, mktMtdBO:3526774, stMtdBO:463235, wisonBO:388105, wisonMtdBO:1172263, avgPrice:258.0},
-    {title:'航海王劇場版：阿拉巴斯坦戰記 ~ 沙漠王女與海賊們', dist:'壹壹喜喜', releaseDate:'2026-07-24', theaters:23, sessions:46, cumBO:694129, totalBO:224641, stBO:168606, mktMtdBO:694129, stMtdBO:202372, wisonBO:445131, wisonMtdBO:512123, avgPrice:380.1},
-    {title:'魯冰花（數位修復版）', dist:'牽猴子', releaseDate:'2026-07-11', theaters:52, sessions:86, cumBO:5434239, totalBO:462473, stBO:93316, mktMtdBO:5434239, stMtdBO:1176679, wisonBO:246315, wisonMtdBO:2977704, avgPrice:296.1},
-    {title:'再生家族', dist:'車庫娛樂', releaseDate:'2026-07-24', theaters:64, sessions:269, cumBO:756656, totalBO:237420, stBO:48081, mktMtdBO:756656, stMtdBO:121654, wisonBO:126928, wisonMtdBO:307858, avgPrice:247.8},
-    {title:'屍變焚場', dist:'索尼', releaseDate:'2026-07-10', theaters:66, sessions:104, cumBO:8239837, totalBO:146515, stBO:51241, mktMtdBO:8239837, stMtdBO:1680814, wisonBO:135257, wisonMtdBO:4253468, avgPrice:276.4},
-    {title:'屍速禁區', dist:'車庫娛樂', releaseDate:'2026-05-27', theaters:40, sessions:59, cumBO:233317108, totalBO:174096, stBO:66101, mktMtdBO:233317108, stMtdBO:3293969, wisonBO:174486, wisonMtdBO:8335719, avgPrice:287.3},
+    // 資料來源：taipeitheater.org.tw + 內部系統 2026-07-29；cumBO=全台累積票房（元，累積至7/29）；totalBO=當日全台票房（元）；stBO/wisonBO=各院線當日（元）
+    // releaseDate = 首映日，days 由 JS 動態計算（不需手動更新）；stBO/stMtdBO採內部系統「歷史電影統計」逐片實查加總（各格式版本合計）；wisonBO/wisonMtdBO仍為估算值（採當日/當月全台威秀對秀泰整體倍率反推，非逐片實查）
+    // ⚠ 《劇場版 吉伊卡哇 人魚島的秘密》已於7/29全台排行未進前60名，本次移除；新增《蜘蛛人：重生日》（索尼，7/29上映首日，全台市佔74.0%）
+    {title:'蜘蛛人：重生日', dist:'索尼', releaseDate:'2026-07-29', theaters:90, sessions:1697, cumBO:34358373, totalBO:34358373, stBO:7597452, mktMtdBO:34358373, stMtdBO:8244432, wisonBO:18175469, wisonMtdBO:21457104, avgPrice:310.5},
+    {title:'奧德賽', dist:'UIP', releaseDate:'2026-07-17', theaters:93, sessions:774, cumBO:174305023, totalBO:7397401, stBO:771964, mktMtdBO:174305023, stMtdBO:24445891, wisonBO:1846778, wisonMtdBO:63623305, avgPrice:342.1},
+    {title:'名偵探柯南 高速公路的墮天使', dist:'普威爾', releaseDate:'2026-06-29', theaters:86, sessions:332, cumBO:195271492, totalBO:1151174, stBO:219847, mktMtdBO:195271492, stMtdBO:26288989, wisonBO:525942, wisonMtdBO:68420185, avgPrice:264.0},
+    {title:'玩具總動員5', dist:'迪士尼', releaseDate:'2026-06-21', theaters:86, sessions:330, cumBO:268959598, totalBO:876720, stBO:198011, mktMtdBO:268959598, stMtdBO:20879155, wisonBO:473704, wisonMtdBO:54340456, avgPrice:266.5},
+    {title:'小小兵&大怪獸', dist:'UIP', releaseDate:'2026-07-04', theaters:85, sessions:308, cumBO:96046271, totalBO:718387, stBO:131934, mktMtdBO:96046271, stMtdBO:19322055, wisonBO:315627, wisonMtdBO:50287920, avgPrice:263.5},
+    {title:'電影哆啦A夢：新．大雄的海底鬼岩城', dist:'車庫娛樂', releaseDate:'2026-07-13', theaters:79, sessions:217, cumBO:29811658, totalBO:500540, stBO:104896, mktMtdBO:29811658, stMtdBO:5931367, wisonBO:250944, wisonMtdBO:15437080, avgPrice:256.7},
+    {title:'海洋奇緣 (真人版)', dist:'迪士尼', releaseDate:'2026-07-13', theaters:83, sessions:214, cumBO:35819969, totalBO:263555, stBO:52587, mktMtdBO:35819969, stMtdBO:8226126, wisonBO:125804, wisonMtdBO:21409460, avgPrice:260.2},
+    {title:'你的名字。《十周年重映》', dist:'車庫娛樂', releaseDate:'2026-07-24', theaters:60, sessions:120, cumBO:5028889, totalBO:283536, stBO:45965, mktMtdBO:5028889, stMtdBO:688367, wisonBO:109963, wisonMtdBO:1791556, avgPrice:270.8},
+    {title:'航海王劇場版：阿拉巴斯坦戰記 ~ 沙漠王女與海賊們', dist:'壹壹喜喜', releaseDate:'2026-07-24', theaters:21, sessions:27, cumBO:932063, totalBO:28701, stBO:7879, mktMtdBO:932063, stMtdBO:245907, wisonBO:18849, wisonMtdBO:640002, avgPrice:263.3},
+    {title:'魯冰花（數位修復版）', dist:'牽猴子', releaseDate:'2026-07-11', theaters:42, sessions:52, cumBO:5822956, totalBO:92521, stBO:17671, mktMtdBO:5822956, stMtdBO:1267716, wisonBO:42275, wisonMtdBO:3299380, avgPrice:241.6},
+    {title:'再生家族', dist:'車庫娛樂', releaseDate:'2026-07-24', theaters:64, sessions:167, cumBO:1099706, totalBO:66084, stBO:13975, mktMtdBO:1099706, stMtdBO:189079, wisonBO:33433, wisonMtdBO:492100, avgPrice:238.6},
+    {title:'屍變焚場', dist:'索尼', releaseDate:'2026-07-10', theaters:31, sessions:41, cumBO:8468038, totalBO:29483, stBO:10988, mktMtdBO:8468038, stMtdBO:1744902, wisonBO:26287, wisonMtdBO:4541313, avgPrice:270.5},
+    {title:'屍速禁區', dist:'車庫娛樂', releaseDate:'2026-05-27', theaters:25, sessions:36, cumBO:233539876, totalBO:46138, stBO:17318, mktMtdBO:233539876, stMtdBO:3364722, wisonBO:41430, wisonMtdBO:8757085, avgPrice:271.4},
   ],
 
-  // 威秀各家 MTD 2026-07-01～07-26（資料來源：taipeitheater.org.tw，22/22家全數實查）
+  // 威秀各家 MTD 2026-07-01～07-29（資料來源：taipeitheater.org.tw，21/21家全數實查，不含MuvieCinemas）
   wisonMTD: {
     N: [
-      { name:'台北信義威秀', bo:3071.5, visitors:89715, avgP:342.4 },
-      { name:'台北京站威秀', bo:2095.8, visitors:68596, avgP:305.5 },
-      { name:'板橋大遠百威秀', bo:2205.7, visitors:65582, avgP:336.3 },
-      { name:'新竹巨城威秀', bo:2230.7, visitors:71118, avgP:313.7 },
-      { name:'新店裕隆城威秀', bo:1771.6, visitors:53310, avgP:332.3 },
-      { name:'南港LaLaport威秀', bo:1283.8, visitors:41112, avgP:312.3 },
-      { name:'林口威秀', bo:1346.0, visitors:42433, avgP:317.2 },
-      { name:'桃園統領威秀', bo:936.3, visitors:32644, avgP:286.8 },
-      { name:'台北西門威秀', bo:895.0, visitors:31337, avgP:285.6 },
-      { name:'中和環球威秀', bo:979.7, visitors:34467, avgP:284.3 },
-      { name:'新竹大遠百威秀', bo:751.8, visitors:25526, avgP:294.5 },
-      { name:'桃園桃知道威秀', bo:248.7, visitors:8981, avgP:276.9 },
+      { name:'台北信義威秀', bo:3460.8, visitors:100779, avgP:343.4 },
+      { name:'台北京站威秀', bo:2361.9, visitors:77341, avgP:305.4 },
+      { name:'板橋大遠百威秀', bo:2577.8, visitors:76127, avgP:338.6 },
+      { name:'新竹巨城威秀', bo:2522.8, visitors:79998, avgP:315.4 },
+      { name:'新店裕隆城威秀', bo:2045.8, visitors:61185, avgP:334.4 },
+      { name:'南港LaLaport威秀', bo:1419.0, visitors:45506, avgP:311.8 },
+      { name:'林口威秀', bo:1522.0, visitors:47626, avgP:319.6 },
+      { name:'桃園統領威秀', bo:1035.8, visitors:36151, avgP:286.5 },
+      { name:'台北西門威秀', bo:1010.2, visitors:35427, avgP:285.2 },
+      { name:'中和環球威秀', bo:1095.1, visitors:38585, avgP:283.8 },
+      { name:'新竹大遠百威秀', bo:848.0, visitors:28756, avgP:294.9 },
+      { name:'桃園桃知道威秀', bo:285.3, visitors:10264, avgP:277.9 },
     ],
     C: [
-      { name:'台中大遠百威秀', bo:1875.0, visitors:60310, avgP:310.9 },
-      { name:'台中iFG遠雄廣場威秀', bo:1176.4, visitors:39107, avgP:300.8 },
-      { name:'台中老虎城威秀', bo:1024.7, visitors:31701, avgP:323.2 },
-      { name:'頭份尚順威秀', bo:635.3, visitors:22779, avgP:278.9 },
+      { name:'台中大遠百威秀', bo:2196.5, visitors:70293, avgP:312.5 },
+      { name:'台中iFG遠雄廣場威秀', bo:1303.8, visitors:43544, avgP:299.4 },
+      { name:'台中老虎城威秀', bo:1187.9, visitors:36578, avgP:324.8 },
+      { name:'頭份尚順威秀', bo:713.3, visitors:25585, avgP:278.8 },
     ],
     S: [
-      { name:'高雄威秀', bo:2777.3, visitors:86455, avgP:321.2 },
-      { name:'台南南紡威秀', bo:2477.5, visitors:84111, avgP:294.5 },
-      { name:'台南大遠百威秀', bo:595.7, visitors:18440, avgP:323.0 },
-      { name:'台南Focus威秀', bo:365.1, visitors:14054, avgP:259.8 },
-      { name:'花蓮新天堂樂園威秀', bo:154.1, visitors:5299, avgP:290.8 },
+      { name:'高雄威秀', bo:3177.8, visitors:98414, avgP:322.9 },
+      { name:'台南南紡威秀', bo:2799.6, visitors:94697, avgP:295.6 },
+      { name:'台南大遠百威秀', bo:688.3, visitors:21172, avgP:325.1 },
+      { name:'台南Focus威秀', bo:403.0, visitors:15503, avgP:259.9 },
+      { name:'花蓮新天堂樂園威秀', bo:186.5, visitors:6415, avgP:290.7 },
     ],
   },
 
-  // 其他院線影城 MTD 2026-07-01～07-26（資料來源：taipeitheater.org.tw，實查更新）
+  // 其他院線影城 MTD 2026-07-01～07-29（資料來源：taipeitheater.org.tw，實查更新）
   otherCinemas: [
-    {name:'台北美麗華', region:'台北', chain:'MR', chainL:'美麗華', bo:2010.6, vis:54303},
-    {name:'台北國賓長春', region:'台北', chain:'GBA', chainL:'國賓', bo:566.9, vis:21852},
-    {name:'台北大國賓', region:'台北', chain:'GBA', chainL:'國賓', bo:375.9, vis:12349},
-    {name:'喜樂時代南港', region:'台北', chain:'JY', chainL:'喜樂時代', bo:543.6, vis:21025},
-    {name:'喜樂時代今日', region:'台北', chain:'JY', chainL:'喜樂時代', bo:282.3, vis:11613},
-    {name:'新莊國賓', region:'新北', chain:'GBA', chainL:'國賓', bo:393.1, vis:17068},
-    {name:'淡水國賓', region:'新北', chain:'GBA', chainL:'國賓', bo:302.8, vis:13856},
-    {name:'林口國賓', region:'新北', chain:'GBA', chainL:'國賓', bo:192.7, vis:9101},
-    {name:'喜樂時代永和', region:'新北', chain:'JY', chainL:'喜樂時代', bo:309.7, vis:13096},
-    {name:'美麗新台茂', region:'新北', chain:'MRN', chainL:'美麗新', bo:759.9, vis:22942},
-    {name:'八德國賓', region:'桃園', chain:'GBA', chainL:'國賓', bo:578.6, vis:24459},
-    {name:'in89統領', region:'桃園', chain:'IN89', chainL:'in89', bo:127.9, vis:5050},
-    {name:'台中豐原in89', region:'台中', chain:'IN89', chainL:'in89', bo:245.4, vis:9615},
-    {name:'嘉義in89', region:'台南', chain:'IN89', chainL:'in89', bo:416.6, vis:12969},
-    {name:'高雄草衙道國賓', region:'高雄', chain:'GBA', chainL:'國賓', bo:429.3, vis:18967},
-    {name:'高雄義大國賓', region:'高雄', chain:'GBA', chainL:'國賓', bo:234.0, vis:10575},
-    {name:'屏東國賓', region:'高雄', chain:'GBA', chainL:'國賓', bo:437.4, vis:19441},
-    {name:'高雄in89大立', region:'高雄', chain:'IN89', chainL:'in89', bo:386.2, vis:14065},
-    {name:'高雄in89駁二', region:'高雄', chain:'IN89', chainL:'in89', bo:77.0, vis:3563},
-    {name:'高雄喜樂時代總圖店', region:'高雄', chain:'JY', chainL:'喜樂時代', bo:276.9, vis:12762},
+    {name:'台北美麗華', region:'台北', chain:'MR', chainL:'美麗華', bo:2400.4, vis:64016},
+    {name:'台北國賓長春', region:'台北', chain:'GBA', chainL:'國賓', bo:624.1, vis:24024},
+    {name:'台北大國賓', region:'台北', chain:'GBA', chainL:'國賓', bo:444.3, vis:14487},
+    {name:'喜樂時代南港', region:'台北', chain:'JY', chainL:'喜樂時代', bo:585.9, vis:22622},
+    {name:'喜樂時代今日', region:'台北', chain:'JY', chainL:'喜樂時代', bo:306.3, vis:12570},
+    {name:'新莊國賓', region:'新北', chain:'GBA', chainL:'國賓', bo:436.2, vis:18888},
+    {name:'淡水國賓', region:'新北', chain:'GBA', chainL:'國賓', bo:347.4, vis:15845},
+    {name:'林口國賓', region:'新北', chain:'GBA', chainL:'國賓', bo:214.9, vis:10075},
+    {name:'喜樂時代永和', region:'新北', chain:'JY', chainL:'喜樂時代', bo:342.1, vis:14445},
+    {name:'美麗新台茂', region:'新北', chain:'MRN', chainL:'美麗新', bo:871.2, vis:26068},
+    {name:'八德國賓', region:'桃園', chain:'GBA', chainL:'國賓', bo:641.5, vis:26959},
+    {name:'in89統領', region:'桃園', chain:'IN89', chainL:'in89', bo:144.6, vis:5722},
+    {name:'台中豐原in89', region:'台中', chain:'IN89', chainL:'in89', bo:273.1, vis:10673},
+    {name:'嘉義in89', region:'台南', chain:'IN89', chainL:'in89', bo:493.6, vis:15160},
+    {name:'高雄草衙道國賓', region:'高雄', chain:'GBA', chainL:'國賓', bo:469.3, vis:20652},
+    {name:'高雄義大國賓', region:'高雄', chain:'GBA', chainL:'國賓', bo:254.1, vis:11432},
+    {name:'屏東國賓', region:'高雄', chain:'GBA', chainL:'國賓', bo:489.1, vis:21606},
+    {name:'高雄in89大立', region:'高雄', chain:'IN89', chainL:'in89', bo:432.9, vis:15752},
+    {name:'高雄in89駁二', region:'高雄', chain:'IN89', chainL:'in89', bo:88.8, vis:4110},
+    {name:'高雄喜樂時代總圖店', region:'高雄', chain:'JY', chainL:'喜樂時代', bo:300.6, vis:13827},
   ],
 
   // ── 月份存檔（已結束月份官方數據；每月底系統自動由台北票房觀測站補齊） ──
@@ -1021,6 +1021,78 @@ const DATA = {
 
   // 每日歷史快照（key = 'YYYY-MM-DD'，匯出 HTML 後永久保存）
   history: {
+  '2026-07-29': {
+    date:'2026-07-29', mktBO:4645.0, mktVisitors:150477, mktATP:308.7, stBO:937.0, stFB:200.2, stVisitors:27102,
+    ystBO:338.0, mtdBO:13245.4, ytdBO:99054.4, wisonBO:2241.5, mktShare:20.17,
+    wisonVisitors:71001, wisonATP:315.7,
+    competitors:{'秀泰':937.0,'威秀':2241.5,'國賓':261.5,'美麗華':177.2,'in89':100.3,'新光':292.6,'美麗新台茂':58.8,'喜樂':68.0,'其他':508.1},
+    mktNote:'全台100家4738場次4645.0萬；週三；《蜘蛛人：重生日》上映首日市佔74.0%；lastWeekBO(7/22，上週三)=1784.6萬；⚠台北大巨蛋秀泰當日taipeitheater回報數字與內部系統有落差，秀泰欄位採內部系統937.0萬為準，差額併入「其他」（詳見competitors欄位註解）',
+    cinemas:[
+      {name:"秀泰巨蛋", bo:192.2, fb:40.9, visitors:3710, shows:63, avgPrice:518.2},
+      {name:"秀泰欣欣", bo:82.3, fb:16.0, visitors:2536, shows:34, avgPrice:324.6},
+      {name:"秀泰土城", bo:31.6, fb:6.1, visitors:1113, shows:22, avgPrice:283.8},
+      {name:"秀泰樹林", bo:60.5, fb:15.7, visitors:1911, shows:31, avgPrice:316.3},
+      {name:"秀泰基隆", bo:25.4, fb:4.2, visitors:934, shows:25, avgPrice:272.4},
+      {name:"秀泰文心", bo:131.8, fb:26.8, visitors:3929, shows:49, avgPrice:335.6},
+      {name:"秀泰站前", bo:127.6, fb:24.8, visitors:3686, shows:41, avgPrice:346.2},
+      {name:"秀泰麗寶", bo:21.9, fb:4.9, visitors:725, shows:17, avgPrice:302.5},
+      {name:"秀泰北港", bo:6.5, fb:1.0, visitors:232, shows:18, avgPrice:281.3},
+      {name:"秀泰嘉義", bo:47.3, fb:9.0, visitors:1579, shows:29, avgPrice:299.7},
+      {name:"秀泰仁德", bo:5.7, fb:0.9, visitors:209, shows:10, avgPrice:273.3},
+      {name:"秀泰夢時代", bo:102.3, fb:23.6, visitors:3225, shows:45, avgPrice:317.3},
+      {name:"秀泰岡山", bo:64.5, fb:17.3, visitors:1971, shows:31, avgPrice:327.4},
+      {name:"秀泰台東", bo:18.5, fb:4.7, visitors:661, shows:21, avgPrice:279.7},
+      {name:"秀泰花蓮", bo:18.6, fb:4.2, visitors:681, shows:17, avgPrice:273.0}
+    ]
+  },
+  '2026-07-28': {
+    date:'2026-07-28', mktBO:1785.5, mktVisitors:56005, mktATP:318.8, stBO:338.0, stFB:92.6, stVisitors:10294,
+    ystBO:303.1, mtdBO:12308.4, ytdBO:98117.4, wisonBO:967.5, mktShare:18.93,
+    wisonVisitors:28862, wisonATP:335.2,
+    competitors:{'秀泰':338.0,'威秀':967.5,'國賓':70.6,'美麗華':104.5,'in89':42.4,'新光':128.4,'美麗新台茂':27.2,'喜樂':24.8,'其他':82.1},
+    mktNote:'全台4744場次1785.5萬；週二；lastWeekBO(7/21，上週二)=1707.6萬；⚠台北大巨蛋秀泰當日taipeitheater回報476,605元，明顯低於內部系統實查1,123,585元，研判為對外通報延遲，秀泰欄位採內部系統338.0萬為準，差額64.698萬併入「其他」以維持加總=mkt.bo精確',
+    cinemas:[
+      {name:"秀泰巨蛋", bo:112.4, fb:30.6, visitors:2600, shows:41, avgPrice:432.1},
+      {name:"秀泰欣欣", bo:19.2, fb:5.6, visitors:663, shows:9, avgPrice:289.9},
+      {name:"秀泰土城", bo:8.7, fb:2.4, visitors:329, shows:6, avgPrice:265.6},
+      {name:"秀泰樹林", bo:16.3, fb:5.8, visitors:556, shows:8, avgPrice:293.6},
+      {name:"秀泰基隆", bo:7.9, fb:1.7, visitors:302, shows:8, avgPrice:261.6},
+      {name:"秀泰文心", bo:41.1, fb:12.7, visitors:1303, shows:16, avgPrice:315.5},
+      {name:"秀泰站前", bo:38.1, fb:9.4, visitors:1201, shows:12, avgPrice:317.3},
+      {name:"秀泰麗寶", bo:7.8, fb:2.1, visitors:262, shows:6, avgPrice:298.7},
+      {name:"秀泰北港", bo:1.8, fb:0.5, visitors:71, shows:5, avgPrice:257.6},
+      {name:"秀泰嘉義", bo:16.9, fb:4.2, visitors:626, shows:10, avgPrice:270.7},
+      {name:"秀泰仁德", bo:0.9, fb:0.0, visitors:33, shows:2, avgPrice:280.2},
+      {name:"秀泰夢時代", bo:37.8, fb:9.5, visitors:1338, shows:18, avgPrice:282.5},
+      {name:"秀泰岡山", bo:17.1, fb:4.9, visitors:565, shows:8, avgPrice:302.4},
+      {name:"秀泰台東", bo:7.4, fb:2.1, visitors:278, shows:8, avgPrice:265.1},
+      {name:"秀泰花蓮", bo:4.4, fb:1.1, visitors:167, shows:4, avgPrice:266.3}
+    ]
+  },
+  '2026-07-27': {
+    date:'2026-07-27', mktBO:1801.9, mktVisitors:56004, mktATP:321.8, stBO:303.1, stFB:69.7, stVisitors:9332,
+    ystBO:817.5, mtdBO:11970.4, ytdBO:97779.4, wisonBO:971.6, mktShare:16.82,
+    wisonVisitors:28981, wisonATP:335.3,
+    competitors:{'秀泰':303.1,'威秀':971.6,'國賓':78.1,'美麗華':108.1,'in89':36.6,'新光':120.5,'美麗新台茂':25.4,'喜樂':29.7,'其他':128.8},
+    mktNote:'全台4756場次1801.9萬；週一；lastWeekBO(7/20，上週一)=1729.6萬',
+    cinemas:[
+      {name:"秀泰巨蛋", bo:64.4, fb:11.1, visitors:1256, shows:20, avgPrice:512.6},
+      {name:"秀泰欣欣", bo:19.5, fb:4.7, visitors:669, shows:9, avgPrice:291.9},
+      {name:"秀泰土城", bo:8.1, fb:1.7, visitors:291, shows:5, avgPrice:277.6},
+      {name:"秀泰樹林", bo:17.3, fb:5.4, visitors:586, shows:9, avgPrice:296.0},
+      {name:"秀泰基隆", bo:12.6, fb:3.0, visitors:479, shows:12, avgPrice:263.6},
+      {name:"秀泰文心", bo:49.5, fb:13.1, visitors:1620, shows:19, avgPrice:305.4},
+      {name:"秀泰站前", bo:38.7, fb:8.8, visitors:1213, shows:12, avgPrice:319.1},
+      {name:"秀泰麗寶", bo:6.5, fb:1.6, visitors:215, shows:5, avgPrice:302.2},
+      {name:"秀泰北港", bo:1.3, fb:0.3, visitors:51, shows:3, avgPrice:262.5},
+      {name:"秀泰嘉義", bo:16.7, fb:4.5, visitors:600, shows:10, avgPrice:277.6},
+      {name:"秀泰仁德", bo:1.1, fb:0.1, visitors:42, shows:2, avgPrice:266.5},
+      {name:"秀泰夢時代", bo:37.0, fb:8.0, visitors:1242, shows:16, avgPrice:297.6},
+      {name:"秀泰岡山", bo:17.7, fb:4.0, visitors:597, shows:8, avgPrice:296.6},
+      {name:"秀泰台東", bo:6.7, fb:2.1, visitors:247, shows:7, avgPrice:269.2},
+      {name:"秀泰花蓮", bo:6.1, fb:1.3, visitors:224, shows:5, avgPrice:270.9}
+    ]
+  },
   '2026-07-26': {
     date:'2026-07-26', mktBO:4379.5, mktVisitors:141586, mktATP:309.3, stBO:817.5, stFB:151.2, stVisitors:25518,
     ystBO:854.7, mtdBO:11667.3, ytdBO:97476.3, wisonBO:2157.9, mktShare:18.67,
@@ -1139,6 +1211,30 @@ const DATA = {
       {name:"秀泰岡山", bo:16.4, fb:4.0, visitors:554, shows:75, avgPrice:296.4},
       {name:"秀泰台東", bo:9.1, fb:2.0, visitors:368, shows:37, avgPrice:248.6},
       {name:"秀泰花蓮", bo:5.4, fb:1.2, visitors:197, shows:46, avgPrice:273.2}
+    ]
+  },
+  '2026-07-21': {
+    date:'2026-07-21', mktBO:1707.6, mktVisitors:54465, mktATP:313.5, stBO:279.5, stFB:57.8, stVisitors:8891,
+    ystBO:293.1, mtdBO:9000.8, ytdBO:94809.8, wisonBO:924.3, mktShare:16.37,
+    wisonVisitors:28039, wisonATP:329.6,
+    competitors:{'秀泰':279.5,'威秀':924.3,'國賓':79.5,'美麗華':109.5,'in89':32.4,'新光':97.0,'美麗新台茂':22.2,'喜樂':22.5,'其他':140.8},
+    mktNote:'全台100家4969場次1707.6萬；週二；本次為補齊歷史缺口而回溯查證',
+    cinemas:[
+      {name:"秀泰巨蛋", bo:51.2, fb:9.2, visitors:1017, shows:15, avgPrice:503.7},
+      {name:"秀泰欣欣", bo:18.9, fb:3.9, visitors:645, shows:8, avgPrice:292.5},
+      {name:"秀泰土城", bo:9.9, fb:2.6, visitors:370, shows:6, avgPrice:267.2},
+      {name:"秀泰樹林", bo:13.4, fb:3.4, visitors:462, shows:7, avgPrice:290.3},
+      {name:"秀泰基隆", bo:11.1, fb:1.5, visitors:430, shows:10, avgPrice:259.2},
+      {name:"秀泰文心", bo:39.2, fb:8.2, visitors:1262, shows:15, avgPrice:310.7},
+      {name:"秀泰站前", bo:40.6, fb:6.7, visitors:1306, shows:13, avgPrice:310.8},
+      {name:"秀泰麗寶", bo:5.8, fb:1.6, visitors:206, shows:4, avgPrice:279.4},
+      {name:"秀泰北港", bo:2.8, fb:0.7, visitors:111, shows:7, avgPrice:252.7},
+      {name:"秀泰嘉義", bo:15.7, fb:3.1, visitors:569, shows:9, avgPrice:275.2},
+      {name:"秀泰仁德", bo:0.9, fb:0.2, visitors:36, shows:2, avgPrice:251.1},
+      {name:"秀泰夢時代", bo:38.9, fb:9.9, visitors:1348, shows:17, avgPrice:288.3},
+      {name:"秀泰岡山", bo:19.9, fb:4.6, visitors:704, shows:9, avgPrice:283.0},
+      {name:"秀泰台東", bo:5.9, fb:1.4, visitors:221, shows:6, avgPrice:265.7},
+      {name:"秀泰花蓮", bo:5.4, fb:1.0, visitors:204, shows:4, avgPrice:262.9}
     ]
   },
   '2026-07-20': {
@@ -1434,6 +1530,30 @@ const DATA = {
       {"name":"秀泰台東","bo":6.0,"fb":1.9,"visitors":236,"shows":40,"avgPrice":252.6},
       {"name":"秀泰花蓮","bo":4.6,"fb":1.1,"visitors":176,"shows":49,"avgPrice":263.9},
     ],
+  },
+  '2026-07-08': {
+    date:'2026-07-08', mktBO:1656.3, mktVisitors:58859, mktATP:281.4, stBO:341.0, stFB:71.0, stVisitors:10954,
+    ystBO:273.0, mtdBO:3918.0, ytdBO:89727.0, wisonBO:792.6, mktShare:20.59,
+    wisonVisitors:26633, wisonATP:297.6,
+    competitors:{'秀泰':341.0,'威秀':792.6,'國賓':111.4,'美麗華':27.5,'in89':33.6,'新光':81.7,'美麗新台茂':21.7,'喜樂':43.9,'其他':202.8},
+    mktNote:'全台100家5427場次1656.3萬；週三；本次為補齊歷史缺口而回溯查證',
+    cinemas:[
+      {name:"秀泰巨蛋", bo:74.6, fb:15.9, visitors:1565, shows:21, avgPrice:476.6},
+      {name:"秀泰欣欣", bo:22.1, fb:4.3, visitors:780, shows:9, avgPrice:283.1},
+      {name:"秀泰土城", bo:14.7, fb:2.5, visitors:552, shows:9, avgPrice:266.9},
+      {name:"秀泰樹林", bo:18.0, fb:4.6, visitors:635, shows:9, avgPrice:283.0},
+      {name:"秀泰基隆", bo:11.6, fb:1.7, visitors:434, shows:9, avgPrice:266.6},
+      {name:"秀泰文心", bo:46.7, fb:7.6, visitors:1560, shows:17, avgPrice:299.3},
+      {name:"秀泰站前", bo:34.1, fb:7.1, visitors:1190, shows:12, avgPrice:286.4},
+      {name:"秀泰麗寶", bo:8.3, fb:2.3, visitors:282, shows:6, avgPrice:296.0},
+      {name:"秀泰北港", bo:2.5, fb:0.4, visitors:99, shows:6, avgPrice:257.1},
+      {name:"秀泰嘉義", bo:19.8, fb:4.2, visitors:721, shows:11, avgPrice:274.1},
+      {name:"秀泰仁德", bo:1.4, fb:0.3, visitors:51, shows:2, avgPrice:271.9},
+      {name:"秀泰夢時代", bo:49.8, fb:10.6, visitors:1700, shows:20, avgPrice:292.9},
+      {name:"秀泰岡山", bo:23.0, fb:5.7, visitors:818, shows:10, avgPrice:281.7},
+      {name:"秀泰台東", bo:6.6, fb:1.7, visitors:270, shows:7, avgPrice:244.0},
+      {name:"秀泰花蓮", bo:7.9, fb:2.0, visitors:297, shows:6, avgPrice:265.0}
+    ]
   },
   '2026-07-10': {
     date:'2026-07-10', mktBO:1166.4, mktVisitors:42151, mktATP:276.7, stBO:312.9, stFB:82.4, stVisitors:10349,
