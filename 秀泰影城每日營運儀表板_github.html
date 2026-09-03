@@ -1771,8 +1771,8 @@ function renderFilms() {
 
   // ── 排序：新片優先，次按全台當日 ──────────────────────────────────────
   const sorted = [...moviesWithDays].sort((a,b) => {
-    const aNew = (a._days||99) <= 3 ? 1 : 0;
-    const bNew = (b._days||99) <= 3 ? 1 : 0;
+    const aNew = (a._days||99) <= 10 ? 1 : 0;
+    const bNew = (b._days||99) <= 10 ? 1 : 0;
     if(bNew !== aNew) return bNew - aNew;
     return (b.totalBO||0) - (a.totalBO||0);
   });
@@ -1798,7 +1798,7 @@ function renderFilms() {
     const stMtdShare = mMtd>0 && sMtd>0 ? (sMtd/mMtd*100).toFixed(1) : null;
     const wShare    = !hasDailyData ? null : (tBO>0 ? (wBO/tBO*100).toFixed(1) : '0.0');
     const wMtdShare  = mMtd>0 && wMtd>0  ? (wMtd/mMtd*100).toFixed(1) : null;
-    const isNew  = (m._days||99) <= 3;
+    const isNew  = (m._days||99) <= 10;
     const bg = i%2===1 ? 'background:var(--gray-lt);' : '';
     return `<tr style="${bg}">
       <td class="c" style="padding:7px 6px;"><span class="film-rank ${cls}">${rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':rank}</span></td>
