@@ -561,10 +561,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
             <th class="r th-bo">票房 BO<br><span style="font-weight:400;opacity:.75;">(萬元)</span></th>
             <th class="r th-bo">來客數 ADM<br><span style="font-weight:400;opacity:.75;">(人)</span></th>
             <th class="r th-bo">平均票價 ATP<br><span style="font-weight:400;opacity:.75;">(元/人)</span></th>
-            <th class="r th-bo">VS上週同日</th>
+            <th class="r th-bo js-w7label">VS上週同日</th>
             <th class="r th-cb">餐飲收入<br><span style="font-weight:400;opacity:.75;">(萬元)</span></th>
             <th class="r th-cb">餐飲/人 SPP<br><span style="font-weight:400;opacity:.75;">(元/人)</span></th>
-            <th class="r th-cb">VS上週同日</th>
+            <th class="r th-cb js-w7label">VS上週同日</th>
           </tr></thead>
         <tbody id="stDailyBody"></tbody>
       </table>
@@ -15089,6 +15089,14 @@ function renderST() {
   const h7 = DATA.history && DATA.history[d7Key];
   const weekdays = ['日','一','二','三','四','五','六'];
   const w7label = '上週' + weekdays[d7.getDay()];
+  // 2026-09-10 修復：DATA.cinemas 從未有 w7BO/w7FB 欄位，導致「VS上週同日」兩欄永遠顯示「—」。
+  // 改為以館名從 h7（上週同日 history 快照，內含每館 bo/fb）查表當後備，過去與未來每一天都會自動生效。
+  const h7cin = {};
+  if (h7 && Array.isArray(h7.cinemas)) h7.cinemas.forEach(function(x){ if (x && x.name) h7cin[x.name] = x; });
+  const w7boOf = function(c){ return (+c.w7BO) || (h7cin[c.name] ? +h7cin[c.name].bo : 0) || 0; };
+  const w7fbOf = function(c){ return (+c.w7FB) || (h7cin[c.name] ? +h7cin[c.name].fb : 0) || 0; };
+  // 表頭動態標示實際比較的星期（例如「VS上週三」），避免使用者誤解比較基準
+  document.querySelectorAll('.js-w7label').forEach(function(el){ el.textContent = 'VS' + w7label; });
 
   // ── 當日排行 ───────────────────────────────────────────────────────────
   const sorted = [...DATA.cinemas].sort((a,b) => b.bo - a.bo);
@@ -15099,13 +15107,13 @@ function renderST() {
       const atp = c.avgPrice ? +(+c.avgPrice).toFixed(1) : (c.visitors > 0 ? +(c.bo * 10000 / c.visitors).toFixed(1) : 0);
       const fb  = +(c.fb || 0);
       const spp = c.visitors > 0 && fb > 0 ? +(fb * 10000 / c.visitors).toFixed(1) : 0;
-      // 票房 VS上週：per-cinema weekly, use c.w7BO if available, else c.ystBO
-      const w7bo  = c.w7BO  || 0;
+      // 票房 VS上週：per-cinema weekly, 優先 c.w7BO，否則從上週同日 history 快照取該館 bo
+      const w7bo  = w7boOf(c);
       const ystbo = c.ystBO || 0;
       const refBO = w7bo > 0 ? w7bo : ystbo;
       const boChip = refBO > 0 ? deltaHtml((c.bo - refBO) / refBO * 100) : '<span style="color:var(--mute);font-size:11px;">—</span>';
-      // Candy Bar VS上週：per-cinema weekly FB
-      const w7fb = c.w7FB || 0;
+      // Candy Bar VS上週：per-cinema weekly FB（同樣以 history 快照為後備）
+      const w7fb = w7fbOf(c);
       const cbChip = (w7fb > 0 && fb > 0) ? deltaHtml((fb - w7fb) / w7fb * 100) : '<span style="color:var(--mute);font-size:11px;">—</span>';
       const cls = i < 3 ? 'rank-num r' + (i+1) : 'rank-num';
       const bg = i%2===1 ? 'background:var(--gray-lt);' : '';
@@ -15122,7 +15130,7 @@ function renderST() {
       </tr>`;
     });
     const totBO=sorted.reduce((s,c)=>s+c.bo,0),totVis=sorted.reduce((s,c)=>s+c.visitors,0),totFB=sorted.reduce((s,c)=>s+(c.fb||0),0);
-    const totW7BO=sorted.reduce((s,c)=>s+(c.w7BO||c.ystBO||0),0),totW7FB=sorted.reduce((s,c)=>s+(c.w7FB||0),0);
+    const totW7BO=sorted.reduce((s,c)=>s+(w7boOf(c)||c.ystBO||0),0),totW7FB=sorted.reduce((s,c)=>s+w7fbOf(c),0);
     const totATP=totVis>0?+(totBO*10000/totVis).toFixed(1):0,totSPP=totVis>0&&totFB>0?+(totFB*10000/totVis).toFixed(1):0;
     const totBoChip=totW7BO>0?deltaHtml((totBO-totW7BO)/totW7BO*100):'—';
     const totCbChip=totW7FB>0&&totFB>0?deltaHtml((totFB-totW7FB)/totW7FB*100):'—';
